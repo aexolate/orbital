@@ -1,18 +1,36 @@
 import React, { Component } from 'react';
-import { Platform, StyleSheet, Text, View, Button, StatusBar } from 'react-native';
+import { Platform, StyleSheet, Text, View, Button, StatusBar, TextInput } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 
-
-
 export default class App extends React.Component {
   state = {
-    textValue: 'empty'
+    textValue: 'empty',
+    currentLat: 0,
+    currentLong: 0,
+    destLat: 1.2962582131565663,  //TODO: Set the destination using geocoding/pinpoint
+    destLong: 103.77629052145139  //This is just placeholder value for testing
   };
 
+  //TODO: Encapsulate the function elsewhere
+  //Returns the great-circle distance between two coordinates using haversine formula
+  //i.e. Shortest distance over earth's surface
+  distanceBetween(lat1, lon1, lat2, lon2) {
+    let R = 6371e3;                 //Earth's Radius 6371km
+    let phi1 = lat1 * Math.PI / 180;
+    let phi2 = lat2 * Math.PI / 180;
+    let dPhi = (lat2 - lat1) * Math.PI / 180;
+    let dLambda = (lon2 - lon1) * Math.PI / 180;
+    let a = Math.sin(dPhi / 2) * Math.sin(dPhi / 2) +
+            Math.cos(phi1) * Math.cos(phi2) *
+            Math.sin(dLambda / 2) * Math.sin(dLambda / 2);
+    let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;   //distance in metres
+  }
+
+  //TODO: Modify the location tracking to continue tracking in background
   async componentDidMount() {
-    console.log('mount');
     try {
       const foregroundPermission = await Location.requestForegroundPermissionsAsync()
       let locationSubscrition = null
@@ -26,8 +44,8 @@ export default class App extends React.Component {
             distanceInterval: 1
           },
           location => {
-            console.log(location);
-            this.setState({textValue: location.coords.latitude + ',' + location.coords.longitude});
+            //console.log(location);  //Debugging Function
+            this.setState({ currentLong: location.coords.longitude, currentLat: location.coords.latitude });
           }
         )
       }
@@ -38,15 +56,16 @@ export default class App extends React.Component {
 
 
   render() {
-    console.log('render')
     return (
-      <View style={{ flex: 1, paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0}}>
+      <View style={styles.map}>
         <MapView
           style={{ flex: 1 }}
-          showsUserLocation = {true}
+          showsUserLocation={true}
         />
         <View style={{ position: 'absolute', bottom: '0%', alignSelf: 'stretch', backgroundColor: 'white' }}>
-          <Text> {'Current GPS: ' + this.state.textValue} </Text>
+          {/* Debugging info to be removed in release version */}
+          <Text> {'Current GPS: ' + this.state.currentLat + ',' + this.state.currentLong} </Text>
+          <Text> {'Distance to Destination: ' + this.distanceBetween(this.state.currentLat, this.state.currentLong, this.state.destLat, this.state.destLong).toFixed(2) + 'm'} </Text>
         </View>
 
       </View>
@@ -56,8 +75,20 @@ export default class App extends React.Component {
   }
 }
 
+
 const styles = StyleSheet.create({
   center: {
     alignItems: 'center'
+  },
+  map: {
+    flex: 1,
+    paddingTop: StatusBar.currentHeight
+  },
+  input: {
+    height: 40,
+    margin: 12,
+    borderWidth: 1,
+    padding: 10,
+    width: 300
   }
 })
