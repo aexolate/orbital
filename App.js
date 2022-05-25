@@ -1,80 +1,121 @@
-import React, { Component } from 'react';
-import { Platform, StyleSheet, Text, View, Button, StatusBar, TextInput } from 'react-native';
+import React, { useEffect, useState, ReactElement } from 'react';
+import { Platform, StyleSheet, Text, View, Button, StatusBar, TextInput, Vibration } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
+import { Audio } from 'expo-av';
+import { distanceBetween } from './Utils.js'
 
-export default class App extends React.Component {
-  state = {
-    textValue: 'empty',
-    currentLat: 0,
-    currentLong: 0,
-    destLat: 1.2962582131565663,  //TODO: Set the destination using geocoding/pinpoint
-    destLong: 103.77629052145139  //This is just placeholder value for testing
+const App = () => {
+  const [status, requestPermission] = Location.useForegroundPermissions();
+  
+  const [curLocation, setCurLocation] = useState({ latitude: 0, longitude: 0 })
+  const [destination, setDestination] = useState({ latitude: 1.418916501296272, longitude: 103.6979021740996 }) //placeholder destination
+  const [distanceToDest, setDistanceToDest] = useState(Infinity)
+  
+  const [sound, setSound] = useState(null)
+  const [isRinging, setIsRinging] = useState(false)    //Indicates if the alarm is already ringing
+  const [isAlarmSet, setIsAlarmSet] = useState(false)  //Indicates whether the alarm has been set
+
+  const ACTIVATION_RADIUS = 500;
+  let foregroundSubscription = null;
+
+  async function stopSound() {
+    await sound.setIsLoopingAsync(false);
+    await sound.stopAsync();
+    await sound.unloadAsync();
+    Vibration.cancel();
+    setIsRinging(false);
+  }
+
+  async function playSound() {
+    const { sound } = await Audio.Sound.createAsync(
+      require('./assets/morning_glory.mp3')
+    );
+    setSound(sound);
+    await sound.setIsLoopingAsync(true);
+    sound.playAsync();
+    console.log('vibration');
+    Vibration.vibrate([0, 200, 100, 200, 500], true);
+  }
+
+
+  useEffect(() => {
+    console.log('useEffect()');
+
+    const requestPermissions = async () => {
+      const foreground = await Location.requestForegroundPermissionsAsync()
+      //if (foreground.granted) await Location.requestBackgroundPermissionsAsync()
+    };
+    requestPermission().then((response) => {
+      if (!response.granted) {
+        console.log("Foreground permission not granted");
+        return;
+      }
+      startForegroundUpdate();
+    });
+  }, [])
+
+
+  const startForegroundUpdate = async () => {
+    foregroundSubscription?.remove()
+    foregroundSubscription = await Location.watchPositionAsync(
+      {
+        accuracy: Location.Accuracy.BestForNavigation,
+        timeInterval: 1000
+      },
+      location => {
+        setCurLocation({ latitude: location.coords.latitude, longitude: location.coords.longitude })
+      }
+    )
   };
 
-  //TODO: Encapsulate the function elsewhere
-  //Returns the great-circle distance between two coordinates using haversine formula
-  //i.e. Shortest distance over earth's surface
-  distanceBetween(lat1, lon1, lat2, lon2) {
-    let R = 6371e3;                 //Earth's Radius 6371km
-    let phi1 = lat1 * Math.PI / 180;
-    let phi2 = lat2 * Math.PI / 180;
-    let dPhi = (lat2 - lat1) * Math.PI / 180;
-    let dLambda = (lon2 - lon1) * Math.PI / 180;
-    let a = Math.sin(dPhi / 2) * Math.sin(dPhi / 2) +
-            Math.cos(phi1) * Math.cos(phi2) *
-            Math.sin(dLambda / 2) * Math.sin(dLambda / 2);
-    let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;   //distance in metres
-  }
-
-  //TODO: Modify the location tracking to continue tracking in background
-  async componentDidMount() {
-    try {
-      const foregroundPermission = await Location.requestForegroundPermissionsAsync()
-      let locationSubscrition = null
-
-      // Location tracking inside the component
-      if (foregroundPermission.granted) {
-        foregroundSubscrition = Location.watchPositionAsync(
-          {
-            // Tracking options
-            accuracy: Location.Accuracy.High,
-            distanceInterval: 1
-          },
-          location => {
-            //console.log(location);  //Debugging Function
-            this.setState({ currentLong: location.coords.longitude, currentLat: location.coords.latitude });
-          }
-        )
-      }
-    } catch (err) {
-
+  //React hook for current location
+  React.useEffect(() => {
+    setDistanceToDest(distanceBetween(curLocation, destination).toFixed(0));
+    if (distanceToDest <= ACTIVATION_RADIUS && !isRinging && isAlarmSet) {
+      playSound();
+      setIsRinging(true);
     }
-  }
+  }, [curLocation]);
 
+  //Render
+  return (
+    <View style={styles.map}>
+      <MapView
+        style={{ flex: 1 }}
+        showsUserLocation={true}
+      >
+        <MapView.Circle
+          radius={ACTIVATION_RADIUS}
+          center={destination}
+          strokeWidth={2}
+          strokeColor={'#1a66ff'}
+          fillColor={'rgba(230,238,255,0.6)'}
+        >
+        </MapView.Circle>
 
-  render() {
-    return (
-      <View style={styles.map}>
-        <MapView
-          style={{ flex: 1 }}
-          showsUserLocation={true}
-        />
-        <View style={{ position: 'absolute', bottom: '0%', alignSelf: 'stretch', backgroundColor: 'white' }}>
-          {/* Debugging info to be removed in release version */}
-          <Text> {'Current GPS: ' + this.state.currentLat + ',' + this.state.currentLong} </Text>
-          <Text> {'Distance to Destination: ' + this.distanceBetween(this.state.currentLat, this.state.currentLong, this.state.destLat, this.state.destLong).toFixed(2) + 'm'} </Text>
-        </View>
+        <MapView.Marker
+          coordinate={destination}
+          pinColor='#1a66ff'
+          title='Destination'
+        >
+        </MapView.Marker>
+      </MapView>
 
+      <View style={{ curLocation: 'absolute', bottom: '0%', alignSelf: 'stretch', backgroundColor: 'white' }}>
+        {/* Debugging Info */}
+        <Text> {'Current Location: ' + curLocation?.latitude + ',' + curLocation?.longitude} </Text>
+        <Text> {'Distance to Destination: ' + distanceToDest + ' m'} </Text>
+        <Button title="Test Alarm" onPress={playSound} />
+        <Button title="Stop Alarm" onPress={stopSound} />
       </View>
 
+    </View>
+  );
+};
 
-    );
-  }
-}
-
+export default App;
 
 const styles = StyleSheet.create({
   center: {
@@ -83,12 +124,5 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
     paddingTop: StatusBar.currentHeight
-  },
-  input: {
-    height: 40,
-    margin: 12,
-    borderWidth: 1,
-    padding: 10,
-    width: 300
   }
 })
