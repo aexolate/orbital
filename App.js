@@ -1,8 +1,9 @@
 import React, { useEffect, useState, ReactElement } from 'react';
-import { Platform, StyleSheet, Text, View, Button, StatusBar, TextInput, Vibration } from 'react-native';
+import { Platform, StyleSheet, Text, View, Button, StatusBar, TextInput, Vibration, Pressable } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
+import Geocoder from 'react-native-geocoding';
 import { Audio } from 'expo-av';
 import { distanceBetween } from './Utils.js'
 
@@ -13,6 +14,8 @@ const App = () => {
   const [destination, setDestination] = useState({ latitude: 1.418916501296272, longitude: 103.6979021740996 }) //placeholder destination
   const [distanceToDest, setDistanceToDest] = useState(Infinity)
   
+  const [destinationWord, setDestinationWord] = useState(''); //destination in string for geocoding
+
   const [sound, setSound] = useState(null)
   const [isRinging, setIsRinging] = useState(false)    //Indicates if the alarm is already ringing
   const [isAlarmSet, setIsAlarmSet] = useState(false)  //Indicates whether the alarm has been set
@@ -79,12 +82,45 @@ const App = () => {
     }
   }, [curLocation]);
 
+  //geocoding: word to coordinates
+  const getCoordinate = (prop) => {
+    Geocoder.init('insert API key');
+    Geocoder.from(prop)
+      .then(json => {
+        var location = json.results[0].geometry.location;
+        const destination = {
+            latitude: location.lat,
+            longitude: location.lng,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+        };
+        console.log(destination);
+        setDestination(destination);
+        setDistanceToDest(distanceBetween(curLocation, destination).toFixed(0));
+      })
+      .catch(error => console.warn(error));
+    }
+
+    //selecting destination via longpress
+    const selectLocation = (prop) => {
+      const destination = {
+        latitude: prop.coordinate.latitude,
+        longitude: prop.coordinate.longitude,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      };
+      console.log(destination);
+      setDestination(destination);
+      setDistanceToDest(distanceBetween(curLocation, destination).toFixed(0));
+    }
+
   //Render
   return (
-    <View style={styles.map}>
+    <View style={styles.container}>
       <MapView
-        style={{ flex: 1 }}
+        style={styles.map}
         showsUserLocation={true}
+        onLongPress={(prop) => {selectLocation(prop.nativeEvent)}}
       >
         <MapView.Circle
           radius={ACTIVATION_RADIUS}
@@ -103,13 +139,36 @@ const App = () => {
         </MapView.Marker>
       </MapView>
 
-      <View style={{ curLocation: 'absolute', bottom: '0%', alignSelf: 'stretch', backgroundColor: 'white' }}>
+      <View style={styles.distanceAndAlarm}>
         {/* Debugging Info */}
         <Text> {'Current Location: ' + curLocation?.latitude + ',' + curLocation?.longitude} </Text>
         <Text> {'Distance to Destination: ' + distanceToDest + ' m'} </Text>
         <Button title="Test Alarm" onPress={playSound} />
         <Button title="Stop Alarm" onPress={stopSound} />
       </View>
+
+      <TextInput
+                    style={styles.input}
+                    onChangeText={setDestinationWord}
+                    value={destinationWord}
+                    placeholder='!input final destination!'
+                    selectionColor='#003D7C'
+                />
+      <Pressable 
+                    onPress = {() => {getCoordinate(destinationWord)}}
+                    style={styles.button}
+      > 
+        <Text>Search Destination</Text>
+      </Pressable>
+      <Pressable 
+                    onPress = {() => {
+                      setIsAlarmSet(true);
+                      alert('alarn SET!');
+                    }}
+                    style={styles.button}
+      > 
+        <Text>SET DESTINATION</Text>
+      </Pressable>
 
     </View>
   );
@@ -118,11 +177,33 @@ const App = () => {
 export default App;
 
 const styles = StyleSheet.create({
-  center: {
-    alignItems: 'center'
+  container: {
+    flex: 1
   },
   map: {
-    flex: 1,
+    flex: 6,
     paddingTop: StatusBar.currentHeight
+  },
+  distanceAndAlarm: {
+    flex: 2,
+    curLocation: 'absolute', 
+    alignSelf: 'center', 
+    backgroundColor: 'white' 
+  },
+  input: {
+    flex: 1,
+    borderColor: 'black',
+    borderWidth: 4,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'flex-start'
+  },
+  button: {
+    flex: 1,
+    backgroundColor: '#003D7C',
+    borderColor: '#000000',
+    borderWidth: 4,
+    justifyContent: 'center',
+    alignItems: 'flex-end',
   }
 })
