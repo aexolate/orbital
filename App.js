@@ -1,4 +1,4 @@
-import React, { useEffect, useState, ReactElement } from 'react';
+import React, { useEffect, useState, ReactElement,useRef } from 'react';
 import { Platform, StyleSheet, Text, View, Button, StatusBar, TextInput, Vibration, Pressable, Alert } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
@@ -8,6 +8,7 @@ import { Audio } from 'expo-av';
 import { distanceBetween } from './Utils.js'
 import { AlarmManager } from './AlarmManager.js'
 import config from './config.js';
+import {API_KEY} from '@env'
 
 const App = () => {
   const [status, requestPermission] = Location.useForegroundPermissions();
@@ -56,7 +57,7 @@ const App = () => {
 
   //selecting destination via geocoding: word to coordinate
   const selectLocGeocode = (prop) => {
-    Geocoder.init(config.API_KEY);
+    Geocoder.init(API_KEY);
     Geocoder.from(prop)
       .then(json => {
         var location = json.results[0].geometry.location;
@@ -101,10 +102,17 @@ const App = () => {
       )
     };
 
+  const mapRef = useRef(null);
+  const shiftMap = () => {
+    let region = { center: {latitude: 1.418916501296272, longitude: 103.6979021740996}, pitch:0, heading:0, zoom:10}
+    mapRef.current.animateCamera(region, {duration: 1000});
+  }
+
   //Render
   return (
     <View style={styles.container}>
       <MapView
+        ref={mapRef}
         style={styles.map}
         showsUserLocation={true}
         mapPadding={{ top: StatusBar.currentHeight }}   //Keeps map elements within view such as 'Locate' button
@@ -132,6 +140,7 @@ const App = () => {
         <Text> {'Distance to Destination: ' + distanceToDest + ' m'} </Text>
         <Button title="Test Alarm" onPress={alarmManager.playAlarm} />
         <Button title="Stop Alarm" onPress={alarmManager.stopAlarm} />
+        <Button title="Shift Map" onPress={shiftMap} />
       </View>
 
       <TextInput
