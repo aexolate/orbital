@@ -3,7 +3,6 @@ import { Platform, StyleSheet, Text, View, Button, StatusBar, TextInput, Vibrati
 import { Audio } from 'expo-av';
 
 export const AlarmManager = () => {
-//TODO: Encapsulate alarm functionalities
   const [sound, setSound] = useState(null)
   //Setup audio instance and load audio in. To be called during init.
   const setupAudio = async () => {

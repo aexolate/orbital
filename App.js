@@ -7,7 +7,7 @@ import Geocoder from 'react-native-geocoding';
 import { Audio } from 'expo-av';
 import { distanceBetween } from './Utils.js'
 import { AlarmManager } from './AlarmManager.js'
-import config from './config.js';
+import { GOOGLE_MAPS_API_KEY } from '@env'
 
 const App = () => {
   const [status, requestPermission] = Location.useForegroundPermissions();
@@ -21,10 +21,11 @@ const App = () => {
   let foregroundSubscription = null;
   const alarmManager = AlarmManager();
   const mapRef = useRef(null);
-  Geocoder.init(config.API_KEY);
+  Geocoder.init(GOOGLE_MAPS_API_KEY);
 
   //Initializing Function
   useEffect(() => {
+    Geocoder.init(GOOGLE_MAPS_API_KEY);
     alarmManager.setupAudio();
     requestPermission().then((response) => {
       if (!response.granted) {
@@ -106,8 +107,11 @@ const App = () => {
         }
       }],
     )
-    console.log(oldDest);
-    console.log(dest);
+  };
+
+  const unsetAlarm = () => {
+    setIsAlarmSet(false);
+    alarmManager.stopAlarm();
   };
 
   //Render
@@ -132,30 +136,32 @@ const App = () => {
         showsUserLocation={true}
         mapPadding={{ top: StatusBar.currentHeight }}   //Keeps map elements within view such as 'Locate' button
         onLongPress={(prop) => { selectLocLongPress(prop.nativeEvent) }}>
-        <MapView.Circle
-          radius={ACTIVATION_RADIUS}
-          center={destination}
-          strokeWidth={2}
-          strokeColor={'#1a66ff'}
-          fillColor={'rgba(230,238,255,0.6)'}
-        >
-        </MapView.Circle>
-
-        <MapView.Marker
-          coordinate={destination}
-          pinColor='#1a66ff'
-          title='Destination'
-        >
-        </MapView.Marker>
+          
+          <View>
+            <MapView.Circle
+              radius={ACTIVATION_RADIUS}
+              center={destination}
+              strokeWidth={2}
+              strokeColor={'#1a66ff'}
+              fillColor={'rgba(230,238,255,0.6)'}
+            >
+            </MapView.Circle>
+            <MapView.Marker
+              coordinate={destination}
+              pinColor='#1a66ff'
+              title='Destination'
+            >
+            </MapView.Marker>
+          </View>
+        
       </MapView>
-
-      <View style={styles.distanceAndAlarm}>
-        {/* Debugging Info */}
-        <Text> {'Current Location: ' + curLocation?.latitude + ',' + curLocation?.longitude} </Text>
-        <Text> {'Distance to Destination: ' + distanceToDest + ' m'} </Text>
-        <Button title="Test Alarm" onPress={alarmManager.playAlarm} />
-        <Button title="Stop Alarm" onPress={alarmManager.stopAlarm} />
-      </View>
+      {isAlarmSet &&
+        <View style={{ position: 'absolute', backgroundColor: 'white', alignItems: 'center', width: '70%', bottom: '30%', alignSelf: 'center' }}>
+          <Text>Alarm is set</Text>
+          <Text> {'Distance to Destination: ' + distanceToDest + ' m'} </Text>
+          <Button title="Cancel Alarm" onPress={unsetAlarm} />
+        </View>
+      }
     </SafeAreaView>
   );
 };
