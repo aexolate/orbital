@@ -4,12 +4,14 @@ import { Audio } from 'expo-av';
 
 export const AlarmManager = () => {
   const [sound, setSound] = useState(null)
+  const [status, setStatus] = useState(null)
   //Setup audio instance and load audio in. To be called during init.
   const setupAudio = async () => {
-    const { sound } = await Audio.Sound.createAsync(
+    const { sound, status } = await Audio.Sound.createAsync(
       require('./assets/morning_glory.mp3')
     );
     setSound(sound);
+    setStatus(status);
     await sound.setIsLoopingAsync(true);
   }
 
@@ -25,17 +27,17 @@ export const AlarmManager = () => {
       console.error("setupAudio() must be called")
       return;
     }
-    
-    if (!sound.isPlaying) {
-      await sound.playAsync();
-    }
 
-    //Vibration
-    let VIBRATION_PATTERN = [0, 200, 100, 200, 500];
-    let VIBRATION_REPEAT = true;
-    Vibration.vibrate(VIBRATION_PATTERN, VIBRATION_REPEAT);
+    //BUG: isPlaying is always false
+    if (!status.isPlaying) {
+      await sound.playAsync();
+      //Vibration
+      let VIBRATION_PATTERN = [200,200];
+      let VIBRATION_REPEAT = true;
+      Vibration.vibrate(VIBRATION_PATTERN, VIBRATION_REPEAT);
+    }
   }
 
-  return {setupAudio, stopAlarm, playAlarm};
+  return { setupAudio, stopAlarm, playAlarm };
 }
 export default AlarmManager;

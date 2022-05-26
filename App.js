@@ -1,5 +1,5 @@
 import React, { useEffect, useState, ReactElement, useRef } from 'react';
-import { Platform, StyleSheet, Text, View, Button, StatusBar, TextInput, Vibration, Pressable, Alert, SafeAreaView } from 'react-native';
+import { Platform, StyleSheet, Text, View, StatusBar, TextInput, Vibration, Pressable, Alert, SafeAreaView } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
@@ -8,6 +8,7 @@ import { Audio } from 'expo-av';
 import { distanceBetween } from './Utils.js'
 import { AlarmManager } from './AlarmManager.js'
 import { GOOGLE_MAPS_API_KEY } from '@env'
+import { Provider as PaperProvider, Searchbar, Button, Card, Title, Paragraph } from 'react-native-paper';
 
 const App = () => {
   const [status, requestPermission] = Location.useForegroundPermissions();
@@ -21,7 +22,6 @@ const App = () => {
   let foregroundSubscription = null;
   const alarmManager = AlarmManager();
   const mapRef = useRef(null);
-  Geocoder.init(GOOGLE_MAPS_API_KEY);
 
   //Initializing Function
   useEffect(() => {
@@ -59,6 +59,7 @@ const App = () => {
 
   //selecting destination via geocoding: word to coordinate
   const selectLocGeocode = (prop) => {
+    console.log('geocode');
     Geocoder.from(prop)
       .then(json => {
         var location = json.results[0].geometry.location;
@@ -73,6 +74,10 @@ const App = () => {
 
   //selecting destination via longpress
   const selectLocLongPress = (prop) => {
+    console.log('long');
+  let region = { center: {latitude: 1.418916501296272, longitude: 103.6979021740996}, pitch:0, heading:0, zoom:10}
+  mapRef.current.animateCamera(region, {duration: 1000});
+
     const dest = {
       latitude: prop.coordinate.latitude,
       longitude: prop.coordinate.longitude,
@@ -103,7 +108,6 @@ const App = () => {
         text: 'Set Alarm',
         onPress: () => {
           setIsAlarmSet(true);
-          alert('alarn SET!');
         }
       }],
     )
@@ -114,29 +118,23 @@ const App = () => {
     alarmManager.stopAlarm();
   };
 
+  const pressSmth = () => {
+    selectLocGeocode(destinationWord);
+  }
+
   //Render
   return (
-    <SafeAreaView style={styles.container}>
-      <TextInput
-        style={styles.input}
-        onChangeText={setDestinationWord}
-        value={destinationWord}
-        placeholder='!input final destination!'
-        selectionColor='#003D7C'
-      />
-      <Pressable
-        onPress={() => { selectLocGeocode(destinationWord) }}
-        style={styles.button}
-      >
-        <Text>Search Destination</Text>
-      </Pressable>
-      <MapView
-        ref={mapRef}
-        style={styles.map}
-        showsUserLocation={true}
-        mapPadding={{ top: StatusBar.currentHeight }}   //Keeps map elements within view such as 'Locate' button
-        onLongPress={(prop) => { selectLocLongPress(prop.nativeEvent) }}>
-          
+
+    <PaperProvider>
+      <SafeAreaView style={styles.container}>
+        <MapView
+          ref={mapRef}
+          style={{ flex: 1 }}
+          showsUserLocation={true}
+          mapPadding={{ top: StatusBar.currentHeight }}   //Keeps map elements within view such as 'Locate' button
+          onLongPress={(prop) => { selectLocLongPress(prop.nativeEvent) }}>
+
+
           <View>
             <MapView.Circle
               radius={ACTIVATION_RADIUS}
@@ -153,16 +151,27 @@ const App = () => {
             >
             </MapView.Marker>
           </View>
-        
-      </MapView>
-      {isAlarmSet &&
-        <View style={{ position: 'absolute', backgroundColor: 'white', alignItems: 'center', width: '70%', bottom: '30%', alignSelf: 'center' }}>
-          <Text>Alarm is set</Text>
-          <Text> {'Distance to Destination: ' + distanceToDest + ' m'} </Text>
-          <Button title="Cancel Alarm" onPress={unsetAlarm} />
+        </MapView>
+        {isAlarmSet &&
+          <View style={{ position: 'absolute', backgroundColor: 'white', alignItems: 'center', opacity: 0.8, width: '90%', bottom: '5%', alignSelf: 'center' }}>
+            <Text> {'Distance to Destination: ' + distanceToDest + ' m'} </Text>
+            <Button icon='cancel' onPress={unsetAlarm}>Cancel Alarm</Button>
+          </View>
+        }
+
+        <View style={{ position: 'absolute', width: '80%', opacity: 0.95, top: '20%', alignSelf: 'center' }}>
+          <Searchbar
+            onIconPress={pressSmth}
+            onSubmitEditing={pressSmth}
+            onChangeText={setDestinationWord}
+            value={destinationWord}
+          />
         </View>
-      }
-    </SafeAreaView>
+
+
+
+      </SafeAreaView>
+    </PaperProvider>
   );
 };
 
