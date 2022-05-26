@@ -6,6 +6,7 @@ import * as TaskManager from 'expo-task-manager';
 import Geocoder from 'react-native-geocoding';
 import { Audio } from 'expo-av';
 import { distanceBetween } from './Utils.js'
+import { AlarmManager } from './AlarmManager.js'
 
 const App = () => {
   const [status, requestPermission] = Location.useForegroundPermissions();
@@ -17,39 +18,11 @@ const App = () => {
 
   const ACTIVATION_RADIUS = 500;
   let foregroundSubscription = null;
-
-  //TODO: Encapsulate alarm functionalities
-  const [sound, setSound] = useState(null)
-  //Setup audio instance and load audio in. To be called during init.
-  const setupAudio = async () => {
-    const { sound } = await Audio.Sound.createAsync(
-      require('./assets/morning_glory.mp3')
-    );
-    setSound(sound);
-    await sound.setIsLoopingAsync(true);
-  }
-
-  //Stops playing the alarm
-  const stopAlarm = async () => {
-    await sound.stopAsync();
-    Vibration.cancel();
-  }
-
-  //Activates the alarm
-  const playAlarm = async () => {
-    await sound.playAsync();
-
-    //Vibration
-    let VIBRATION_PATTERN = [0, 200, 100, 200, 500];
-    let VIBRATION_REPEAT = true;
-    Vibration.vibrate(VIBRATION_PATTERN, VIBRATION_REPEAT);
-  }
-
-  
+  const alarmManager = AlarmManager();
 
   //Initializing Function
   useEffect(() => {
-    setupAudio();
+    alarmManager.setupAudio();
     requestPermission().then((response) => {
       if (!response.granted) {
         console.log("Foreground permission not granted");
@@ -58,7 +31,6 @@ const App = () => {
       startForegroundUpdate();
     });
   }, [])
-
 
   const startForegroundUpdate = async () => {
     foregroundSubscription?.remove()
@@ -77,7 +49,7 @@ const App = () => {
   React.useEffect(() => {
     setDistanceToDest(distanceBetween(curLocation, destination).toFixed(0));
     if (distanceToDest <= ACTIVATION_RADIUS && isAlarmSet) {
-      playAlarm();
+      alarmManager.playAlarm();
     }
   }, [curLocation]);
 
@@ -140,8 +112,8 @@ const App = () => {
         {/* Debugging Info */}
         <Text> {'Current Location: ' + curLocation?.latitude + ',' + curLocation?.longitude} </Text>
         <Text> {'Distance to Destination: ' + distanceToDest + ' m'} </Text>
-        <Button title="Test Alarm" onPress={playAlarm} />
-        <Button title="Stop Alarm" onPress={stopAlarm} />
+        <Button title="Test Alarm" onPress={alarmManager.playAlarm} />
+        <Button title="Stop Alarm" onPress={alarmManager.stopAlarm} />
       </View>
 
       <TextInput
