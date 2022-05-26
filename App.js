@@ -1,4 +1,4 @@
-import React, { useEffect, useState, ReactElement } from 'react';
+import React, { useEffect, useState, ReactElement, useRef } from 'react';
 import { Platform, StyleSheet, Text, View, Button, StatusBar, TextInput, Vibration, Pressable, Alert } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
@@ -7,7 +7,7 @@ import Geocoder from 'react-native-geocoding';
 import { Audio } from 'expo-av';
 import { distanceBetween } from './Utils.js'
 import { AlarmManager } from './AlarmManager.js'
-import config from './config.js';
+import { GOOGLE_MAPS_API_KEY } from '@env'
 
 const App = () => {
   const [status, requestPermission] = Location.useForegroundPermissions();
@@ -23,6 +23,7 @@ const App = () => {
 
   //Initializing Function
   useEffect(() => {
+    Geocoder.init(GOOGLE_MAPS_API_KEY);
     alarmManager.setupAudio();
     requestPermission().then((response) => {
       if (!response.granted) {
@@ -56,7 +57,6 @@ const App = () => {
 
   //selecting destination via geocoding: word to coordinate
   const selectLocGeocode = (prop) => {
-    Geocoder.init(config.API_KEY);
     Geocoder.from(prop)
       .then(json => {
         var location = json.results[0].geometry.location;
@@ -80,59 +80,83 @@ const App = () => {
 
   //function to get user to confirm is this is the destination they want to set as alarm
   const setLocConfirmation = (dest) => {
-        Alert.alert(
-        null,
-        'Would you like to set as your destination?',
-        [{
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Set Alarm',
-          onPress: () => {
-            console.log('destination set: ' + JSON.stringify(dest));
-            setDestination(dest);
-            setDistanceToDest(distanceBetween(curLocation, dest).toFixed(0));
+    Alert.alert(
+      null,
+      'Would you like to set as your destination?',
+      [{
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {
+        text: 'Set Alarm',
+        onPress: () => {
+          console.log('destination set: ' + JSON.stringify(dest));
+          setDestination(dest);
+          setDistanceToDest(distanceBetween(curLocation, dest).toFixed(0));
 
-            setIsAlarmSet(true);
-            alert('alarn SET!');
-          }
-        }],
-      )
-    };
+          setIsAlarmSet(true);
+          alert('alarn SET!');
+        }
+      }],
+    )
+  };
+
+  // const mapRef = useRef(null);
+  // const shiftMap = () => {
+  //   let region = { center: {latitude: 1.418916501296272, longitude: 103.6979021740996}, pitch:0, heading:0, zoom:10}
+  //   mapRef.current.animateCamera(region, {duration: 1000});
+  // }
+
+  const unsetAlarm = () => {
+    setIsAlarmSet(false);
+    alarmManager.stopAlarm();
+  }
 
   //Render
   return (
     <View style={styles.container}>
       <MapView
+        // ref={mapRef}
         style={styles.map}
         showsUserLocation={true}
         mapPadding={{ top: StatusBar.currentHeight }}   //Keeps map elements within view such as 'Locate' button
         onLongPress={(prop) => { selectLocLongPress(prop.nativeEvent) }}>
-        <MapView.Circle
-          radius={ACTIVATION_RADIUS}
-          center={destination}
-          strokeWidth={2}
-          strokeColor={'#1a66ff'}
-          fillColor={'rgba(230,238,255,0.6)'}
-        >
-        </MapView.Circle>
 
-        <MapView.Marker
-          coordinate={destination}
-          pinColor='#1a66ff'
-          title='Destination'
-        >
-        </MapView.Marker>
+        {isAlarmSet &&
+          <View>
+            <MapView.Circle
+              radius={ACTIVATION_RADIUS}
+              center={destination}
+              strokeWidth={2}
+              strokeColor={'#1a66ff'}
+              fillColor={'rgba(230,238,255,0.6)'}
+            >
+            </MapView.Circle>
+            <MapView.Marker
+              coordinate={destination}
+              pinColor='#1a66ff'
+              title='Destination'
+            >
+            </MapView.Marker>
+          </View>
+        }
       </MapView>
 
-      <View style={styles.distanceAndAlarm}>
-        {/* Debugging Info */}
+      {/* <View style={styles.distanceAndAlarm}>
         <Text> {'Current Location: ' + curLocation?.latitude + ',' + curLocation?.longitude} </Text>
         <Text> {'Distance to Destination: ' + distanceToDest + ' m'} </Text>
         <Button title="Test Alarm" onPress={alarmManager.playAlarm} />
         <Button title="Stop Alarm" onPress={alarmManager.stopAlarm} />
-      </View>
+        <Button title="Shift Map" onPress={shiftMap} />
+      </View> */}
+
+      {isAlarmSet &&
+        <View style={{ position: 'absolute', backgroundColor: 'white', alignItems: 'center', width: '70%', bottom: '30%', alignSelf: 'center' }}>
+          <Text>Alarm is set</Text>
+          <Text> {'Distance to Destination: ' + distanceToDest + ' m'} </Text>
+          <Button title="Cancel Alarm" onPress={unsetAlarm} />
+        </View>
+      }
 
       <TextInput
         style={styles.input}
