@@ -6,6 +6,7 @@ import * as TaskManager from 'expo-task-manager';
 import Geocoder from 'react-native-geocoding';
 import { Audio } from 'expo-av';
 import { distanceBetween } from './Utils.js'
+import config from './config.js';
 
 const App = () => {
   const [status, requestPermission] = Location.useForegroundPermissions();
@@ -31,6 +32,7 @@ const App = () => {
 
   //Stops playing the alarm
   const stopAlarm = async () => {
+    setIsAlarmSet(false)
     await sound.stopAsync();
     Vibration.cancel();
   }
@@ -45,7 +47,6 @@ const App = () => {
     Vibration.vibrate(VIBRATION_PATTERN, VIBRATION_REPEAT);
   }
 
-  
 
   //Initializing Function
   useEffect(() => {
@@ -81,35 +82,52 @@ const App = () => {
     }
   }, [curLocation]);
 
-  //geocoding: word to coordinates
-  const getCoordinate = (prop) => {
-    Geocoder.init('insert API key');  //TODO: Change to .env secret
+  //selecting destination via geocoding: word to coordinate
+  const selectLocGeocode = (prop) => {
+    Geocoder.init(config.API_KEY);
     Geocoder.from(prop)
       .then(json => {
         var location = json.results[0].geometry.location;
-        const destination = {
+        const dest = {
           latitude: location.lat,
-          longitude: location.lng,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
+          longitude: location.lng
         };
-        console.log(destination);
-        setDestination(destination);
-        setDistanceToDest(distanceBetween(curLocation, destination).toFixed(0));
+        setLocConfirmation(dest);
       })
       .catch(error => console.warn(error));
   }
 
   //selecting destination via longpress
-  const selectLocation = (prop) => {
-    const destination = {
+  const selectLocLongPress = (prop) => {
+    const dest = {
       latitude: prop.coordinate.latitude,
       longitude: prop.coordinate.longitude
     };
-    console.log('destination set: ' + JSON.stringify(destination));
-    setDestination(destination);
-    setDistanceToDest(distanceBetween(curLocation, destination).toFixed(0));
+    setLocConfirmation(dest);
   }
+
+  //function to get user to confirm is this is the destination they want to set as alarm
+  const setLocConfirmation = (dest) => {
+        Alert.alert(
+        null,
+        'Would you like to set as your destination?',
+        [{
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Set Alarm',
+          onPress: () => {
+            console.log('destination set: ' + JSON.stringify(dest));
+            setDestination(dest);
+            setDistanceToDest(distanceBetween(curLocation, dest).toFixed(0));
+
+            setIsAlarmSet(true);
+            alert('alarn SET!');
+          }
+        }],
+      )
+    };
 
   //Render
   return (
@@ -118,7 +136,7 @@ const App = () => {
         style={styles.map}
         showsUserLocation={true}
         mapPadding={{ top: StatusBar.currentHeight }}   //Keeps map elements within view such as 'Locate' button
-        onLongPress={(prop) => { selectLocation(prop.nativeEvent) }}>
+        onLongPress={(prop) => { selectLocLongPress(prop.nativeEvent) }}>
         <MapView.Circle
           radius={ACTIVATION_RADIUS}
           center={destination}
@@ -152,21 +170,11 @@ const App = () => {
         selectionColor='#003D7C'
       />
       <Pressable
-        onPress={() => { getCoordinate(destinationWord) }}
+        onPress={() => { selectLocGeocode(destinationWord) }}
         style={styles.button}
       >
         <Text>Search Destination</Text>
       </Pressable>
-      <Pressable
-        onPress={() => {
-          setIsAlarmSet(true);
-          alert('alarn SET!');
-        }}
-        style={styles.button}
-      >
-        <Text>SET DESTINATION</Text>
-      </Pressable>
-
     </View>
   );
 };
