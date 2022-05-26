@@ -74,10 +74,6 @@ const App = () => {
 
   //selecting destination via longpress
   const selectLocLongPress = (prop) => {
-    console.log('long');
-  let region = { center: {latitude: 1.418916501296272, longitude: 103.6979021740996}, pitch:0, heading:0, zoom:10}
-  mapRef.current.animateCamera(region, {duration: 1000});
-
     const dest = {
       latitude: prop.coordinate.latitude,
       longitude: prop.coordinate.longitude,
@@ -167,8 +163,6 @@ const App = () => {
             value={destinationWord}
           />
         </View>
-
-
 
       </SafeAreaView>
     </PaperProvider>
