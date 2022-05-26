@@ -6,11 +6,8 @@ import * as TaskManager from 'expo-task-manager';
 import Geocoder from 'react-native-geocoding';
 import { Audio } from 'expo-av';
 import { distanceBetween } from './Utils.js'
-<<<<<<< HEAD
 import { AlarmManager } from './AlarmManager.js'
-=======
 import config from './config.js';
->>>>>>> 19b3607c1578cc1073ab9ee1c0c46aeae160192d
 
 const App = () => {
   const [status, requestPermission] = Location.useForegroundPermissions();
@@ -22,39 +19,7 @@ const App = () => {
 
   const ACTIVATION_RADIUS = 500;
   let foregroundSubscription = null;
-<<<<<<< HEAD
   const alarmManager = AlarmManager();
-=======
-
-  //TODO: Encapsulate alarm functionalities
-  const [sound, setSound] = useState(null)
-  //Setup audio instance and load audio in. To be called during init.
-  const setupAudio = async () => {
-    const { sound } = await Audio.Sound.createAsync(
-      require('./assets/morning_glory.mp3')
-    );
-    setSound(sound);
-    await sound.setIsLoopingAsync(true);
-  }
-
-  //Stops playing the alarm
-  const stopAlarm = async () => {
-    setIsAlarmSet(false)
-    await sound.stopAsync();
-    Vibration.cancel();
-  }
-
-  //Activates the alarm
-  const playAlarm = async () => {
-    await sound.playAsync();
-
-    //Vibration
-    let VIBRATION_PATTERN = [0, 200, 100, 200, 500];
-    let VIBRATION_REPEAT = true;
-    Vibration.vibrate(VIBRATION_PATTERN, VIBRATION_REPEAT);
-  }
-
->>>>>>> 19b3607c1578cc1073ab9ee1c0c46aeae160192d
 
   //Initializing Function
   useEffect(() => {
