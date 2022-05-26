@@ -1,5 +1,5 @@
-import React, { useEffect, useState, ReactElement } from 'react';
-import { Platform, StyleSheet, Text, View, Button, StatusBar, TextInput, Vibration, Pressable, Alert } from 'react-native';
+import React, { useEffect, useState, ReactElement, useRef } from 'react';
+import { Platform, StyleSheet, Text, View, Button, StatusBar, TextInput, Vibration, Pressable, Alert, SafeAreaView } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
@@ -20,6 +20,8 @@ const App = () => {
   const ACTIVATION_RADIUS = 500;
   let foregroundSubscription = null;
   const alarmManager = AlarmManager();
+  const mapRef = useRef(null);
+  Geocoder.init(config.API_KEY);
 
   //Initializing Function
   useEffect(() => {
@@ -56,13 +58,12 @@ const App = () => {
 
   //selecting destination via geocoding: word to coordinate
   const selectLocGeocode = (prop) => {
-    Geocoder.init(config.API_KEY);
     Geocoder.from(prop)
       .then(json => {
         var location = json.results[0].geometry.location;
         const dest = {
           latitude: location.lat,
-          longitude: location.lng
+          longitude: location.lng,
         };
         setLocConfirmation(dest);
       })
@@ -73,38 +74,60 @@ const App = () => {
   const selectLocLongPress = (prop) => {
     const dest = {
       latitude: prop.coordinate.latitude,
-      longitude: prop.coordinate.longitude
+      longitude: prop.coordinate.longitude,
     };
     setLocConfirmation(dest);
   }
 
   //function to get user to confirm is this is the destination they want to set as alarm
   const setLocConfirmation = (dest) => {
-        Alert.alert(
-        null,
-        'Would you like to set as your destination?',
-        [{
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Set Alarm',
-          onPress: () => {
-            console.log('destination set: ' + JSON.stringify(dest));
-            setDestination(dest);
-            setDistanceToDest(distanceBetween(curLocation, dest).toFixed(0));
+    const oldDest = JSON.parse(JSON.stringify(destination));
+    setDestination(dest);
+    setDistanceToDest(distanceBetween(curLocation, dest).toFixed(0));
+    mapRef.current.animateCamera(dest, { duration: 1000 });
 
-            setIsAlarmSet(true);
-            alert('alarn SET!');
-          }
-        }],
-      )
-    };
+    Alert.alert(
+      null,
+      'Would you like to set as your destination?',
+      [{
+        text: 'Cancel',
+        style: 'cancel',
+        onPress: () => {
+          setDestination(oldDest);
+          setDistanceToDest(distanceBetween(curLocation, oldDest).toFixed(0));
+          mapRef.current.animateCamera(oldDest, { duration: 1000 });
+        }
+      },
+      {
+        text: 'Set Alarm',
+        onPress: () => {
+          setIsAlarmSet(true);
+          alert('alarn SET!');
+        }
+      }],
+    )
+    console.log(oldDest);
+    console.log(dest);
+  };
 
   //Render
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <TextInput
+        style={styles.input}
+        onChangeText={setDestinationWord}
+        value={destinationWord}
+        placeholder='!input final destination!'
+        selectionColor='#003D7C'
+      />
+      <Pressable
+        onPress={() => { selectLocGeocode(destinationWord) }}
+        style={styles.button}
+      >
+        <Text>Search Destination</Text>
+      </Pressable>
       <MapView
+        ref={mapRef}
         style={styles.map}
         showsUserLocation={true}
         mapPadding={{ top: StatusBar.currentHeight }}   //Keeps map elements within view such as 'Locate' button
@@ -133,21 +156,7 @@ const App = () => {
         <Button title="Test Alarm" onPress={alarmManager.playAlarm} />
         <Button title="Stop Alarm" onPress={alarmManager.stopAlarm} />
       </View>
-
-      <TextInput
-        style={styles.input}
-        onChangeText={setDestinationWord}
-        value={destinationWord}
-        placeholder='!input final destination!'
-        selectionColor='#003D7C'
-      />
-      <Pressable
-        onPress={() => { selectLocGeocode(destinationWord) }}
-        style={styles.button}
-      >
-        <Text>Search Destination</Text>
-      </Pressable>
-    </View>
+    </SafeAreaView>
   );
 };
 
