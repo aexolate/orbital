@@ -13,7 +13,7 @@ import { Provider as PaperProvider, Searchbar, Button, Card, Title, Paragraph } 
 const App = () => {
   const [status, requestPermission] = Location.useForegroundPermissions();
   const [curLocation, setCurLocation] = useState({ latitude: 0, longitude: 0 })
-  const [destination, setDestination] = useState({ latitude: 1.418916501296272, longitude: 103.6979021740996 }) //placeholder destination
+  const [destination, setDestination] = useState({ latitude: 0, longitude: 0 })
   const [distanceToDest, setDistanceToDest] = useState(Infinity)
   const [destinationWord, setDestinationWord] = useState(''); //destination in string for geocoding
   const [isAlarmSet, setIsAlarmSet] = useState(false)  //Indicates whether the alarm has been set
@@ -84,7 +84,7 @@ const App = () => {
   //function to get user to confirm is this is the destination they want to set as alarm
   const setLocConfirmation = (dest) => {
     const oldDest = JSON.parse(JSON.stringify(destination));
-    const animateObj = {pitch:0, heading:0, zoom:100}
+    const animateObj = {pitch:0, heading:0, zoom:10}
     setDestination(dest);
     setDistanceToDest(distanceBetween(curLocation, dest).toFixed(0));
     mapRef.current.animateCamera({center: dest, ...animateObj}, { duration: 1000 });
@@ -115,7 +115,7 @@ const App = () => {
     alarmManager.stopAlarm();
   };
 
-  const pressSmth = () => {
+  const searchLocation = () => {
     selectLocGeocode(destinationWord);
   }
 
@@ -158,8 +158,8 @@ const App = () => {
 
         <View style={{ position: 'absolute', width: '80%', opacity: 0.95, top: '20%', alignSelf: 'center' }}>
           <Searchbar
-            onIconPress={pressSmth}
-            onSubmitEditing={pressSmth}
+            onIconPress={searchLocation}
+            onSubmitEditing={searchLocation}
             onChangeText={setDestinationWord}
             value={destinationWord}
           />
