@@ -60,10 +60,11 @@ const App = () => {
   //Effect when curLocation/destination is changed
   React.useEffect(() => {
     //Recalculate distance based on new locations
-    setDistanceToDest(distanceBetween(curLocation, destination).toFixed(0));
+    let distanceRemaining = distanceBetween(curLocation, destination);
+    setDistanceToDest(distanceRemaining);
 
     //Triggers the alarm if location is within range of destination
-    if (distanceToDest <= ACTIVATION_RADIUS && isAlarmSet) {
+    if (distanceRemaining <= ACTIVATION_RADIUS && isAlarmSet) {
       setReachedDestination(true);
       alarmManager.playAlarm();
     }
