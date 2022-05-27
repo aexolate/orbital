@@ -1,10 +1,9 @@
 import React, { useEffect, useState, ReactElement, useRef } from 'react';
-import { Platform, StyleSheet, View, StatusBar, TextInput, Vibration, Pressable, Alert, SafeAreaView } from 'react-native';
+import { Platform, StyleSheet, View, StatusBar, Alert } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 import Geocoder from 'react-native-geocoding';
-import { Audio } from 'expo-av';
 import { distanceBetween } from './Utils.js'
 import { AlarmManager } from './AlarmManager.js'
 import { GOOGLE_MAPS_API_KEY } from '@env'
@@ -82,7 +81,10 @@ const App = () => {
         };
         setLocConfirmation(dest);
       })
-      .catch(error => console.warn(error));
+      .catch(error => {
+        console.log(JSON.stringify(error));
+        Alert.alert('Geocoding Error', JSON.stringify(error));
+      });
   }
 
   //selecting destination via longpress
@@ -133,6 +135,7 @@ const App = () => {
           mapPadding={{ top: StatusBar.currentHeight }}   //Keeps map elements within view such as 'Locate' button
           onLongPress={(mapEvent) => { selectLocLongPress(mapEvent.nativeEvent) }}>
 
+          {/* Destination Marker */}
           {isAlarmSet &&
             <View>
               <MapView.Circle
@@ -150,22 +153,24 @@ const App = () => {
           }
 
           {/* Preview Circle */
-          promptVisible &&
-          < MapView.Circle
-            radius={ACTIVATION_RADIUS}
-            center={previewLocation}
-            strokeWidth={2}
-            strokeColor={'#d0d61c'}
-            fillColor={'rgba(208, 214, 28,0.3)'} 
-          /> }
+            promptVisible &&
+            < MapView.Circle
+              radius={ACTIVATION_RADIUS}
+              center={previewLocation}
+              strokeWidth={2}
+              strokeColor={'#d0d61c'}
+              fillColor={'rgba(208, 214, 28,0.3)'}
+            />}
 
         </MapView>
 
         {isAlarmSet && !reachedDestination &&
-          <View style={styles.infoBox}>
-            <Text style={{ fontWeight: 'bold', fontSize: 18 }}> {'Distance to Destination: ' + (distanceToDest / 1000).toFixed(2) + ' km'} </Text>
-            <Button icon='cancel' mode='contained' onPress={unsetAlarm}>Cancel Alarm</Button>
-          </View>
+          <Card style={styles.infoBox}>
+            <Card.Content>
+              <Text style={{ fontWeight: 'bold', fontSize: 18 }}> {'Distance to Destination: ' + (distanceToDest / 1000).toFixed(2) + ' km'} </Text>
+              <Button icon='cancel' mode='contained' onPress={unsetAlarm}>Cancel Alarm</Button>
+            </Card.Content>
+          </Card>
         }
 
         {!isAlarmSet &&
@@ -196,25 +201,24 @@ const App = () => {
           </Card>
         }
 
-    <Banner
-      visible={promptVisible}
-      actions={[
-        {
-          label: 'Set Destination',
-          onPress: () => {
+        <Banner
+          visible={promptVisible}
+          actions={[
+            {
+              label: 'Set Destination',
+              onPress: () => {
                 setDestination(previewLocation);
-                setIsAlarmSet(true);+
-                setPromptVisible(false)
-            }
-        },
-        {
-          label: 'Cancel',
-          onPress: () => setPromptVisible(false)
-        },
-      ]}>
-      Would you like to set this as your destination?
-    </Banner>
-
+                setIsAlarmSet(true); +
+                  setPromptVisible(false)
+              }
+            },
+            {
+              label: 'Cancel',
+              onPress: () => setPromptVisible(false)
+            },
+          ]}>
+          Would you like to set this as your destination?
+        </Banner>
       </View>
     </PaperProvider>
   );
@@ -261,7 +265,6 @@ const styles = StyleSheet.create({
   },
   infoBox: {
     position: 'absolute',
-    backgroundColor: 'white',
     alignItems: 'center',
     opacity: 0.90,
     width: '90%',
