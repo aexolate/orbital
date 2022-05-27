@@ -84,9 +84,10 @@ const App = () => {
   //function to get user to confirm is this is the destination they want to set as alarm
   const setLocConfirmation = (dest) => {
     const oldDest = JSON.parse(JSON.stringify(destination));
+    const animateObj = {pitch:0, heading:0, zoom:100}
     setDestination(dest);
     setDistanceToDest(distanceBetween(curLocation, dest).toFixed(0));
-    mapRef.current.animateCamera(dest, { duration: 1000 });
+    mapRef.current.animateCamera({center: dest, ...animateObj}, { duration: 1000 });
 
     Alert.alert(
       null,
@@ -97,7 +98,7 @@ const App = () => {
         onPress: () => {
           setDestination(oldDest);
           setDistanceToDest(distanceBetween(curLocation, oldDest).toFixed(0));
-          mapRef.current.animateCamera(oldDest, { duration: 1000 });
+          mapRef.current.animateCamera({center: oldDest, ...animateObj}, { duration: 1000 });
         }
       },
       {
