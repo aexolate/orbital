@@ -18,6 +18,7 @@ import {
 } from 'react-native-paper';
 import CONSTANTS from './src/constants/Constants.js';
 import SnackbarHint from './src/components/SnackbarHint.js';
+import SearchbarLocation from './src/components/SearchbarLocation.js';
 
 const App = () => {
   const [status, requestPermission] = Location.useForegroundPermissions();
@@ -25,7 +26,6 @@ const App = () => {
   const [destination, setDestination] = useState(CONSTANTS.LOCATIONS.DEFAULT);
   const [previewLocation, setPreviewLocation] = useState(CONSTANTS.LOCATIONS.DEFAULT);
   const [distanceToDest, setDistanceToDest] = useState(Infinity);
-  const [destinationWord, setDestinationWord] = useState(''); //destination in string for geocoding
   const [isAlarmSet, setIsAlarmSet] = useState(false); //Indicates whether the alarm has been set
   const [reachedDestination, setReachedDestination] = useState(false); //Indicates whether the user has been in radius of destination
   let foregroundSubscription = null;
@@ -78,22 +78,6 @@ const App = () => {
     }
   }, [curLocation, destination]);
 
-  //selecting destination via geocoding: word to coordinate
-  const selectLocGeocode = (prop) => {
-    Geocoder.from(prop)
-      .then((json) => {
-        var location = json.results[0].geometry.location;
-        const dest = {
-          latitude: location.lat,
-          longitude: location.lng,
-        };
-        setLocConfirmation(dest);
-      })
-      .catch((error) => {
-        Alert.alert('Geocoding Error', JSON.stringify(error.origin.status));
-      });
-  };
-
   //selecting destination via longpress
   const selectLocLongPress = (mapEvent) => {
     if (isAlarmSet) return; //Do nothing on long press if alarm is already set
@@ -117,10 +101,6 @@ const App = () => {
     setIsAlarmSet(false);
     setReachedDestination(false);
     alarmManager.stopAlarm();
-  };
-
-  const searchLocation = () => {
-    selectLocGeocode(destinationWord);
   };
 
   const [promptVisible, setPromptVisible] = React.useState(false);
@@ -185,13 +165,7 @@ const App = () => {
 
         {!isAlarmSet && (
           <View style={styles.searchBar}>
-            <Searchbar
-              placeholder="Search Location"
-              onIconPress={searchLocation}
-              onSubmitEditing={searchLocation}
-              onChangeText={setDestinationWord}
-              value={destinationWord}
-            />
+            <SearchbarLocation onResultReady={(loc) => setLocConfirmation(loc)} />
           </View>
         )}
 
