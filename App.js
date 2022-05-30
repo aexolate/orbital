@@ -7,9 +7,16 @@ import Geocoder from 'react-native-geocoding';
 import { distanceBetween } from './src/utils/distance.js';
 import { AlarmManager } from './AlarmManager.js';
 import { GOOGLE_MAPS_API_KEY } from '@env';
-import { Provider as PaperProvider, Searchbar,
-  Button, Card, Snackbar, Text, Banner, } from 'react-native-paper';
-import CONSTANTS from './src/constants/Constants.js'
+import {
+  Provider as PaperProvider,
+  Searchbar,
+  Button,
+  Card,
+  Snackbar,
+  Text,
+  Banner,
+} from 'react-native-paper';
+import CONSTANTS from './src/constants/Constants.js';
 
 const App = () => {
   const [status, requestPermission] = Location.useForegroundPermissions();
@@ -43,7 +50,7 @@ const App = () => {
         accuracy: Location.Accuracy.BestForNavigation,
         timeInterval: 1000,
       },
-      location => {
+      (location) => {
         setCurLocation({
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
@@ -57,7 +64,7 @@ const App = () => {
     Geocoder.init(GOOGLE_MAPS_API_KEY);
     alarmManager.setupAudio();
 
-    requestPermission().then(response => {
+    requestPermission().then((response) => {
       if (!response.granted) {
         console.log('Foreground permission not granted');
         return;
@@ -80,9 +87,9 @@ const App = () => {
   }, [curLocation, destination]);
 
   //selecting destination via geocoding: word to coordinate
-  const selectLocGeocode = prop => {
+  const selectLocGeocode = (prop) => {
     Geocoder.from(prop)
-      .then(json => {
+      .then((json) => {
         var location = json.results[0].geometry.location;
         const dest = {
           latitude: location.lat,
@@ -90,14 +97,14 @@ const App = () => {
         };
         setLocConfirmation(dest);
       })
-      .catch(error => {
+      .catch((error) => {
         console.log(JSON.stringify(error));
         Alert.alert('Geocoding Error', JSON.stringify(error));
       });
   };
 
   //selecting destination via longpress
-  const selectLocLongPress = mapEvent => {
+  const selectLocLongPress = (mapEvent) => {
     if (isAlarmSet) return; //Do nothing on long press if alarm is already set
 
     const destination = {
@@ -108,7 +115,7 @@ const App = () => {
   };
 
   //function to get user to confirm is this is the destination they want to set as alarm
-  const setLocConfirmation = dest => {
+  const setLocConfirmation = (dest) => {
     setPreviewLocation(dest);
     setPromptVisible(true);
     const animateObj = { pitch: 0, heading: 0, zoom: 15 };
@@ -136,11 +143,11 @@ const App = () => {
         <MapView
           ref={mapRef}
           style={{ flex: 1 }}
-          initialCamera={INITIAL_CAMERA}
+          initialCamera={CONSTANTS.MAP_CAMERA.SINGAPORE}
           zoomControlEnabled={true}
           showsUserLocation={true}
           mapPadding={{ top: StatusBar.currentHeight }} //Keeps map elements within view such as 'Locate' button
-          onLongPress={mapEvent => {
+          onLongPress={(mapEvent) => {
             selectLocLongPress(mapEvent.nativeEvent);
           }}
         >
@@ -245,7 +252,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   map: {
-    flex: 1
+    flex: 1,
   },
   distanceAndAlarm: {
     flex: 2,
