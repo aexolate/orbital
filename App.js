@@ -23,14 +23,13 @@ import {
   Dialog,
 } from 'react-native-paper';
 
+const DEFAULT_LOCATION = { latitude: 0, longitude: 0 };
+
 const App = () => {
   const [status, requestPermission] = Location.useForegroundPermissions();
-  const [curLocation, setCurLocation] = useState({ latitude: 0, longitude: 0 });
-  const [destination, setDestination] = useState({ latitude: 0, longitude: 0 });
-  const [previewLocation, setPreviewLocation] = useState({
-    latitude: 0,
-    longitude: 0,
-  });
+  const [curLocation, setCurLocation] = useState(DEFAULT_LOCATION);
+  const [destination, setDestination] = useState(DEFAULT_LOCATION);
+  const [previewLocation, setPreviewLocation] = useState(DEFAULT_LOCATION);
   const [distanceToDest, setDistanceToDest] = useState(Infinity);
   const [destinationWord, setDestinationWord] = useState(''); //destination in string for geocoding
   const [isAlarmSet, setIsAlarmSet] = useState(false); //Indicates whether the alarm has been set
