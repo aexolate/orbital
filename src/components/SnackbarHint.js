@@ -6,7 +6,12 @@ const SnackbarHint = () => {
   const onDismissSnackBar = () => setHintVisible(false);
 
   return (
-    <Snackbar visible={hintVisible} onDismiss={onDismissSnackBar} action={{ label: 'Dismiss' }}>
+    <Snackbar
+      visible={hintVisible}
+      onDismiss={onDismissSnackBar}
+      action={{ label: 'Dismiss' }}
+      duration={5000}
+    >
       Search the address or long-press on the map to set the alarm
     </Snackbar>
   );

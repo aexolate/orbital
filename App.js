@@ -3,22 +3,13 @@ import { Platform, StyleSheet, View, StatusBar, Alert } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
-import Geocoder from 'react-native-geocoding';
 import { distanceBetween } from './src/utils/distance.js';
 import { AlarmManager } from './AlarmManager.js';
-import { GOOGLE_MAPS_API_KEY } from '@env';
-import {
-  Provider as PaperProvider,
-  Searchbar,
-  Button,
-  Card,
-  Snackbar,
-  Text,
-  Banner,
-} from 'react-native-paper';
+import { Provider as PaperProvider, Button, Card, Text, Banner } from 'react-native-paper';
 import CONSTANTS from './src/constants/Constants.js';
 import SnackbarHint from './src/components/SnackbarHint.js';
 import SearchbarLocation from './src/components/SearchbarLocation.js';
+import WaypointIndicator from './src/components/WaypointIndicator.js';
 
 const App = () => {
   const [status, requestPermission] = Location.useForegroundPermissions();
@@ -53,7 +44,6 @@ const App = () => {
 
   //Initializing Function
   useEffect(() => {
-    Geocoder.init(GOOGLE_MAPS_API_KEY);
     alarmManager.setupAudio();
 
     requestPermission().then((response) => {
@@ -120,19 +110,12 @@ const App = () => {
             selectLocLongPress(mapEvent.nativeEvent);
           }}
         >
-          {/* Destination Marker */}
           {isAlarmSet && (
-            <View>
-              <MapView.Circle
-                radius={ACTIVATION_RADIUS}
-                center={destination}
-                strokeWidth={2}
-                strokeColor={'#fe5f55'}
-                fillColor={'rgba(254,95,85,0.3)'}
-              />
-
-              <MapView.Marker coordinate={destination} pinColor="#fe5f55" title="Destination" />
-            </View>
+            <WaypointIndicator
+              title="Destination"
+              center={destination}
+              radius={ACTIVATION_RADIUS}
+            />
           )}
 
           {
@@ -153,8 +136,7 @@ const App = () => {
           <Card style={styles.infoBox}>
             <Card.Content>
               <Text style={{ fontWeight: 'bold', fontSize: 18 }}>
-                {' '}
-                {'Distance to Destination: ' + (distanceToDest / 1000).toFixed(2) + ' km'}{' '}
+                {'Distance to Destination: ' + (distanceToDest / 1000).toFixed(2) + ' km'}
               </Text>
               <Button icon="cancel" mode="contained" onPress={unsetAlarm}>
                 Cancel Alarm
