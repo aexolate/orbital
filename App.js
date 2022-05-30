@@ -17,6 +17,7 @@ import {
   Banner,
 } from 'react-native-paper';
 import CONSTANTS from './src/constants/Constants.js';
+import SnackbarHint from './src/components/SnackbarHint.js';
 
 const App = () => {
   const [status, requestPermission] = Location.useForegroundPermissions();
@@ -30,15 +31,6 @@ const App = () => {
   let foregroundSubscription = null;
   const alarmManager = AlarmManager();
   const mapRef = useRef(null);
-
-  //Initial map to be centered at Singapore
-  const INITIAL_CAMERA = {
-    center: { latitude: 1.3521, longitude: 103.8198 },
-    pitch: 0,
-    heading: 0,
-    altitude: 0,
-    zoom: 10,
-  };
 
   //Distance to destination for alarm to activate
   const ACTIVATION_RADIUS = 500;
@@ -80,7 +72,7 @@ const App = () => {
     setDistanceToDest(distanceRemaining);
 
     //Triggers the alarm if location is within range of destination
-    if (distanceRemaining <= ACTIVATION_RADIUS && isAlarmSet) {
+    if (distanceRemaining <= ACTIVATION_RADIUS && isAlarmSet && !reachedDestination) {
       setReachedDestination(true);
       alarmManager.playAlarm();
     }
@@ -98,8 +90,7 @@ const App = () => {
         setLocConfirmation(dest);
       })
       .catch((error) => {
-        console.log(JSON.stringify(error));
-        Alert.alert('Geocoding Error', JSON.stringify(error));
+        Alert.alert('Geocoding Error', JSON.stringify(error.origin.status));
       });
   };
 
@@ -132,9 +123,7 @@ const App = () => {
     selectLocGeocode(destinationWord);
   };
 
-  const [hintVisible, setHintVisible] = React.useState(true);
   const [promptVisible, setPromptVisible] = React.useState(false);
-  const onDismissSnackBar = () => setHintVisible(false);
 
   //Render
   return (
@@ -206,9 +195,7 @@ const App = () => {
           </View>
         )}
 
-        <Snackbar visible={hintVisible} onDismiss={onDismissSnackBar} action={{ label: 'Dismiss' }}>
-          Search the address or long-press on the map to set the alarm
-        </Snackbar>
+        <SnackbarHint />
 
         {reachedDestination && (
           <Card>
