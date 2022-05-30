@@ -4,32 +4,18 @@ import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 import Geocoder from 'react-native-geocoding';
-import { distanceBetween } from './Utils.js';
+import { distanceBetween } from './src/utils/distance.js';
 import { AlarmManager } from './AlarmManager.js';
 import { GOOGLE_MAPS_API_KEY } from '@env';
-import {
-  Provider as PaperProvider,
-  Searchbar,
-  Button,
-  Card,
-  Title,
-  Paragraph,
-  Snackbar,
-  Text,
-  Portal,
-  Banner,
-  Modal,
-  Surface,
-  Dialog,
-} from 'react-native-paper';
-
-const DEFAULT_LOCATION = { latitude: 0, longitude: 0 };
+import { Provider as PaperProvider, Searchbar,
+  Button, Card, Snackbar, Text, Banner, } from 'react-native-paper';
+import CONSTANTS from './src/constants/Constants.js'
 
 const App = () => {
   const [status, requestPermission] = Location.useForegroundPermissions();
-  const [curLocation, setCurLocation] = useState(DEFAULT_LOCATION);
-  const [destination, setDestination] = useState(DEFAULT_LOCATION);
-  const [previewLocation, setPreviewLocation] = useState(DEFAULT_LOCATION);
+  const [curLocation, setCurLocation] = useState(CONSTANTS.LOCATIONS.DEFAULT);
+  const [destination, setDestination] = useState(CONSTANTS.LOCATIONS.DEFAULT);
+  const [previewLocation, setPreviewLocation] = useState(CONSTANTS.LOCATIONS.DEFAULT);
   const [distanceToDest, setDistanceToDest] = useState(Infinity);
   const [destinationWord, setDestinationWord] = useState(''); //destination in string for geocoding
   const [isAlarmSet, setIsAlarmSet] = useState(false); //Indicates whether the alarm has been set
@@ -259,8 +245,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   map: {
-    flex: 1,
-    paddingTop: StatusBar.currentHeight,
+    flex: 1
   },
   distanceAndAlarm: {
     flex: 2,
