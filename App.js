@@ -3,50 +3,25 @@ import { Platform, StyleSheet, View, StatusBar, Alert } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
-import Geocoder from 'react-native-geocoding';
-import { distanceBetween } from './Utils.js';
+import { distanceBetween } from './src/utils/distance.js';
 import { AlarmManager } from './AlarmManager.js';
-import { GOOGLE_MAPS_API_KEY } from '@env';
-import {
-  Provider as PaperProvider,
-  Searchbar,
-  Button,
-  Card,
-  Title,
-  Paragraph,
-  Snackbar,
-  Text,
-  Portal,
-  Banner,
-  Modal,
-  Surface,
-  Dialog,
-} from 'react-native-paper';
+import { Provider as PaperProvider, Button, Card, Text, Banner } from 'react-native-paper';
+import CONSTANTS from './src/constants/Constants.js';
+import SnackbarHint from './src/components/SnackbarHint.js';
+import SearchbarLocation from './src/components/SearchbarLocation.js';
+import WaypointIndicator from './src/components/WaypointIndicator.js';
 
 const App = () => {
   const [status, requestPermission] = Location.useForegroundPermissions();
-  const [curLocation, setCurLocation] = useState({ latitude: 0, longitude: 0 });
-  const [destination, setDestination] = useState({ latitude: 0, longitude: 0 });
-  const [previewLocation, setPreviewLocation] = useState({
-    latitude: 0,
-    longitude: 0,
-  });
+  const [curLocation, setCurLocation] = useState(CONSTANTS.LOCATIONS.DEFAULT);
+  const [destination, setDestination] = useState(CONSTANTS.LOCATIONS.DEFAULT);
+  const [previewLocation, setPreviewLocation] = useState(CONSTANTS.LOCATIONS.DEFAULT);
   const [distanceToDest, setDistanceToDest] = useState(Infinity);
-  const [destinationWord, setDestinationWord] = useState(''); //destination in string for geocoding
   const [isAlarmSet, setIsAlarmSet] = useState(false); //Indicates whether the alarm has been set
   const [reachedDestination, setReachedDestination] = useState(false); //Indicates whether the user has been in radius of destination
   let foregroundSubscription = null;
   const alarmManager = AlarmManager();
   const mapRef = useRef(null);
-
-  //Initial map to be centered at Singapore
-  const INITIAL_CAMERA = {
-    center: { latitude: 1.3521, longitude: 103.8198 },
-    pitch: 0,
-    heading: 0,
-    altitude: 0,
-    zoom: 10,
-  };
 
   //Distance to destination for alarm to activate
   const ACTIVATION_RADIUS = 500;
@@ -58,7 +33,7 @@ const App = () => {
         accuracy: Location.Accuracy.BestForNavigation,
         timeInterval: 1000,
       },
-      location => {
+      (location) => {
         setCurLocation({
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
@@ -69,10 +44,9 @@ const App = () => {
 
   //Initializing Function
   useEffect(() => {
-    Geocoder.init(GOOGLE_MAPS_API_KEY);
     alarmManager.setupAudio();
 
-    requestPermission().then(response => {
+    requestPermission().then((response) => {
       if (!response.granted) {
         console.log('Foreground permission not granted');
         return;
@@ -88,31 +62,14 @@ const App = () => {
     setDistanceToDest(distanceRemaining);
 
     //Triggers the alarm if location is within range of destination
-    if (distanceRemaining <= ACTIVATION_RADIUS && isAlarmSet) {
+    if (distanceRemaining <= ACTIVATION_RADIUS && isAlarmSet && !reachedDestination) {
       setReachedDestination(true);
       alarmManager.playAlarm();
     }
   }, [curLocation, destination]);
 
-  //selecting destination via geocoding: word to coordinate
-  const selectLocGeocode = prop => {
-    Geocoder.from(prop)
-      .then(json => {
-        var location = json.results[0].geometry.location;
-        const dest = {
-          latitude: location.lat,
-          longitude: location.lng,
-        };
-        setLocConfirmation(dest);
-      })
-      .catch(error => {
-        console.log(JSON.stringify(error));
-        Alert.alert('Geocoding Error', JSON.stringify(error));
-      });
-  };
-
   //selecting destination via longpress
-  const selectLocLongPress = mapEvent => {
+  const selectLocLongPress = (mapEvent) => {
     if (isAlarmSet) return; //Do nothing on long press if alarm is already set
 
     const destination = {
@@ -123,7 +80,7 @@ const App = () => {
   };
 
   //function to get user to confirm is this is the destination they want to set as alarm
-  const setLocConfirmation = dest => {
+  const setLocConfirmation = (dest) => {
     setPreviewLocation(dest);
     setPromptVisible(true);
     const animateObj = { pitch: 0, heading: 0, zoom: 15 };
@@ -136,13 +93,7 @@ const App = () => {
     alarmManager.stopAlarm();
   };
 
-  const searchLocation = () => {
-    selectLocGeocode(destinationWord);
-  };
-
-  const [hintVisible, setHintVisible] = React.useState(true);
   const [promptVisible, setPromptVisible] = React.useState(false);
-  const onDismissSnackBar = () => setHintVisible(false);
 
   //Render
   return (
@@ -151,27 +102,20 @@ const App = () => {
         <MapView
           ref={mapRef}
           style={{ flex: 1 }}
-          initialCamera={INITIAL_CAMERA}
+          initialCamera={CONSTANTS.MAP_CAMERA.SINGAPORE}
           zoomControlEnabled={true}
           showsUserLocation={true}
           mapPadding={{ top: StatusBar.currentHeight }} //Keeps map elements within view such as 'Locate' button
-          onLongPress={mapEvent => {
+          onLongPress={(mapEvent) => {
             selectLocLongPress(mapEvent.nativeEvent);
           }}
         >
-          {/* Destination Marker */}
           {isAlarmSet && (
-            <View>
-              <MapView.Circle
-                radius={ACTIVATION_RADIUS}
-                center={destination}
-                strokeWidth={2}
-                strokeColor={'#fe5f55'}
-                fillColor={'rgba(254,95,85,0.3)'}
-              />
-
-              <MapView.Marker coordinate={destination} pinColor="#fe5f55" title="Destination" />
-            </View>
+            <WaypointIndicator
+              title="Destination"
+              center={destination}
+              radius={ACTIVATION_RADIUS}
+            />
           )}
 
           {
@@ -192,8 +136,7 @@ const App = () => {
           <Card style={styles.infoBox}>
             <Card.Content>
               <Text style={{ fontWeight: 'bold', fontSize: 18 }}>
-                {' '}
-                {'Distance to Destination: ' + (distanceToDest / 1000).toFixed(2) + ' km'}{' '}
+                {'Distance to Destination: ' + (distanceToDest / 1000).toFixed(2) + ' km'}
               </Text>
               <Button icon="cancel" mode="contained" onPress={unsetAlarm}>
                 Cancel Alarm
@@ -204,19 +147,11 @@ const App = () => {
 
         {!isAlarmSet && (
           <View style={styles.searchBar}>
-            <Searchbar
-              placeholder="Search Location"
-              onIconPress={searchLocation}
-              onSubmitEditing={searchLocation}
-              onChangeText={setDestinationWord}
-              value={destinationWord}
-            />
+            <SearchbarLocation onResultReady={(loc) => setLocConfirmation(loc)} />
           </View>
         )}
 
-        <Snackbar visible={hintVisible} onDismiss={onDismissSnackBar} action={{ label: 'Dismiss' }}>
-          Search the address or long-press on the map to set the alarm
-        </Snackbar>
+        <SnackbarHint />
 
         {reachedDestination && (
           <Card>
@@ -261,7 +196,6 @@ const styles = StyleSheet.create({
   },
   map: {
     flex: 1,
-    paddingTop: StatusBar.currentHeight,
   },
   distanceAndAlarm: {
     flex: 2,
