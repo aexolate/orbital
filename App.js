@@ -98,6 +98,7 @@ const App = () => {
   //Render
   return (
     <PaperProvider>
+      <StatusBar barStyle="dark-content" backgroundColor={'transparent'} translucent={true} />
       <View style={styles.container}>
         <MapView
           ref={mapRef}
