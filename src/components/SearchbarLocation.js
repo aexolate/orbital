@@ -38,7 +38,7 @@ const LocationSearchbar = (props) => {
 };
 
 LocationSearchbar.propTypes = {
-  onResultReady: PropTypes.func
+  onResultReady: PropTypes.func,
 };
 
 export default LocationSearchbar;
