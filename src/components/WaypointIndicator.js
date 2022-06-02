@@ -4,11 +4,11 @@ import MapView from 'react-native-maps';
 import PropTypes from 'prop-types';
 
 const WaypointIndicator = (props) => {
-  const colorEnum = {
-    Destination: { color: '#fe5f55', fillColor: 'rgba(254,95,85,0.3)' },
-    Preview: { color: '#d0d61c', fillColor: 'rgba(208, 214, 28,0.3)' },
-  };
-  const waypointType = props.waypointType;
+  // const colorEnum = {
+  //   Destination: { color: '#fe5f55', fillColor: 'rgba(254,95,85,0.3)' },
+  //   Preview: { color: '#d0d61c', fillColor: 'rgba(208, 214, 28,0.3)' },
+  // };
+  // const waypointType = props.waypointType;
 
   return (
     <View>
