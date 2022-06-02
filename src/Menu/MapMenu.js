@@ -11,7 +11,6 @@ import SnackbarHint from '../components/SnackbarHint.js';
 import SearchbarLocation from '../components/SearchbarLocation.js';
 import WaypointIndicator from '../components/WaypointIndicator.js';
 
-
 const MapMenu = () => {
   const [status, requestPermission] = Location.useForegroundPermissions();
   const [curLocation, setCurLocation] = useState(CONSTANTS.LOCATIONS.DEFAULT);
