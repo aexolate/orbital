@@ -30,9 +30,11 @@ export default {
         },
       },
       permissions: [
-        'ACCESS_BACKGROUND_LOCATION',
         'ACCESS_COARSE_LOCATION',
         'ACCESS_FINE_LOCATION',
+        'ACCESS_BACKGROUND_LOCATION',
+        'FOREGROUND_SERVICE',
+        'VIBRATE'
       ],
     },
     web: {
