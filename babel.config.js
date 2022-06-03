@@ -13,7 +13,7 @@ module.exports = function (api) {
           safe: false,
         },
       ],
-      ['react-native-reanimated/plugin']
+      ['react-native-reanimated/plugin'],
     ],
   };
 };

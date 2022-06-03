@@ -1,7 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { StyleSheet, View, StatusBar } from 'react-native';
-import MapView from 'react-native-maps';
+import React, { useEffect, useState, ReactElement, useRef } from 'react';
+import { Platform, StyleSheet, View, StatusBar, Alert } from 'react-native';
+import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
+import * as TaskManager from 'expo-task-manager';
+import { GeofencingEventType } from 'expo-location';
 import { distanceBetween } from '../utils/distance.js';
 import { AlarmManager } from '../../AlarmManager.js';
 import { Provider as PaperProvider, Button, Card, Text, Banner } from 'react-native-paper';
@@ -10,8 +12,9 @@ import SnackbarHint from '../components/SnackbarHint.js';
 import SearchbarLocation from '../components/SearchbarLocation.js';
 import WaypointIndicator from '../components/WaypointIndicator.js';
 
-const MapMenu = () => {
+const App = () => {
   const [status, requestPermission] = Location.useForegroundPermissions();
+  const [statusBG, requestPermissionBG] = Location.useBackgroundPermissions();
   const [curLocation, setCurLocation] = useState(CONSTANTS.LOCATIONS.DEFAULT);
   const [destination, setDestination] = useState(CONSTANTS.LOCATIONS.DEFAULT);
   const [previewLocation, setPreviewLocation] = useState(CONSTANTS.LOCATIONS.DEFAULT);
@@ -24,6 +27,20 @@ const MapMenu = () => {
 
   //Distance to destination for alarm to activate
   const ACTIVATION_RADIUS = 500;
+
+  TaskManager.defineTask('Geofencing', ({ data: { eventType, region }, error }) => {
+    if (error) {
+      console.log(error.message);
+      return;
+    }
+
+    if (eventType === GeofencingEventType.Enter) {
+      //console.log("You've entered region:", region);
+      setReachedDestination(true);
+      alarmManager.playAlarm();
+      Location.stopGeofencingAsync('Geofencing');
+    }
+  });
 
   const startForegroundUpdate = async () => {
     foregroundSubscription?.remove();
@@ -51,6 +68,10 @@ const MapMenu = () => {
         return;
       }
       startForegroundUpdate();
+
+      requestPermissionBG().then((response) => {
+        console.log(response);
+      });
     });
   }, []);
 
@@ -59,12 +80,6 @@ const MapMenu = () => {
     //Recalculate distance based on new locations
     let distanceRemaining = distanceBetween(curLocation, destination);
     setDistanceToDest(distanceRemaining);
-
-    //Triggers the alarm if location is within range of destination
-    if (distanceRemaining <= ACTIVATION_RADIUS && isAlarmSet && !reachedDestination) {
-      setReachedDestination(true);
-      alarmManager.playAlarm();
-    }
   }, [curLocation, destination]);
 
   //selecting destination via longpress
@@ -105,7 +120,7 @@ const MapMenu = () => {
           initialCamera={CONSTANTS.MAP_CAMERA.SINGAPORE}
           zoomControlEnabled={true}
           showsUserLocation={true}
-          mapPadding={{ top: StatusBar.currentHeight }} //Keeps map elements within view such as 'Locate' button
+          //mapPadding={{ top: StatusBar.currentHeight }} //Keeps map elements within view such as 'Locate' button
           onLongPress={(mapEvent) => {
             selectLocLongPress(mapEvent.nativeEvent);
           }}
@@ -173,6 +188,13 @@ const MapMenu = () => {
                 setDestination(previewLocation);
                 setIsAlarmSet(true);
                 setPromptVisible(false);
+                Location.startGeofencingAsync('Geofencing', [
+                  {
+                    latitude: previewLocation.latitude,
+                    longitude: previewLocation.longitude,
+                    radius: 500,
+                  },
+                ]);
               },
             },
             {
@@ -188,7 +210,7 @@ const MapMenu = () => {
   );
 };
 
-export default MapMenu;
+export default App;
 
 const styles = StyleSheet.create({
   container: {
@@ -197,12 +219,6 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
-  distanceAndAlarm: {
-    flex: 2,
-    curLocation: 'absolute',
-    alignSelf: 'center',
-    backgroundColor: 'white',
-  },
   input: {
     flex: 1,
     borderColor: 'black',
@@ -210,14 +226,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'flex-start',
-  },
-  button: {
-    flex: 1,
-    backgroundColor: '#003D7C',
-    borderColor: '#000000',
-    borderWidth: 4,
-    justifyContent: 'center',
-    alignItems: 'flex-end',
   },
   searchBar: {
     position: 'absolute',
