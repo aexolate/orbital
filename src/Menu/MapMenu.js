@@ -12,7 +12,7 @@ import SnackbarHint from '../components/SnackbarHint.js';
 import SearchbarLocation from '../components/SearchbarLocation.js';
 import WaypointIndicator from '../components/WaypointIndicator.js';
 
-const App = () => {
+const MapMenu = () => {
   const [status, requestPermission] = Location.useForegroundPermissions();
   const [statusBG, requestPermissionBG] = Location.useBackgroundPermissions();
   const [curLocation, setCurLocation] = useState(CONSTANTS.LOCATIONS.DEFAULT);
@@ -210,7 +210,7 @@ const App = () => {
   );
 };
 
-export default App;
+export default MapMenu;
 
 const styles = StyleSheet.create({
   container: {
