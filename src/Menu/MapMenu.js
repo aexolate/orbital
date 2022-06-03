@@ -11,11 +11,12 @@ import CONSTANTS from '../constants/Constants.js';
 import SnackbarHint from '../components/SnackbarHint.js';
 import SearchbarLocation from '../components/SearchbarLocation.js';
 import WaypointIndicator from '../components/WaypointIndicator.js';
+import WaypointEnum, { WAYPOINT_TYPE } from '../constants/WaypointEnum.js';
 
 const MapMenu = () => {
   const [status, requestPermission] = Location.useForegroundPermissions();
   const [statusBG, requestPermissionBG] = Location.useBackgroundPermissions();
-  const [curLocation, setCurLocation] = useState(CONSTANTS.LOCATIONS.DEFAULT);
+  //const [curLocation, setCurLocation] = useState(CONSTANTS.LOCATIONS.DEFAULT);
   const [destination, setDestination] = useState(CONSTANTS.LOCATIONS.DEFAULT);
   const [previewLocation, setPreviewLocation] = useState(CONSTANTS.LOCATIONS.DEFAULT);
   const [distanceToDest, setDistanceToDest] = useState(Infinity);
@@ -35,28 +36,27 @@ const MapMenu = () => {
     }
 
     if (eventType === GeofencingEventType.Enter) {
-      //console.log("You've entered region:", region);
       setReachedDestination(true);
       alarmManager.playAlarm();
       Location.stopGeofencingAsync('Geofencing');
     }
   });
 
-  const startForegroundUpdate = async () => {
-    foregroundSubscription?.remove();
-    foregroundSubscription = await Location.watchPositionAsync(
-      {
-        accuracy: Location.Accuracy.BestForNavigation,
-        timeInterval: 1000,
-      },
-      (location) => {
-        setCurLocation({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-        });
-      },
-    );
-  };
+  // const startForegroundUpdate = async () => {
+  //   foregroundSubscription?.remove();
+  //   foregroundSubscription = await Location.watchPositionAsync(
+  //     {
+  //       accuracy: Location.Accuracy.BestForNavigation,
+  //       timeInterval: 1000,
+  //     },
+  //     (location) => {
+  //       setCurLocation({
+  //         latitude: location.coords.latitude,
+  //         longitude: location.coords.longitude,
+  //       });
+  //     },
+  //   );
+  // };
 
   //Initializing Function
   useEffect(() => {
@@ -67,20 +67,18 @@ const MapMenu = () => {
         console.log('Foreground permission not granted');
         return;
       }
-      startForegroundUpdate();
+      //startForegroundUpdate();
 
-      requestPermissionBG().then((response) => {
-        console.log(response);
-      });
+      requestPermissionBG();
     });
   }, []);
 
   //Effect when curLocation/destination is changed
-  React.useEffect(() => {
-    //Recalculate distance based on new locations
-    let distanceRemaining = distanceBetween(curLocation, destination);
-    setDistanceToDest(distanceRemaining);
-  }, [curLocation, destination]);
+  // React.useEffect(() => {
+  //   //Recalculate distance based on new locations
+  //   let distanceRemaining = distanceBetween(curLocation, destination);
+  //   setDistanceToDest(distanceRemaining);
+  // }, [curLocation, destination]);
 
   //selecting destination via longpress
   const selectLocLongPress = (mapEvent) => {
@@ -98,7 +96,7 @@ const MapMenu = () => {
     setPreviewLocation(dest);
     setPromptVisible(true);
     const animateObj = { pitch: 0, heading: 0, zoom: 15 };
-    mapRef.current.animateCamera({ center: dest, ...animateObj }, { duration: 1000 });
+    mapRef.current.animateCamera({ center: dest, ...animateObj }, { duration: 500 });
   };
 
   const unsetAlarm = () => {
@@ -109,10 +107,19 @@ const MapMenu = () => {
 
   const [promptVisible, setPromptVisible] = React.useState(false);
 
+  const onUserLocationChange = (location) => {
+    console.log(location.nativeEvent);
+    const curLocation = {
+      latitude: location.nativeEvent.coordinate.latitude,
+      longitude: location.nativeEvent.coordinate.longitude,
+    };
+    setDistanceToDest(distanceBetween(curLocation, destination));
+  };
+
   //Render
   return (
     <PaperProvider>
-      <StatusBar barStyle="dark-content" backgroundColor={'transparent'} translucent={true} />
+      {/* <StatusBar barStyle="dark-content" backgroundColor={'transparent'} translucent={true} /> */}
       <View style={styles.container}>
         <MapView
           ref={mapRef}
@@ -120,7 +127,7 @@ const MapMenu = () => {
           initialCamera={CONSTANTS.MAP_CAMERA.SINGAPORE}
           zoomControlEnabled={true}
           showsUserLocation={true}
-          //mapPadding={{ top: StatusBar.currentHeight }} //Keeps map elements within view such as 'Locate' button
+          onUserLocationChange={onUserLocationChange}
           onLongPress={(mapEvent) => {
             selectLocLongPress(mapEvent.nativeEvent);
           }}
@@ -130,18 +137,18 @@ const MapMenu = () => {
               title="Destination"
               center={destination}
               radius={ACTIVATION_RADIUS}
+              waypointType={WAYPOINT_TYPE.DESTINATION}
             />
           )}
 
           {
             /* Preview Circle */
             promptVisible && (
-              <MapView.Circle
+              <WaypointIndicator
+                title="Preview"
                 radius={ACTIVATION_RADIUS}
                 center={previewLocation}
-                strokeWidth={2}
-                strokeColor={'#d0d61c'}
-                fillColor={'rgba(208, 214, 28,0.3)'}
+                waypointType={WAYPOINT_TYPE.PREVIEW}
               />
             )
           }
