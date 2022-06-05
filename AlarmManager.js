@@ -5,13 +5,11 @@ import { Audio } from 'expo-av';
 export const AlarmManager = () => {
   const [sound, setSound] = useState(null);
   const [status, setStatus] = useState(null);
+
   //Setup audio instance and load audio in. To be called during init.
   const setupAudio = async () => {
     await Audio.setAudioModeAsync({
-      allowsRecordingIOS: false,
       staysActiveInBackground: true,
-      shouldDuckAndroid: true,
-      playThroughEarpieceAndroid: false,
     });
 
     const { sound, status } = await Audio.Sound.createAsync(require('./assets/morning_glory.mp3'));
