@@ -1,7 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { StyleSheet, View, StatusBar } from 'react-native';
-import MapView from 'react-native-maps';
+import React, { useEffect, useState, ReactElement, useRef } from 'react';
+import { Platform, StyleSheet, View, StatusBar, Alert } from 'react-native';
+import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
+import * as TaskManager from 'expo-task-manager';
+import { GeofencingEventType } from 'expo-location';
 import { distanceBetween } from '../utils/distance.js';
 import { AlarmManager } from '../../AlarmManager.js';
 import { Provider as PaperProvider, Button, Card, Text, Banner } from 'react-native-paper';
@@ -9,63 +11,56 @@ import CONSTANTS from '../constants/Constants.js';
 import SnackbarHint from '../components/SnackbarHint.js';
 import SearchbarLocation from '../components/SearchbarLocation.js';
 import WaypointIndicator from '../components/WaypointIndicator.js';
+import { WAYPOINT_TYPE } from '../constants/WaypointEnum.js';
 
 const MapMenu = () => {
   const [status, requestPermission] = Location.useForegroundPermissions();
-  const [curLocation, setCurLocation] = useState(CONSTANTS.LOCATIONS.DEFAULT);
+  const [statusBG, requestPermissionBG] = Location.useBackgroundPermissions();
   const [destination, setDestination] = useState(CONSTANTS.LOCATIONS.DEFAULT);
   const [previewLocation, setPreviewLocation] = useState(CONSTANTS.LOCATIONS.DEFAULT);
   const [distanceToDest, setDistanceToDest] = useState(Infinity);
   const [isAlarmSet, setIsAlarmSet] = useState(false); //Indicates whether the alarm has been set
   const [reachedDestination, setReachedDestination] = useState(false); //Indicates whether the user has been in radius of destination
-  let foregroundSubscription = null;
+  const [promptVisible, setPromptVisible] = React.useState(false);
   const alarmManager = AlarmManager();
   const mapRef = useRef(null);
 
   //Distance to destination for alarm to activate
   const ACTIVATION_RADIUS = 500;
 
-  const startForegroundUpdate = async () => {
-    foregroundSubscription?.remove();
-    foregroundSubscription = await Location.watchPositionAsync(
-      {
-        accuracy: Location.Accuracy.BestForNavigation,
-        timeInterval: 1000,
-      },
-      (location) => {
-        setCurLocation({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-        });
-      },
-    );
-  };
+  TaskManager.defineTask('Geofencing', ({ data: { eventType }, error }) => {
+    if (error) {
+      console.log(error.message);
+      return;
+    }
+
+    if (eventType === GeofencingEventType.Enter) {
+      setReachedDestination(true);
+      alarmManager.playAlarm();
+      Location.stopGeofencingAsync('Geofencing');
+    }
+  });
 
   //Initializing Function
   useEffect(() => {
     alarmManager.setupAudio();
-
-    requestPermission().then((response) => {
-      if (!response.granted) {
-        console.log('Foreground permission not granted');
-        return;
-      }
-      startForegroundUpdate();
-    });
+    askPerms();
   }, []);
 
-  //Effect when curLocation/destination is changed
-  React.useEffect(() => {
-    //Recalculate distance based on new locations
-    let distanceRemaining = distanceBetween(curLocation, destination);
-    setDistanceToDest(distanceRemaining);
+  const askPerms = async () => {
+    await requestPermission().then((response) => {
+      if (!response.granted) {
+        return;
+      }
+      requestPermissionBG().then(() => {
+        checkPerms();
+      });
+    });
+  };
 
-    //Triggers the alarm if location is within range of destination
-    if (distanceRemaining <= ACTIVATION_RADIUS && isAlarmSet && !reachedDestination) {
-      setReachedDestination(true);
-      alarmManager.playAlarm();
-    }
-  }, [curLocation, destination]);
+  const checkPerms = async () => {
+    return await Location.getBackgroundPermissionsAsync().then((perm) => perm.granted);
+  };
 
   //selecting destination via longpress
   const selectLocLongPress = (mapEvent) => {
@@ -78,12 +73,12 @@ const MapMenu = () => {
     setLocConfirmation(destination);
   };
 
-  //function to get user to confirm is this is the destination they want to set as alarm
+  //function to get user to confirm is this the destination they want to set as alarm
   const setLocConfirmation = (dest) => {
     setPreviewLocation(dest);
     setPromptVisible(true);
     const animateObj = { pitch: 0, heading: 0, zoom: 15 };
-    mapRef.current.animateCamera({ center: dest, ...animateObj }, { duration: 1000 });
+    mapRef.current.animateCamera({ center: dest, ...animateObj }, { duration: 500 });
   };
 
   const unsetAlarm = () => {
@@ -92,12 +87,16 @@ const MapMenu = () => {
     alarmManager.stopAlarm();
   };
 
-  const [promptVisible, setPromptVisible] = React.useState(false);
+  const onUserLocationChange = (location) => {
+    const coordinate = location.nativeEvent.coordinate;
+    const curLocation = { latitude: coordinate.latitude, longitude: coordinate.longitude };
+    setDistanceToDest(distanceBetween(curLocation, destination));
+  };
 
   //Render
   return (
     <PaperProvider>
-      <StatusBar barStyle="dark-content" backgroundColor={'transparent'} translucent={true} />
+      {/* <StatusBar barStyle="dark-content" backgroundColor={'transparent'} translucent={true} /> */}
       <View style={styles.container}>
         <MapView
           ref={mapRef}
@@ -105,7 +104,7 @@ const MapMenu = () => {
           initialCamera={CONSTANTS.MAP_CAMERA.SINGAPORE}
           zoomControlEnabled={true}
           showsUserLocation={true}
-          mapPadding={{ top: StatusBar.currentHeight }} //Keeps map elements within view such as 'Locate' button
+          onUserLocationChange={onUserLocationChange}
           onLongPress={(mapEvent) => {
             selectLocLongPress(mapEvent.nativeEvent);
           }}
@@ -115,18 +114,18 @@ const MapMenu = () => {
               title="Destination"
               center={destination}
               radius={ACTIVATION_RADIUS}
+              waypointType={WAYPOINT_TYPE.DESTINATION}
             />
           )}
 
           {
             /* Preview Circle */
             promptVisible && (
-              <MapView.Circle
-                radius={ACTIVATION_RADIUS}
+              <WaypointIndicator
+                title="Preview"
                 center={previewLocation}
-                strokeWidth={2}
-                strokeColor={'#d0d61c'}
-                fillColor={'rgba(208, 214, 28,0.3)'}
+                radius={ACTIVATION_RADIUS}
+                waypointType={WAYPOINT_TYPE.PREVIEW}
               />
             )
           }
@@ -173,6 +172,12 @@ const MapMenu = () => {
                 setDestination(previewLocation);
                 setIsAlarmSet(true);
                 setPromptVisible(false);
+                const region = {
+                  latitude: previewLocation.latitude,
+                  longitude: previewLocation.longitude,
+                  radius: ACTIVATION_RADIUS,
+                };
+                Location.startGeofencingAsync('Geofencing', [region]);
               },
             },
             {
@@ -187,7 +192,6 @@ const MapMenu = () => {
     </PaperProvider>
   );
 };
-
 export default MapMenu;
 
 const styles = StyleSheet.create({
@@ -197,12 +201,6 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
-  distanceAndAlarm: {
-    flex: 2,
-    curLocation: 'absolute',
-    alignSelf: 'center',
-    backgroundColor: 'white',
-  },
   input: {
     flex: 1,
     borderColor: 'black',
@@ -210,14 +208,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'flex-start',
-  },
-  button: {
-    flex: 1,
-    backgroundColor: '#003D7C',
-    borderColor: '#000000',
-    borderWidth: 4,
-    justifyContent: 'center',
-    alignItems: 'flex-end',
   },
   searchBar: {
     position: 'absolute',
