@@ -2,7 +2,7 @@ export default {
   expo: {
     name: 'reachliao',
     slug: 'reachliao',
-    version: '1.0.0',
+    version: '1.1.0',
     orientation: 'portrait',
     icon: './assets/icon.png',
     userInterfaceStyle: 'light',
@@ -34,7 +34,7 @@ export default {
         'ACCESS_FINE_LOCATION',
         'ACCESS_BACKGROUND_LOCATION',
         'FOREGROUND_SERVICE',
-        'VIBRATE'
+        'VIBRATE',
       ],
     },
     web: {
