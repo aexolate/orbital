@@ -39,7 +39,7 @@ const MapMenu = () => {
     }
 
     if (eventType === GeofencingEventType.Enter) {
-      console.log(region);
+      //console.log(region);
       setReachedDestination(true);
       alarmManager.playAlarm();
       Location.stopGeofencingAsync('GEOFENCING_TASK');
@@ -89,6 +89,7 @@ const MapMenu = () => {
   };
 
   const unsetAlarm = () => {
+    waypointsManager.clearWaypoints();
     setIsAlarmSet(false);
     setReachedDestination(false);
     alarmManager.stopAlarm();
@@ -97,21 +98,21 @@ const MapMenu = () => {
   const onUserLocationChange = (location) => {
     const coordinate = location.nativeEvent.coordinate;
     const curLocation = { latitude: coordinate.latitude, longitude: coordinate.longitude };
-    setDistanceToDest(distanceBetween(curLocation, destination));
+    setDistanceToDest(waypointsManager.distanceToNearestWP(curLocation));
   };
 
   const addDestination = (location) => {
+    waypointsManager.addWaypoint({ ...location, radius: ACTIVATION_RADIUS });
     setDestination(location);
     setIsAlarmSet(true);
-    const region = {
-      latitude: location.latitude,
-      longitude: location.longitude,
-      radius: ACTIVATION_RADIUS,
-    };
-    Location.startGeofencingAsync('GEOFENCING_TASK', [region]);
-
-    setPromptVisible(false);
   };
+
+  useEffect(() => {
+    //If there are multiple waypoints set, start geofencing task
+    if (waypointsManager.waypoints.length > 0) {
+      Location.startGeofencingAsync('GEOFENCING_TASK', waypointsManager.waypoints);
+    }
+  }, [waypointsManager.waypoints]);
 
   //Render
   return (
@@ -127,14 +128,15 @@ const MapMenu = () => {
           onUserLocationChange={onUserLocationChange}
           onLongPress={(mapEvent) => selectLocLongPress(mapEvent.nativeEvent)}
         >
-          {isAlarmSet && (
+          {waypointsManager.waypoints.map((marker, index) => (
             <WaypointIndicator
+              key={index}
               title="Destination"
-              center={destination}
+              center={marker}
               radius={ACTIVATION_RADIUS}
               waypointType={WAYPOINT_TYPE.DESTINATION}
             />
-          )}
+          ))}
 
           {promptVisible && (
             <WaypointIndicator
@@ -177,7 +179,10 @@ const MapMenu = () => {
 
         <PromptBox
           visible={promptVisible}
-          onConfirmPrompt={() => addDestination(previewLocation)}
+          onConfirmPrompt={() => {
+            addDestination(previewLocation);
+            setPromptVisible(false);
+          }}
           onCancelPrompt={() => setPromptVisible(false)}
         />
       </View>

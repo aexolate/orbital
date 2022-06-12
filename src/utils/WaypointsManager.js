@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import * as Location from 'expo-location';
+import { distanceBetween } from '../utils/distance.js';
 
 export const WaypointsManager = () => {
   const [waypoints, setWaypoints] = React.useState([]);
@@ -16,18 +16,25 @@ export const WaypointsManager = () => {
     );
   };
 
-  const getWaypoints = () => {
-    return waypoints;
+  const clearWaypoints = () => {
+    setWaypoints([]);
   };
 
   const getWaypointCount = () => {
     return waypoints.length;
   };
 
-  //const distanceToNearestWaypoint = () => {
-  //TODO
-  //};
+  const distanceToNearestWP = (curLocation) => {
+    return Math.max(waypoints.map((wp) => distanceBetween(wp, curLocation)));
+  };
 
-  return { addWaypoint, removeWaypoint, getWaypoints, getWaypointCount };
+  return {
+    addWaypoint,
+    removeWaypoint,
+    waypoints,
+    getWaypointCount,
+    clearWaypoints,
+    distanceToNearestWP,
+  };
 };
 export default WaypointsManager;
