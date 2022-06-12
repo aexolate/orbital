@@ -15,11 +15,12 @@ import WaypointIndicator from '../components/WaypointIndicator.js';
 import AlarmBox from '../components/AlarmBox.js';
 import { WAYPOINT_TYPE } from '../constants/WaypointEnum.js';
 import PromptBox from '../components/PromptBox.js';
+import InfoBox from '../components/InfoBox.js';
 
 const MapMenu = () => {
   const [status, requestPermission] = Location.useForegroundPermissions();
   const [statusBG, requestPermissionBG] = Location.useBackgroundPermissions();
-  const [destination, setDestination] = useState(CONSTANTS.LOCATIONS.DEFAULT);
+  //const [destination, setDestination] = useState(CONSTANTS.LOCATIONS.DEFAULT);
   const [previewLocation, setPreviewLocation] = useState(CONSTANTS.LOCATIONS.DEFAULT);
   const [distanceToDest, setDistanceToDest] = useState(Infinity);
   const [isAlarmSet, setIsAlarmSet] = useState(false); //Indicates whether the alarm has been set
@@ -103,7 +104,7 @@ const MapMenu = () => {
 
   const addDestination = (location) => {
     waypointsManager.addWaypoint({ ...location, radius: ACTIVATION_RADIUS });
-    setDestination(location);
+    //setDestination(location);
     setIsAlarmSet(true);
   };
 
@@ -149,16 +150,9 @@ const MapMenu = () => {
         </MapView>
 
         {isAlarmSet && !reachedDestination && (
-          <Card style={styles.infoBox}>
-            <Card.Content>
-              <Text style={{ fontWeight: 'bold', fontSize: 18 }}>
-                {'Distance to Destination: ' + (distanceToDest / 1000).toFixed(2) + ' km'}
-              </Text>
-              <Button icon="cancel" mode="contained" onPress={unsetAlarm}>
-                Cancel Alarm
-              </Button>
-            </Card.Content>
-          </Card>
+          <View>
+            <InfoBox distance={(distanceToDest / 1000).toFixed(2)} onCancelAlarm={unsetAlarm} />
+          </View>
         )}
 
         {!isAlarmSet && (
@@ -166,12 +160,6 @@ const MapMenu = () => {
             <SearchbarLocation onResultReady={(loc) => setLocConfirmation(loc)} />
           </View>
         )}
-        {/* <FAB
-          style={styles.fab}
-          label="Add more waypoints"
-          icon="plus"
-          onPress={() => console.log('Pressed')}
-        /> */}
 
         <SnackbarHint />
 
