@@ -6,12 +6,15 @@ import * as TaskManager from 'expo-task-manager';
 import { GeofencingEventType } from 'expo-location';
 import { distanceBetween } from '../utils/distance.js';
 import { AlarmManager } from '../../AlarmManager.js';
-import { Provider as PaperProvider, Button, Card, Text, Banner } from 'react-native-paper';
+import { WaypointsManager } from '../utils/WaypointsManager.js';
+import { Provider as PaperProvider, Button, Card, Text, Banner, FAB } from 'react-native-paper';
 import CONSTANTS from '../constants/Constants.js';
 import SnackbarHint from '../components/SnackbarHint.js';
 import SearchbarLocation from '../components/SearchbarLocation.js';
 import WaypointIndicator from '../components/WaypointIndicator.js';
+import AlarmBox from '../components/AlarmBox.js';
 import { WAYPOINT_TYPE } from '../constants/WaypointEnum.js';
+import PromptBox from '../components/PromptBox.js';
 
 const MapMenu = () => {
   const [status, requestPermission] = Location.useForegroundPermissions();
@@ -23,21 +26,23 @@ const MapMenu = () => {
   const [reachedDestination, setReachedDestination] = useState(false); //Indicates whether the user has been in radius of destination
   const [promptVisible, setPromptVisible] = React.useState(false);
   const alarmManager = AlarmManager();
+  const waypointsManager = WaypointsManager();
   const mapRef = useRef(null);
 
   //Distance to destination for alarm to activate
   const ACTIVATION_RADIUS = 500;
 
-  TaskManager.defineTask('Geofencing', ({ data: { eventType }, error }) => {
+  TaskManager.defineTask('GEOFENCING_TASK', ({ data: { region, eventType }, error }) => {
     if (error) {
       console.log(error.message);
       return;
     }
 
     if (eventType === GeofencingEventType.Enter) {
+      console.log(region);
       setReachedDestination(true);
       alarmManager.playAlarm();
-      Location.stopGeofencingAsync('Geofencing');
+      Location.stopGeofencingAsync('GEOFENCING_TASK');
     }
   });
 
@@ -77,8 +82,10 @@ const MapMenu = () => {
   const setLocConfirmation = (dest) => {
     setPreviewLocation(dest);
     setPromptVisible(true);
-    const animateObj = { pitch: 0, heading: 0, zoom: 15 };
-    mapRef.current.animateCamera({ center: dest, ...animateObj }, { duration: 500 });
+    mapRef.current.animateCamera(
+      { center: dest, pitch: 0, heading: 0, zoom: 15 },
+      { duration: 500 },
+    );
   };
 
   const unsetAlarm = () => {
@@ -93,6 +100,19 @@ const MapMenu = () => {
     setDistanceToDest(distanceBetween(curLocation, destination));
   };
 
+  const addDestination = (location) => {
+    setDestination(location);
+    setIsAlarmSet(true);
+    const region = {
+      latitude: location.latitude,
+      longitude: location.longitude,
+      radius: ACTIVATION_RADIUS,
+    };
+    Location.startGeofencingAsync('GEOFENCING_TASK', [region]);
+
+    setPromptVisible(false);
+  };
+
   //Render
   return (
     <PaperProvider>
@@ -100,14 +120,12 @@ const MapMenu = () => {
       <View style={styles.container}>
         <MapView
           ref={mapRef}
-          style={{ flex: 1 }}
+          style={styles.map}
           initialCamera={CONSTANTS.MAP_CAMERA.SINGAPORE}
           zoomControlEnabled={true}
           showsUserLocation={true}
           onUserLocationChange={onUserLocationChange}
-          onLongPress={(mapEvent) => {
-            selectLocLongPress(mapEvent.nativeEvent);
-          }}
+          onLongPress={(mapEvent) => selectLocLongPress(mapEvent.nativeEvent)}
         >
           {isAlarmSet && (
             <WaypointIndicator
@@ -118,17 +136,14 @@ const MapMenu = () => {
             />
           )}
 
-          {
-            /* Preview Circle */
-            promptVisible && (
-              <WaypointIndicator
-                title="Preview"
-                center={previewLocation}
-                radius={ACTIVATION_RADIUS}
-                waypointType={WAYPOINT_TYPE.PREVIEW}
-              />
-            )
-          }
+          {promptVisible && (
+            <WaypointIndicator
+              title="Preview"
+              center={previewLocation}
+              radius={ACTIVATION_RADIUS}
+              waypointType={WAYPOINT_TYPE.PREVIEW}
+            />
+          )}
         </MapView>
 
         {isAlarmSet && !reachedDestination && (
@@ -149,45 +164,22 @@ const MapMenu = () => {
             <SearchbarLocation onResultReady={(loc) => setLocConfirmation(loc)} />
           </View>
         )}
+        {/* <FAB
+          style={styles.fab}
+          label="Add more waypoints"
+          icon="plus"
+          onPress={() => console.log('Pressed')}
+        /> */}
 
         <SnackbarHint />
 
-        {reachedDestination && (
-          <Card>
-            <Card.Title title="Destination Reached" />
-            <Card.Content>
-              <Button icon="alarm-off" mode="contained" onPress={unsetAlarm}>
-                Dismiss Alarm
-              </Button>
-            </Card.Content>
-          </Card>
-        )}
+        {reachedDestination && <AlarmBox onDismissAlarm={unsetAlarm} />}
 
-        <Banner
+        <PromptBox
           visible={promptVisible}
-          actions={[
-            {
-              label: 'Set Destination',
-              onPress: () => {
-                setDestination(previewLocation);
-                setIsAlarmSet(true);
-                setPromptVisible(false);
-                const region = {
-                  latitude: previewLocation.latitude,
-                  longitude: previewLocation.longitude,
-                  radius: ACTIVATION_RADIUS,
-                };
-                Location.startGeofencingAsync('Geofencing', [region]);
-              },
-            },
-            {
-              label: 'Cancel',
-              onPress: () => setPromptVisible(false),
-            },
-          ]}
-        >
-          Would you like to set this as your destination?
-        </Banner>
+          onConfirmPrompt={() => addDestination(previewLocation)}
+          onCancelPrompt={() => setPromptVisible(false)}
+        />
       </View>
     </PaperProvider>
   );
@@ -235,5 +227,11 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     top: '30%',
     elevation: 4,
+  },
+  fab: {
+    position: 'absolute',
+    margin: 0,
+    left: 20,
+    bottom: 30,
   },
 });
