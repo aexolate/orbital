@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { distanceBetween } from '../utils/distance.js';
 
 export const WaypointsManager = () => {
@@ -10,9 +10,7 @@ export const WaypointsManager = () => {
 
   const removeWaypoint = (coord) => {
     setWaypoints((wp) =>
-      wp.filter((x) => {
-        !(x.latitude == coord.latitude && x.longitude == coord.longitude);
-      }),
+      wp.filter((x) => !(x.latitude == coord.latitude && x.longitude == coord.longitude)),
     );
   };
 
@@ -25,7 +23,7 @@ export const WaypointsManager = () => {
   };
 
   const distanceToNearestWP = (curLocation) => {
-    return Math.max(waypoints.map((wp) => distanceBetween(wp, curLocation)));
+    return Math.min(...waypoints.map((wp) => distanceBetween(wp, curLocation)));
   };
 
   return {

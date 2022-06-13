@@ -1,6 +1,6 @@
 import * as Location from 'expo-location';
 import { Linking, StyleSheet, View, BackHandler } from 'react-native';
-import React, { useEffect, useState, useRef } from 'react';
+import React from 'react';
 import { Provider as PaperProvider, Button, Text } from 'react-native-paper';
 
 export default function PermissionsMenu() {

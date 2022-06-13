@@ -13,19 +13,19 @@ import SnackbarHint from '../components/SnackbarHint.js';
 import SearchbarLocation from '../components/SearchbarLocation.js';
 import WaypointIndicator from '../components/WaypointIndicator.js';
 import AlarmBox from '../components/AlarmBox.js';
-import { WAYPOINT_TYPE } from '../constants/WaypointEnum.js';
 import PromptBox from '../components/PromptBox.js';
 import InfoBox from '../components/InfoBox.js';
+import { WAYPOINT_TYPE } from '../constants/WaypointEnum.js';
 
 const MapMenu = () => {
   const [status, requestPermission] = Location.useForegroundPermissions();
   const [statusBG, requestPermissionBG] = Location.useBackgroundPermissions();
-  //const [destination, setDestination] = useState(CONSTANTS.LOCATIONS.DEFAULT);
+  const [promptVisible, setPromptVisible] = React.useState(false);
   const [previewLocation, setPreviewLocation] = useState(CONSTANTS.LOCATIONS.DEFAULT);
   const [distanceToDest, setDistanceToDest] = useState(Infinity);
-  const [isAlarmSet, setIsAlarmSet] = useState(false); //Indicates whether the alarm has been set
+  //const [isAlarmSet, setIsAlarmSet] = useState(false); //Indicates whether the alarm has been set (DEPRECATED)
+  const [canModifyAlarm, setCanModifyAlarm] = useState(true); //Indicates whether new waypoints can be added
   const [reachedDestination, setReachedDestination] = useState(false); //Indicates whether the user has been in radius of destination
-  const [promptVisible, setPromptVisible] = React.useState(false);
   const alarmManager = AlarmManager();
   const waypointsManager = WaypointsManager();
   const mapRef = useRef(null);
@@ -33,17 +33,15 @@ const MapMenu = () => {
   //Distance to destination for alarm to activate
   const ACTIVATION_RADIUS = 500;
 
+  //Define geofencing task for expo-location. Must be defined in top level scope
   TaskManager.defineTask('GEOFENCING_TASK', ({ data: { region, eventType }, error }) => {
-    if (error) {
-      console.log(error.message);
-      return;
-    }
-
     if (eventType === GeofencingEventType.Enter) {
-      //console.log(region);
+      //Removes the waypoint that the user just entered
+      waypointsManager.removeWaypoint(region);
+
+      //Indicates the user has reached destination and displays AlarmBox and plays the alarm
       setReachedDestination(true);
       alarmManager.playAlarm();
-      Location.stopGeofencingAsync('GEOFENCING_TASK');
     }
   });
 
@@ -70,7 +68,7 @@ const MapMenu = () => {
 
   //selecting destination via longpress
   const selectLocLongPress = (mapEvent) => {
-    if (isAlarmSet) return; //Do nothing on long press if alarm is already set
+    if (!canModifyAlarm) return; //Do nothing if not allowed to set new waypoints
 
     const destination = {
       latitude: mapEvent.coordinate.latitude,
@@ -83,15 +81,22 @@ const MapMenu = () => {
   const setLocConfirmation = (dest) => {
     setPreviewLocation(dest);
     setPromptVisible(true);
-    mapRef.current.animateCamera(
-      { center: dest, pitch: 0, heading: 0, zoom: 15 },
-      { duration: 500 },
-    );
+    mapRef.current.animateCamera({ center: dest, zoom: 15, duration: 500 });
   };
 
+  //Removes the alarm set and removes all waypoints
   const unsetAlarm = () => {
     waypointsManager.clearWaypoints();
-    setIsAlarmSet(false);
+    setCanModifyAlarm(true);
+    setReachedDestination(false);
+    alarmManager.stopAlarm();
+  };
+
+  //Dismiss the ringing alarm
+  const dismissAlarm = () => {
+    if (waypointsManager.waypoints.length == 0) {
+      setCanModifyAlarm(true);
+    }
     setReachedDestination(false);
     alarmManager.stopAlarm();
   };
@@ -104,15 +109,22 @@ const MapMenu = () => {
 
   const addDestination = (location) => {
     waypointsManager.addWaypoint({ ...location, radius: ACTIVATION_RADIUS });
-    //setDestination(location);
-    setIsAlarmSet(true);
+    setCanModifyAlarm(false);
   };
 
+  //Handles geofencing when the waypoints are modified
   useEffect(() => {
-    //If there are multiple waypoints set, start geofencing task
-    if (waypointsManager.waypoints.length > 0) {
-      Location.startGeofencingAsync('GEOFENCING_TASK', waypointsManager.waypoints);
-    }
+    Location.hasStartedGeofencingAsync('GEOFENCING_TASK')
+      .then((started) => {
+        //Stops geofencing first to start geofencing later with the updated waypoints
+        if (started) Location.stopGeofencingAsync('GEOFENCING_TASK');
+      })
+      .then(() => {
+        //If there are multiple waypoints set, start geofencing task
+        if (waypointsManager.waypoints.length > 0) {
+          Location.startGeofencingAsync('GEOFENCING_TASK', waypointsManager.waypoints);
+        }
+      });
   }, [waypointsManager.waypoints]);
 
   //Render
@@ -149,13 +161,15 @@ const MapMenu = () => {
           )}
         </MapView>
 
-        {isAlarmSet && !reachedDestination && (
-          <View>
-            <InfoBox distance={(distanceToDest / 1000).toFixed(2)} onCancelAlarm={unsetAlarm} />
-          </View>
+        {waypointsManager.waypoints.length > 0 && !reachedDestination && (
+          <InfoBox distance={distanceToDest} onCancelAlarm={unsetAlarm} />
         )}
 
-        {!isAlarmSet && (
+        {!canModifyAlarm && waypointsManager.waypoints.length > 0 && !reachedDestination && (
+          <FAB style={styles.fab} icon="map-marker-plus" onPress={() => setCanModifyAlarm(true)} />
+        )}
+
+        {canModifyAlarm && (
           <View style={styles.searchBar}>
             <SearchbarLocation onResultReady={(loc) => setLocConfirmation(loc)} />
           </View>
@@ -163,7 +177,7 @@ const MapMenu = () => {
 
         <SnackbarHint />
 
-        {reachedDestination && <AlarmBox onDismissAlarm={unsetAlarm} />}
+        {reachedDestination && <AlarmBox onDismissAlarm={dismissAlarm} />}
 
         <PromptBox
           visible={promptVisible}
@@ -224,7 +238,7 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     margin: 0,
-    left: 20,
-    bottom: 30,
+    left: 10,
+    bottom: 130,
   },
 });
