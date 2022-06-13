@@ -112,9 +112,16 @@ const MapMenu = () => {
 
   useEffect(() => {
     //Updates the distance when waypoints are modified
-    Location.getLastKnownPositionAsync().then((locationObj) => {
-      setDistanceToDest(waypointsManager.distanceToNearestWP(locationObj.coords));
-    });
+    if (waypointsManager.waypoints.length > 0) {
+      Location.getLastKnownPositionAsync().then((locationObj) => {
+        setDistanceToDest(waypointsManager.distanceToNearestWP(locationObj.coords));
+      });
+    }
+
+    //Allow new waypoints to be added if there are no waypoints set
+    if (waypointsManager.waypoints.length == 0) {
+      setCanModifyAlarm(true);
+    }
 
     //Handles geofencing when the waypoints are modified
     Location.hasStartedGeofencingAsync('GEOFENCING_TASK')
@@ -141,6 +148,7 @@ const MapMenu = () => {
           initialCamera={CONSTANTS.MAP_CAMERA.SINGAPORE}
           zoomControlEnabled={true}
           showsUserLocation={true}
+          mapPadding={{}}
           onUserLocationChange={onUserLocationChange}
           onLongPress={(mapEvent) => selectLocLongPress(mapEvent.nativeEvent)}
         >
@@ -167,11 +175,13 @@ const MapMenu = () => {
         {waypointsManager.waypoints.length > 0 && !reachedDestination && (
           <View>
             <InfoBox distance={distanceToDest} onCancelAlarm={unsetAlarm} />
-            {/* <WaypointsList 
+            <WaypointsList
               waypoints={waypointsManager.waypoints}
-              gotoWP={(coords) => animateToCoords(coords)}
+              gotoWP={(coords) => {
+                mapRef.current.animateCamera({ center: coords, zoom: 15, duration: 500 });
+              }}
               deleteWP={(coords) => waypointsManager.removeWaypoint(coords)}
-            /> */}
+            />
           </View>
         )}
 
@@ -220,10 +230,11 @@ const styles = StyleSheet.create({
   },
   searchBar: {
     position: 'absolute',
-    width: '80%',
+    width: '85%',
     opacity: 0.95,
-    top: '8%',
-    alignSelf: 'center',
+    paddingLeft: 10,
+    paddingTop: 10,
+    //alignSelf: 'center',
   },
   infoBox: {
     position: 'absolute',

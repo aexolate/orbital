@@ -1,9 +1,16 @@
 import React from 'react';
-import { List } from 'react-native-paper';
+import { Colors, List } from 'react-native-paper';
 import { View, TouchableOpacity } from 'react-native';
 import PropTypes from 'prop-types';
 
 const WaypointsList = (props) => {
+  const gotoWP = (coords) => {
+    props.gotoWP(coords);
+  };
+  const deleteWP = (coords) => {
+    props.deleteWP(coords);
+  };
+
   return (
     <List.Accordion title="Waypoints" left={(props) => <List.Icon {...props} icon="map-marker" />}>
       {props.waypoints.map((coords, index) => (
@@ -11,12 +18,12 @@ const WaypointsList = (props) => {
           key={index}
           left={(props) => (
             <View style={{ flexDirection: 'row' }}>
-              <TouchableOpacity onPress={() => props.gotoWP(coords)}>
-                <List.Icon {...props} icon="crosshairs-gps" />
+              <TouchableOpacity onPress={() => gotoWP(coords)}>
+                <List.Icon {...props} color={Colors.blue800} icon="crosshairs-gps" />
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={() => props.deleteWP(coords)}>
-                <List.Icon {...props} icon="map-marker-remove" />
+              <TouchableOpacity onPress={() => deleteWP(coords)}>
+                <List.Icon {...props} color={Colors.red500} icon="map-marker-remove" />
               </TouchableOpacity>
             </View>
           )}

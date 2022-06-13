@@ -7,9 +7,9 @@ const InfoBox = (props) => {
     <Card>
       <Card.Content>
         <Text style={{ fontWeight: 'bold', fontSize: 18 }}>
-          {'Distance to Destination: ' + (props.distance / 1000).toFixed(2) + ' km'}
+          {'Distance Remaining: ' + (props.distance / 1000).toFixed(2) + ' km'}
         </Text>
-        <Button icon="cancel" mode="contained" onPress={props.onCancelAlarm}>
+        <Button icon="cancel" color="darkred" mode="contained" onPress={props.onCancelAlarm}>
           Cancel Alarm
         </Button>
       </Card.Content>
