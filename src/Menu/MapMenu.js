@@ -13,7 +13,7 @@ import SearchbarLocation from '../components/SearchbarLocation.js';
 import WaypointIndicator from '../components/WaypointIndicator.js';
 import { WAYPOINT_TYPE } from '../constants/WaypointEnum.js';
 
-const MapMenu = () => {
+const MapMenu = ({ route, navigation }) => {
   const [status, requestPermission] = Location.useForegroundPermissions();
   const [statusBG, requestPermissionBG] = Location.useBackgroundPermissions();
   const [destination, setDestination] = useState(CONSTANTS.LOCATIONS.DEFAULT);
@@ -26,7 +26,7 @@ const MapMenu = () => {
   const mapRef = useRef(null);
 
   //Distance to destination for alarm to activate
-  const ACTIVATION_RADIUS = 500;
+  const ACTIVATION_RADIUS = //edit
 
   TaskManager.defineTask('Geofencing', ({ data: { eventType }, error }) => {
     if (error) {
