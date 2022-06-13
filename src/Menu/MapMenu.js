@@ -1,13 +1,12 @@
 import React, { useEffect, useState, ReactElement, useRef } from 'react';
-import { Platform, StyleSheet, View, StatusBar, Alert } from 'react-native';
+import { Platform, StyleSheet, View, StatusBar, TouchableOpacity } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 import { GeofencingEventType } from 'expo-location';
-import { distanceBetween } from '../utils/distance.js';
 import { AlarmManager } from '../../AlarmManager.js';
 import { WaypointsManager } from '../utils/WaypointsManager.js';
-import { Provider as PaperProvider, Button, Card, Text, Banner, FAB } from 'react-native-paper';
+import { Provider as PaperProvider, FAB, List } from 'react-native-paper';
 import CONSTANTS from '../constants/Constants.js';
 import SnackbarHint from '../components/SnackbarHint.js';
 import SearchbarLocation from '../components/SearchbarLocation.js';
@@ -15,6 +14,7 @@ import WaypointIndicator from '../components/WaypointIndicator.js';
 import AlarmBox from '../components/AlarmBox.js';
 import PromptBox from '../components/PromptBox.js';
 import InfoBox from '../components/InfoBox.js';
+import WaypointsList from '../components/WaypointsList.js';
 import { WAYPOINT_TYPE } from '../constants/WaypointEnum.js';
 
 const MapMenu = () => {
@@ -102,9 +102,7 @@ const MapMenu = () => {
   };
 
   const onUserLocationChange = (location) => {
-    const coordinate = location.nativeEvent.coordinate;
-    const curLocation = { latitude: coordinate.latitude, longitude: coordinate.longitude };
-    setDistanceToDest(waypointsManager.distanceToNearestWP(curLocation));
+    setDistanceToDest(waypointsManager.distanceToNearestWP(location.nativeEvent.coordinate));
   };
 
   const addDestination = (location) => {
@@ -112,11 +110,16 @@ const MapMenu = () => {
     setCanModifyAlarm(false);
   };
 
-  //Handles geofencing when the waypoints are modified
   useEffect(() => {
+    //Updates the distance when waypoints are modified
+    Location.getLastKnownPositionAsync().then((locationObj) => {
+      setDistanceToDest(waypointsManager.distanceToNearestWP(locationObj.coords));
+    });
+
+    //Handles geofencing when the waypoints are modified
     Location.hasStartedGeofencingAsync('GEOFENCING_TASK')
       .then((started) => {
-        //Stops geofencing first to start geofencing later with the updated waypoints
+        //Stops old geofencing to start the geofencing again with the updated waypoints
         if (started) Location.stopGeofencingAsync('GEOFENCING_TASK');
       })
       .then(() => {
@@ -162,7 +165,14 @@ const MapMenu = () => {
         </MapView>
 
         {waypointsManager.waypoints.length > 0 && !reachedDestination && (
-          <InfoBox distance={distanceToDest} onCancelAlarm={unsetAlarm} />
+          <View>
+            <InfoBox distance={distanceToDest} onCancelAlarm={unsetAlarm} />
+            {/* <WaypointsList 
+              waypoints={waypointsManager.waypoints}
+              gotoWP={(coords) => animateToCoords(coords)}
+              deleteWP={(coords) => waypointsManager.removeWaypoint(coords)}
+            /> */}
+          </View>
         )}
 
         {!canModifyAlarm && waypointsManager.waypoints.length > 0 && !reachedDestination && (
@@ -212,7 +222,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: '80%',
     opacity: 0.95,
-    top: '15%',
+    top: '8%',
     alignSelf: 'center',
   },
   infoBox: {
@@ -239,6 +249,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     margin: 0,
     left: 10,
-    bottom: 130,
+    top: 10,
   },
 });
