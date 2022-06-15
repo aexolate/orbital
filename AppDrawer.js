@@ -9,8 +9,7 @@ const AppDrawer = () => {
   return (
     <Drawer.Navigator useLegacyImplementation>
       <Drawer.Screen name="Map" 
-                     component={MapMenu} 
-                     initialParams={{ activationRdius: 500 }}/>
+                     component={MapMenu} />
       <Drawer.Screen name="Settings" component={SettingsMenu} />
     </Drawer.Navigator>
   );

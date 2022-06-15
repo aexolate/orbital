@@ -16,6 +16,7 @@ import PromptBox from '../components/PromptBox.js';
 import InfoBox from '../components/InfoBox.js';
 import WaypointsList from '../components/WaypointsList.js';
 import { WAYPOINT_TYPE } from '../constants/WaypointEnum.js';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const MapMenu = ({ route, navigation }) => {
   const [status, requestPermission] = Location.useForegroundPermissions();
@@ -30,8 +31,7 @@ const MapMenu = ({ route, navigation }) => {
   const waypointsManager = WaypointsManager();
   const mapRef = useRef(null);
 
-  //Distance to destination for alarm to activate
-  const ACTIVATION_RADIUS = //edit
+  const activationRadius = 500;
 
   //Define geofencing task for expo-location. Must be defined in top level scope
   TaskManager.defineTask('GEOFENCING_TASK', ({ data: { region, eventType }, error }) => {
@@ -106,7 +106,7 @@ const MapMenu = ({ route, navigation }) => {
   };
 
   const addDestination = (location) => {
-    waypointsManager.addWaypoint({ ...location, radius: ACTIVATION_RADIUS });
+    waypointsManager.addWaypoint({ ...location, radius: activationRadius });
     setCanModifyAlarm(false);
   };
 
@@ -157,7 +157,7 @@ const MapMenu = ({ route, navigation }) => {
               key={index}
               title="Destination"
               center={marker}
-              radius={ACTIVATION_RADIUS}
+              radius={activationRadius}
               waypointType={WAYPOINT_TYPE.DESTINATION}
             />
           ))}
@@ -166,7 +166,7 @@ const MapMenu = ({ route, navigation }) => {
             <WaypointIndicator
               title="Preview"
               center={previewLocation}
-              radius={ACTIVATION_RADIUS}
+              radius={activationRadius}
               waypointType={WAYPOINT_TYPE.PREVIEW}
             />
           )}
