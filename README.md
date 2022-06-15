@@ -1,4 +1,6 @@
-# reachliao
+# reachliao 
+[![ESLint Check](https://github.com/aexolate/reachliao/actions/workflows/node.js.yml/badge.svg?branch=master)](https://github.com/aexolate/reachliao/actions/workflows/node.js.yml)
+
 ReachLiao is a location based alarm designed to help commuters nap without worrying about missing their stop or destination.
 
 ReachLiao plans to support multiple features such as
