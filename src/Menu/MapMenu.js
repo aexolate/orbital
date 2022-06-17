@@ -16,7 +16,7 @@ import PromptBox from '../components/PromptBox.js';
 import InfoBox from '../components/InfoBox.js';
 import WaypointsList from '../components/WaypointsList.js';
 import { WAYPOINT_TYPE } from '../constants/WaypointEnum.js';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getData } from '../utils/AsyncStorage.js';
 
 const MapMenu = ({ route, navigation }) => {
   const [status, requestPermission] = Location.useForegroundPermissions();
@@ -30,8 +30,7 @@ const MapMenu = ({ route, navigation }) => {
   const alarmManager = AlarmManager();
   const waypointsManager = WaypointsManager();
   const mapRef = useRef(null);
-
-  const activationRadius = 500;
+  const [activationRadius, setActivationRadius] = useState(500); //TESTING
 
   //Define geofencing task for expo-location. Must be defined in top level scope
   TaskManager.defineTask('GEOFENCING_TASK', ({ data: { region, eventType }, error }) => {
@@ -79,6 +78,8 @@ const MapMenu = ({ route, navigation }) => {
 
   //function to get user to confirm is this the destination they want to set as alarm
   const setLocConfirmation = (dest) => {
+    getData('radius').then(radius => setActivationRadius(parseInt(radius))); // TO EDIT
+    console.log('setLocConfirm ', activationRadius);
     setPreviewLocation(dest);
     setPromptVisible(true);
     mapRef.current.animateCamera({ center: dest, zoom: 15, duration: 500 });
