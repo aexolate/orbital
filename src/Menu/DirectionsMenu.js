@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, Alert } from 'react-native';
+import React, {useEffect, useRef} from 'react';
+import { View, Text, Alert, Keyboard } from 'react-native';
 import { TextInput, Button, Divider, ActivityIndicator } from 'react-native-paper';
 import MapView from 'react-native-maps';
 import { GOOGLE_MAPS_API_KEY } from '@env';
@@ -15,6 +15,11 @@ const DirectionsMenu = ({ navigation }) => {
   const [destinationText, setDestinationText] = React.useState('');
   const [coords, setCoords] = React.useState([]);
   const [markers, setMarkers] = React.useState([]);
+  const mapRef = useRef(null);
+
+  useEffect(() => {
+    mapRef.current.fitToCoordinates(coords);
+  }, [coords]);
 
   const searchDirections = (start, end) => {
     if (!start || !end) {
@@ -24,12 +29,19 @@ const DirectionsMenu = ({ navigation }) => {
       return;
     }
 
+    Keyboard.dismiss();
+
     try {
       const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${start}&destination=${end}&mode=transit&key=${GOOGLE_MAPS_API_KEY}`;
-      console.log(url);
+      //console.log(url);
       const response = fetch(url)
         .then((res) => res.json())
         .then((resJson) => {
+          if (resJson.status != "OK") {
+            Alert.alert('Directions Error', "Status: " + resJson.status, [{ text: 'OK' }]);
+            return;
+          }
+
           //Coordinates used to draw the path from origin to destination
           const polyline = resJson.routes[0].overview_polyline.points;
           const points = decode(polyline).map((point) => {
@@ -47,10 +59,11 @@ const DirectionsMenu = ({ navigation }) => {
               };
             });
           setMarkers(markers);
-          console.log(markers);
         });
     } catch (error) {
-      console.log(error);
+      Alert.alert('Error', error, [
+        { text: 'OK' },
+      ]);
     }
   };
 
@@ -95,7 +108,13 @@ const DirectionsMenu = ({ navigation }) => {
       </Button>
 
       <View style={{ flex: 1, padding: 10 }}>
-        <MapView zoomControlEnabled showsUserLocation style={{ flex: 1 }}>
+        <MapView 
+          ref={mapRef}
+          zoomControlEnabled 
+          showsUserLocation 
+          style={{ flex: 1 }}>
+
+
           {markers.map((m, index) => (
             <MapView.Marker
               key={index}
