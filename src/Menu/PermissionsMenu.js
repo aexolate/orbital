@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import { Provider as PaperProvider, Button, Text } from 'react-native-paper';
 import PropTypes from 'prop-types';
 
-export default function PermissionsMenu({navigation}) {
+export default function PermissionsMenu({ navigation }) {
   const [foreground, requestForeground] = Location.useForegroundPermissions();
   const [background, requestBackground] = Location.useBackgroundPermissions();
 
@@ -66,13 +66,13 @@ export default function PermissionsMenu({navigation}) {
           </View>
         </View>
 
-        {background?.granted &&
-        <View style={styles.block}>
-          <Button color="green" mode="contained" onPress={() => navigation.navigate('Map')}>
-            Return To Map
-          </Button>
-        </View>
-        }
+        {background?.granted && (
+          <View style={styles.block}>
+            <Button color="green" mode="contained" onPress={() => navigation.navigate('Map')}>
+              Return To Map
+            </Button>
+          </View>
+        )}
       </View>
     </PaperProvider>
   );
