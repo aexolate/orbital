@@ -1,9 +1,10 @@
 import * as Location from 'expo-location';
 import { Linking, StyleSheet, View, BackHandler } from 'react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Provider as PaperProvider, Button, Text } from 'react-native-paper';
+import PropTypes from 'prop-types';
 
-export default function PermissionsMenu() {
+export default function PermissionsMenu({navigation}) {
   const [foreground, requestForeground] = Location.useForegroundPermissions();
   const [background, requestBackground] = Location.useBackgroundPermissions();
 
@@ -65,15 +66,21 @@ export default function PermissionsMenu() {
           </View>
         </View>
 
+        {background?.granted &&
         <View style={styles.block}>
-          <Button icon="cancel" color="red" mode="contained" onPress={() => BackHandler.exitApp()}>
-            Decline
+          <Button color="green" mode="contained" onPress={() => navigation.navigate('Map')}>
+            Return To Map
           </Button>
         </View>
+        }
       </View>
     </PaperProvider>
   );
 }
+PermissionsMenu.propTypes = {
+  route: PropTypes.any.isRequired,
+  navigation: PropTypes.any.isRequired,
+};
 
 const styles = StyleSheet.create({
   block: {
