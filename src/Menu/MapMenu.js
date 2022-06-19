@@ -1,12 +1,19 @@
 import React, { useEffect, useState, ReactElement, useRef } from 'react';
-import { Platform, StyleSheet, View, StatusBar, TouchableOpacity } from 'react-native';
+import {
+  Platform,
+  StyleSheet,
+  View,
+  StatusBar,
+  TouchableOpacity,
+  useColorScheme,
+} from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 import { GeofencingEventType } from 'expo-location';
 import { AlarmManager } from '../../AlarmManager.js';
 import { WaypointsManager } from '../utils/WaypointsManager.js';
-import { Provider as PaperProvider, FAB, List } from 'react-native-paper';
+import { Provider as PaperProvider, FAB, List, HelperText } from 'react-native-paper';
 import CONSTANTS from '../constants/Constants.js';
 import SnackbarHint from '../components/SnackbarHint.js';
 import SearchbarLocation from '../components/SearchbarLocation.js';
@@ -16,14 +23,15 @@ import PromptBox from '../components/PromptBox.js';
 import InfoBox from '../components/InfoBox.js';
 import WaypointsList from '../components/WaypointsList.js';
 import { WAYPOINT_TYPE } from '../constants/WaypointEnum.js';
+import PropTypes from 'prop-types';
 
-const MapMenu = () => {
+const MapMenu = ({ route, navigation }) => {
   const [status, requestPermission] = Location.useForegroundPermissions();
   const [statusBG, requestPermissionBG] = Location.useBackgroundPermissions();
+
   const [promptVisible, setPromptVisible] = React.useState(false);
   const [previewLocation, setPreviewLocation] = useState(CONSTANTS.LOCATIONS.DEFAULT);
   const [distanceToDest, setDistanceToDest] = useState(Infinity);
-  //const [isAlarmSet, setIsAlarmSet] = useState(false); //Indicates whether the alarm has been set (DEPRECATED)
   const [canModifyAlarm, setCanModifyAlarm] = useState(true); //Indicates whether new waypoints can be added
   const [reachedDestination, setReachedDestination] = useState(false); //Indicates whether the user has been in radius of destination
   const alarmManager = AlarmManager();
@@ -44,6 +52,14 @@ const MapMenu = () => {
       alarmManager.playAlarm();
     }
   });
+
+  React.useEffect(() => {
+    if (route.params?.requests) {
+      route.params.requests.map((r) => {
+        addDestination(r.coords);
+      });
+    }
+  }, [route.params?.requests]);
 
   //Initializing Function
   useEffect(() => {
@@ -88,8 +104,8 @@ const MapMenu = () => {
   const unsetAlarm = () => {
     waypointsManager.clearWaypoints();
     setCanModifyAlarm(true);
-    setReachedDestination(false);
-    alarmManager.stopAlarm();
+    // setReachedDestination(false);
+    // alarmManager.stopAlarm();
   };
 
   //Dismiss the ringing alarm
@@ -186,16 +202,24 @@ const MapMenu = () => {
         )}
 
         {!canModifyAlarm && waypointsManager.waypoints.length > 0 && !reachedDestination && (
-          <FAB style={styles.fab} icon="map-marker-plus" onPress={() => setCanModifyAlarm(true)} />
+          <FAB
+            style={styles.fab}
+            label="ADD WAYPOINT"
+            icon="map-marker-plus"
+            onPress={() => setCanModifyAlarm(true)}
+          />
         )}
 
         {canModifyAlarm && (
           <View style={styles.searchBar}>
             <SearchbarLocation onResultReady={(loc) => setLocConfirmation(loc)} />
+            <HelperText style={{ backgroundColor: 'white' }}>
+              or long-press the map to select location
+            </HelperText>
           </View>
         )}
 
-        <SnackbarHint />
+        {/* <SnackbarHint /> */}
 
         {reachedDestination && <AlarmBox onDismissAlarm={dismissAlarm} />}
 
@@ -210,6 +234,10 @@ const MapMenu = () => {
       </View>
     </PaperProvider>
   );
+};
+MapMenu.propTypes = {
+  route: PropTypes.any.isRequired,
+  navigation: PropTypes.any.isRequired,
 };
 export default MapMenu;
 
