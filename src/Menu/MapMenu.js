@@ -30,7 +30,8 @@ const MapMenu = ({ route, navigation }) => {
   const alarmManager = AlarmManager();
   const waypointsManager = WaypointsManager();
   const mapRef = useRef(null);
-  const [activationRadius, setActivationRadius] = useState(500); //TESTING
+  const [activationRadius, setActivationRadius] = useState(0); //TESTING
+  getData('radius').then(radius => setActivationRadius(radius));
 
   //Define geofencing task for expo-location. Must be defined in top level scope
   TaskManager.defineTask('GEOFENCING_TASK', ({ data: { region, eventType }, error }) => {
