@@ -16,9 +16,11 @@ export default {
     },
     assetBundlePatterns: ['**/*'],
     ios: {
+      userInterfaceStyle: 'light',
       supportsTablet: true,
     },
     android: {
+      userInterfaceStyle: 'light',
       adaptiveIcon: {
         foregroundImage: './assets/adaptive-icon.png',
         backgroundColor: '#FFFFFF',
