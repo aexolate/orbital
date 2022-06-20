@@ -1,4 +1,4 @@
-import React, {useEffect, useRef} from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, Text, Alert, Keyboard } from 'react-native';
 import { TextInput, Button, Divider, ActivityIndicator } from 'react-native-paper';
 import MapView from 'react-native-maps';
@@ -23,9 +23,7 @@ const DirectionsMenu = ({ navigation }) => {
 
   const searchDirections = (start, end) => {
     if (!start || !end) {
-      Alert.alert('Missing Values', 'Input your origin and destination', [
-        { text: 'OK' },
-      ]);
+      Alert.alert('Missing Values', 'Input your origin and destination', [{ text: 'OK' }]);
       return;
     }
 
@@ -37,8 +35,8 @@ const DirectionsMenu = ({ navigation }) => {
       const response = fetch(url)
         .then((res) => res.json())
         .then((resJson) => {
-          if (resJson.status != "OK") {
-            Alert.alert('Directions Error', "Status: " + resJson.status, [{ text: 'OK' }]);
+          if (resJson.status != 'OK') {
+            Alert.alert('Directions Error', 'Status: ' + resJson.status, [{ text: 'OK' }]);
             return;
           }
 
@@ -61,9 +59,7 @@ const DirectionsMenu = ({ navigation }) => {
           setMarkers(markers);
         });
     } catch (error) {
-      Alert.alert('Error', error, [
-        { text: 'OK' },
-      ]);
+      Alert.alert('Error', error, [{ text: 'OK' }]);
     }
   };
 
@@ -108,13 +104,7 @@ const DirectionsMenu = ({ navigation }) => {
       </Button>
 
       <View style={{ flex: 1, padding: 10 }}>
-        <MapView 
-          ref={mapRef}
-          zoomControlEnabled 
-          showsUserLocation 
-          style={{ flex: 1 }}>
-
-
+        <MapView ref={mapRef} zoomControlEnabled showsUserLocation style={{ flex: 1 }}>
           {markers.map((m, index) => (
             <MapView.Marker
               key={index}

@@ -3,6 +3,7 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import MapMenu from './src/Menu/MapMenu';
 import SettingsMenu from './src/Menu/SettingsMenu';
 import DirectionsMenu from './src/Menu/DirectionsMenu';
+import PermissionsMenu from './src/Menu/PermissionsMenu';
 
 const Drawer = createDrawerNavigator();
 
@@ -12,6 +13,7 @@ const AppDrawer = () => {
       <Drawer.Screen name="Map" component={MapMenu} />
       <Drawer.Screen name="Settings" component={SettingsMenu} />
       <Drawer.Screen name="Directions" component={DirectionsMenu} />
+      <Drawer.Screen name="Permissions" component={PermissionsMenu} />
     </Drawer.Navigator>
   );
 };
