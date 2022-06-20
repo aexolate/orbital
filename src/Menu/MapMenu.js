@@ -64,22 +64,24 @@ const MapMenu = ({ route, navigation }) => {
   //Initializing Function
   useEffect(() => {
     alarmManager.setupAudio();
-    askPerms();
+    checkRequestLocationPerms();
   }, []);
 
-  const askPerms = async () => {
-    await requestPermission().then((response) => {
-      if (!response.granted) {
-        return;
-      }
-      requestPermissionBG().then(() => {
-        checkPerms();
+  const checkRequestLocationPerms = () => {
+    requestPermission()
+      .then((response) => {
+        if (response.granted) {
+          requestPermissionBG();
+        }
+      })
+      .then(() => {
+        Location.getBackgroundPermissionsAsync().then((perm) => {
+          if (!perm.granted) {
+            //Navigate user to permissions if BG location not granted
+            navigation.navigate('Permissions');
+          }
+        });
       });
-    });
-  };
-
-  const checkPerms = async () => {
-    return await Location.getBackgroundPermissionsAsync().then((perm) => perm.granted);
   };
 
   //selecting destination via longpress
