@@ -6,8 +6,15 @@ import { getData, storeData } from '../utils/AsyncStorage';
 //activation radius is currently only set in confirm location, should change to on load screen
 const SettingsMenu = ({ route, navigation }) => {
 
-  const [radiusText, setRadiusText] = useState(route.params.radius);
-  console.log('radius text ', route.params)
+  const [radiusText, setRadiusText] = useState(0);
+
+  useEffect(() => {
+    if (route.params?.radius) {
+      setRadiusText(route.params.radius);
+    }
+  }, [route.params.radius]);
+
+  console.log(route.params);
 
   return (
     <View style={styles.container}>
