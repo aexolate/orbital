@@ -33,10 +33,10 @@ const FavouritesMenu = ({ navigation }) => {
 
   //TODO: To properly define the type of a waypoint, additional mapping should not be required at this stage.
   const setAlarm = (waypoints) => {
-    const wps = waypoints.map(wp => {
+    const wps = waypoints.map((wp) => {
       return {
-        coords: {latitude: wp.latitude, longitude: wp.longitude},
-        title: 'Destination'
+        coords: { latitude: wp.latitude, longitude: wp.longitude },
+        title: 'Destination',
       };
     });
     navigation.navigate('Map', { requests: wps });
@@ -44,33 +44,37 @@ const FavouritesMenu = ({ navigation }) => {
 
   const removeAlarm = (id) => {
     dbManager.removeAlarm(id);
-    updateItems();            //TODO: could be buggy - what if items are updated before the previous alarm is removed?
+    updateItems(); //TODO: could be buggy - what if items are updated before the previous alarm is removed?
   };
 
   return (
-    <View style={{ flex: 1}}>
+    <View style={{ flex: 1 }}>
       {/* <Text>Add alarms to your favourite by clicking the Favourite button after setting your alarm</Text> */}
 
       <ScrollView showsVerticalScrollIndicator={true} persistentScrollbar={true}>
-        {items?.map((data, index) => 
-          (
-            <View key={index} style={{backgroundColor:'white', padding:20}}>
-              <Text>{data.id}</Text>
-              <Text>{data.name}</Text>
-              <Text>{data.waypoints}</Text>
-              <Button mode='contained' color='#577399' onPress={() => setAlarm(JSON.parse(data.waypoints))}>Set Alarm</Button>
-              <Button mode='contained' color='#FE5F55' onPress={() => removeAlarm(data.id)}>Remove</Button>
-            </View>
-          )
-        )}
+        {items?.map((data, index) => (
+          <View key={index} style={{ backgroundColor: 'white', padding: 20 }}>
+            <Text>{data.id}</Text>
+            <Text>{data.name}</Text>
+            <Text>{data.waypoints}</Text>
+            <Button
+              mode="contained"
+              color="#577399"
+              onPress={() => setAlarm(JSON.parse(data.waypoints))}
+            >
+              Set Alarm
+            </Button>
+            <Button mode="contained" color="#FE5F55" onPress={() => removeAlarm(data.id)}>
+              Remove
+            </Button>
+          </View>
+        ))}
       </ScrollView>
-
 
       {/* <Text>Debugging Buttons - remove in release</Text>
       <Button onPress={() => dbManager.clearTable()}>clear</Button>
       <Button onPress={() => dbManager.printTable()}>print</Button>
       <Button onPress={test}>test</Button> */}
-
     </View>
   );
 };

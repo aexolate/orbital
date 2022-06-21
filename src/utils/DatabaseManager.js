@@ -32,7 +32,7 @@ export const DatabaseManager = () => {
   return {
     insertAlarm,
     removeAlarm,
-    db
+    db,
   };
 
   //=====================================================================

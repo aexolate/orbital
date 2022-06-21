@@ -5,10 +5,7 @@ import PropTypes from 'prop-types';
 
 const FavouritesDialog = (props) => {
   const [visible, setVisible] = React.useState(props.visible);
-  const [text, setText] = React.useState("");
-
-  const showDialog = () => setVisible(true);
-  const hideDialog = () => setVisible(false);
+  const [text, setText] = React.useState('');
 
   const confirm = () => {
     if (props.onConfirm) {
