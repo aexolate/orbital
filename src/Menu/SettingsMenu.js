@@ -20,6 +20,7 @@ const SettingsMenu = () => {
         placeholder="Enter Activation Radius"
         value={radiusText}
         onChangeText={setRadiusText}
+        keyboardType="numeric"
       />
       <Button
         style={styles.Button}

@@ -135,7 +135,7 @@ const MapMenu = ({ route, navigation }) => {
 
   const addDestination = (location) => {
     var radius = radiusValue;
-    if (waypointsManager.waypoints.length > 0 && wpRadiusValue != '') {
+    if (wpRadiusValue != '') {
       radius = wpRadiusValue;
     }
     waypointsManager.addWaypoint({ ...location, radius: radius });
@@ -217,7 +217,7 @@ const MapMenu = ({ route, navigation }) => {
           </View>
         )}
 
-        {waypointsManager.waypoints.length > 0 && canModifyAlarm && (
+        {canModifyAlarm && (
           <View>
             <TextInput
               style={styles.wpTextInput}
@@ -226,6 +226,7 @@ const MapMenu = ({ route, navigation }) => {
               value={wpRadiusValue}
               onChangeText={setWpRadiusValue}
               right={<TextInput.Affix text="meters" />}
+              keyboardType="numeric"
             />
           </View>
         )}
