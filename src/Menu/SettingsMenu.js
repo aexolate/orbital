@@ -15,13 +15,6 @@ const SettingsMenu = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Radius: {radiusValue}</Text>
-      <TextInput
-        style={styles.textInput}
-        placeholder="Enter Activation Radius"
-        value={radiusText}
-        onChangeText={setRadiusText}
-        keyboardType="numeric"
-      />
       <Button
         style={styles.Button}
         mode="contained"
@@ -33,6 +26,13 @@ const SettingsMenu = () => {
       >
         confirm
       </Button>
+      <TextInput
+        style={styles.textInput}
+        placeholder="Enter Activation Radius"
+        value={radiusText}
+        onChangeText={setRadiusText}
+        keyboardType="numeric"
+      />
     </View>
   );
 };

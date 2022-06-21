@@ -33,6 +33,7 @@ import WaypointsList from '../components/WaypointsList.js';
 import { WAYPOINT_TYPE } from '../constants/WaypointEnum.js';
 import PropTypes from 'prop-types';
 import { getData } from '../utils/AsyncStorage.js';
+import { Value } from 'react-native-reanimated';
 
 const MapMenu = ({ route, navigation }) => {
   const [status, requestPermission] = Location.useForegroundPermissions();
@@ -46,9 +47,17 @@ const MapMenu = ({ route, navigation }) => {
   const alarmManager = AlarmManager();
   const waypointsManager = WaypointsManager();
   const mapRef = useRef(null);
-  const [radiusValue, setRadiusValue] = useState(0);
-  const [wpRadiusValue, setWpRadiusValue] = useState('');
+  const [radiusValue, setRadiusValue] = useState(0); //internal default radius value from settings
+  const [wpRadiusValue, setWpRadiusValue] = useState(''); //waypoint radius value that can be changed from MapMenu
 
+  useEffect(() => {
+    getData('radius').then((value) => {
+      setRadiusValue(value);
+      if (wpRadiusValue == '') {
+        setWpRadiusValue(value);
+      }
+    });
+  });
   //Define geofencing task for expo-location. Must be defined in top level scope
   TaskManager.defineTask('GEOFENCING_TASK', ({ data: { region, eventType }, error }) => {
     if (eventType === GeofencingEventType.Enter) {
@@ -105,7 +114,6 @@ const MapMenu = ({ route, navigation }) => {
 
   //function to get user to confirm is this the destination they want to set as alarm
   const setLocConfirmation = (dest) => {
-    getData('radius').then((radius) => setRadiusValue(radius));
     setPreviewLocation(dest);
     setPromptVisible(true);
     mapRef.current.animateCamera({ center: dest, zoom: 15, duration: 500 });
@@ -114,7 +122,7 @@ const MapMenu = ({ route, navigation }) => {
   //Removes the alarm set and removes all waypoints
   const unsetAlarm = () => {
     waypointsManager.clearWaypoints();
-    setWpRadiusValue(''); //to reset value for next waypoint
+    setWpRadiusValue(radiusValue); //to reset value for next waypoint
     setCanModifyAlarm(true);
     // setReachedDestination(false);
     // alarmManager.stopAlarm();
@@ -134,11 +142,7 @@ const MapMenu = ({ route, navigation }) => {
   };
 
   const addDestination = (location) => {
-    var radius = radiusValue;
-    if (wpRadiusValue != '') {
-      radius = wpRadiusValue;
-    }
-    waypointsManager.addWaypoint({ ...location, radius: radius });
+    waypointsManager.addWaypoint({ ...location, radius: wpRadiusValue });
     setCanModifyAlarm(false);
   };
 
@@ -189,7 +193,7 @@ const MapMenu = ({ route, navigation }) => {
               key={index}
               title="Destination"
               center={marker}
-              radius={marker.radius} //to edit
+              radius={marker.radius}
               waypointType={WAYPOINT_TYPE.DESTINATION}
             />
           ))}
@@ -258,7 +262,7 @@ const MapMenu = ({ route, navigation }) => {
           onConfirmPrompt={() => {
             addDestination(previewLocation);
             setPromptVisible(false);
-            setWpRadiusValue(''); //to reset value for next waypoint
+            setWpRadiusValue(radiusValue); //to reset value for next waypoint
           }}
           onCancelPrompt={() => setPromptVisible(false)}
         />
