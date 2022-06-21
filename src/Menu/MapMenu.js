@@ -13,7 +13,15 @@ import * as TaskManager from 'expo-task-manager';
 import { GeofencingEventType } from 'expo-location';
 import { AlarmManager } from '../../AlarmManager.js';
 import { WaypointsManager } from '../utils/WaypointsManager.js';
-import { Provider as PaperProvider, FAB, List, HelperText, Text, Button, TextInput } from 'react-native-paper';
+import {
+  Provider as PaperProvider,
+  FAB,
+  List,
+  HelperText,
+  Text,
+  Button,
+  TextInput,
+} from 'react-native-paper';
 import CONSTANTS from '../constants/Constants.js';
 import SnackbarHint from '../components/SnackbarHint.js';
 import SearchbarLocation from '../components/SearchbarLocation.js';
@@ -97,7 +105,7 @@ const MapMenu = ({ route, navigation }) => {
 
   //function to get user to confirm is this the destination they want to set as alarm
   const setLocConfirmation = (dest) => {
-    getData('radius').then(radius => setRadiusValue(radius));
+    getData('radius').then((radius) => setRadiusValue(radius));
     setPreviewLocation(dest);
     setPromptVisible(true);
     mapRef.current.animateCamera({ center: dest, zoom: 15, duration: 500 });
@@ -106,7 +114,7 @@ const MapMenu = ({ route, navigation }) => {
   //Removes the alarm set and removes all waypoints
   const unsetAlarm = () => {
     waypointsManager.clearWaypoints();
-    setWpRadiusValue(''); //to reset value for next waypoint 
+    setWpRadiusValue(''); //to reset value for next waypoint
     setCanModifyAlarm(true);
     // setReachedDestination(false);
     // alarmManager.stopAlarm();
@@ -165,18 +173,15 @@ const MapMenu = ({ route, navigation }) => {
   return (
     <PaperProvider>
       {waypointsManager.waypoints.length > 0 && canModifyAlarm && (
-          <View>
-            <Text
-            >
-              Enter radius for new waypoint, leave it empty for default value 
-            </Text>
-            <TextInput
-              placeholder="Enter New Radius Value"
-              value={wpRadiusValue}
-              onChangeText={setWpRadiusValue}
-            />
-          </View>
-        )}
+        <View>
+          <Text>Enter radius for new waypoint, leave it empty for default value</Text>
+          <TextInput
+            placeholder="Enter New Radius Value"
+            value={wpRadiusValue}
+            onChangeText={setWpRadiusValue}
+          />
+        </View>
+      )}
       {/* <StatusBar barStyle="dark-content" backgroundColor={'transparent'} translucent={true} /> */}
       <View style={styles.container}>
         <MapView
@@ -203,7 +208,7 @@ const MapMenu = ({ route, navigation }) => {
             <WaypointIndicator
               title="Preview"
               center={previewLocation}
-              radius={wpRadiusValue == '' ? radiusValue : wpRadiusValue} 
+              radius={wpRadiusValue == '' ? radiusValue : wpRadiusValue}
               waypointType={WAYPOINT_TYPE.PREVIEW}
             />
           )}
@@ -221,7 +226,6 @@ const MapMenu = ({ route, navigation }) => {
             />
           </View>
         )}
-
 
         {!canModifyAlarm && waypointsManager.waypoints.length > 0 && !reachedDestination && (
           <FAB
@@ -250,7 +254,7 @@ const MapMenu = ({ route, navigation }) => {
           onConfirmPrompt={() => {
             addDestination(previewLocation);
             setPromptVisible(false);
-            setWpRadiusValue(''); //to reset value for next waypoint 
+            setWpRadiusValue(''); //to reset value for next waypoint
           }}
           onCancelPrompt={() => setPromptVisible(false)}
         />
