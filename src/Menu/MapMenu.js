@@ -219,7 +219,8 @@ const MapMenu = ({ route, navigation }) => {
 
         {waypointsManager.waypoints.length > 0 && canModifyAlarm && (
           <View>
-            <TextInput style={styles.wpTextInput}
+            <TextInput
+              style={styles.wpTextInput}
               mode="outlined"
               label="Activation Radius"
               value={wpRadiusValue}
@@ -326,5 +327,5 @@ const styles = StyleSheet.create({
     margin: 0,
     left: 10,
     bottom: 530, //top prop not working
-  }
+  },
 });
