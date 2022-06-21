@@ -6,6 +6,7 @@ import {
   StatusBar,
   TouchableOpacity,
   useColorScheme,
+  Alert,
 } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
@@ -21,8 +22,10 @@ import WaypointIndicator from '../components/WaypointIndicator.js';
 import AlarmBox from '../components/AlarmBox.js';
 import PromptBox from '../components/PromptBox.js';
 import InfoBox from '../components/InfoBox.js';
+import FavouritesDialog from '../components/FavouritesDialog.js';
 import WaypointsList from '../components/WaypointsList.js';
 import { WAYPOINT_TYPE } from '../constants/WaypointEnum.js';
+import { DatabaseManager } from '../utils/DatabaseManager';
 import PropTypes from 'prop-types';
 
 const MapMenu = ({ route, navigation }) => {
@@ -30,12 +33,14 @@ const MapMenu = ({ route, navigation }) => {
   const [statusBG, requestPermissionBG] = Location.useBackgroundPermissions();
 
   const [promptVisible, setPromptVisible] = React.useState(false);
+  const [favDialogVisible, setFavDialogVisible] = React.useState(false);
   const [previewLocation, setPreviewLocation] = useState(CONSTANTS.LOCATIONS.DEFAULT);
   const [distanceToDest, setDistanceToDest] = useState(Infinity);
   const [canModifyAlarm, setCanModifyAlarm] = useState(true); //Indicates whether new waypoints can be added
   const [reachedDestination, setReachedDestination] = useState(false); //Indicates whether the user has been in radius of destination
   const alarmManager = AlarmManager();
   const waypointsManager = WaypointsManager();
+  const dbManager = DatabaseManager();
   const mapRef = useRef(null);
 
   //Distance to destination for alarm to activate
@@ -155,6 +160,11 @@ const MapMenu = ({ route, navigation }) => {
       });
   }, [waypointsManager.waypoints]);
 
+  const addAlarmToFavourites = (title) => {
+    dbManager.insertAlarm(title, waypointsManager.waypoints);
+    Alert.alert('Favourites', 'Current alarm has been added to favourites');
+  };
+
   //Render
   return (
     <PaperProvider>
@@ -208,9 +218,29 @@ const MapMenu = ({ route, navigation }) => {
             style={styles.fab}
             label="ADD WAYPOINT"
             icon="map-marker-plus"
+            theme={{ colors: { accent: 'teal' } }}
             onPress={() => setCanModifyAlarm(true)}
           />
         )}
+
+        {waypointsManager.waypoints.length > 0 && (
+          <FAB
+            style={styles.fabFav}
+            label="FAVOURITE"
+            icon="star"
+            theme={{ colors: { accent: 'yellow' } }}
+            onPress={() => setFavDialogVisible(true)}
+          />
+        )}
+
+        <FavouritesDialog
+          visible={favDialogVisible}
+          onConfirm={(title) => {
+            addAlarmToFavourites(title);
+            setFavDialogVisible(false);
+          }}
+          onDismiss={() => setFavDialogVisible(false)}
+        />
 
         {canModifyAlarm && (
           <View style={styles.searchBar}>
@@ -290,6 +320,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     margin: 0,
     left: 10,
+    top: 10,
+  },
+  fabFav: {
+    position: 'absolute',
+    margin: 0,
+    left: 190,
     top: 10,
   },
 });
