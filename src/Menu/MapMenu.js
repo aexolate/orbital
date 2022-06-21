@@ -172,16 +172,6 @@ const MapMenu = ({ route, navigation }) => {
   //Render
   return (
     <PaperProvider>
-      {waypointsManager.waypoints.length > 0 && canModifyAlarm && (
-        <View>
-          <Text>Enter radius for new waypoint, leave it empty for default value</Text>
-          <TextInput
-            placeholder="Enter New Radius Value"
-            value={wpRadiusValue}
-            onChangeText={setWpRadiusValue}
-          />
-        </View>
-      )}
       {/* <StatusBar barStyle="dark-content" backgroundColor={'transparent'} translucent={true} /> */}
       <View style={styles.container}>
         <MapView
@@ -223,6 +213,18 @@ const MapMenu = ({ route, navigation }) => {
                 mapRef.current.animateCamera({ center: coords, zoom: 15, duration: 500 });
               }}
               deleteWP={(coords) => waypointsManager.removeWaypoint(coords)}
+            />
+          </View>
+        )}
+
+        {waypointsManager.waypoints.length > 0 && canModifyAlarm && (
+          <View>
+            <TextInput style={styles.wpTextInput}
+              mode="outlined"
+              label="Activation Radius"
+              value={wpRadiusValue}
+              onChangeText={setWpRadiusValue}
+              right={<TextInput.Affix text="meters" />}
             />
           </View>
         )}
@@ -317,4 +319,12 @@ const styles = StyleSheet.create({
     left: 10,
     top: 10,
   },
+  wpTextInput: {
+    position: 'absolute',
+    height: 50,
+    width: 170,
+    margin: 0,
+    left: 10,
+    bottom: 530, //top prop not working
+  }
 });
