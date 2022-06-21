@@ -15,6 +15,11 @@ const SettingsMenu = () => {
 
   return (
     <View style={styles.container}>
+      <Text
+        style={styles.text}
+      >
+        Radius: {radiusValue}
+      </Text>
       <TextInput
         style={styles.textInput}
         placeholder="Enter Activation Radius"
@@ -32,11 +37,6 @@ const SettingsMenu = () => {
       >
         confirm
       </Button>
-      <Text
-        style={styles.text}
-      >
-        {radiusValue}
-      </Text>
     </View>
   );
 };
@@ -48,7 +48,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   text: {
-    flex: 2,
+    flex: 1,
+    justifyContent: 'space-around',
+    alignItems: 'center',
   },
   textInput: {
     flex: 1,
