@@ -24,6 +24,7 @@ import InfoBox from '../components/InfoBox.js';
 import WaypointsList from '../components/WaypointsList.js';
 import { WAYPOINT_TYPE } from '../constants/WaypointEnum.js';
 import PropTypes from 'prop-types';
+import { getData } from '../utils/AsyncStorage.js';
 
 const MapMenu = ({ route, navigation }) => {
   const [status, requestPermission] = Location.useForegroundPermissions();
@@ -37,9 +38,7 @@ const MapMenu = ({ route, navigation }) => {
   const alarmManager = AlarmManager();
   const waypointsManager = WaypointsManager();
   const mapRef = useRef(null);
-
-  //Distance to destination for alarm to activate
-  const ACTIVATION_RADIUS = //edit
+  const [radiusValue, setRadiusValue] = useState(0); 
 
   //Define geofencing task for expo-location. Must be defined in top level scope
   TaskManager.defineTask('GEOFENCING_TASK', ({ data: { region, eventType }, error }) => {
@@ -97,6 +96,7 @@ const MapMenu = ({ route, navigation }) => {
 
   //function to get user to confirm is this the destination they want to set as alarm
   const setLocConfirmation = (dest) => {
+    getData('radius').then(radius => setRadiusValue(parseInt(radius)));
     setPreviewLocation(dest);
     setPromptVisible(true);
     mapRef.current.animateCamera({ center: dest, zoom: 15, duration: 500 });
@@ -124,7 +124,7 @@ const MapMenu = ({ route, navigation }) => {
   };
 
   const addDestination = (location) => {
-    waypointsManager.addWaypoint({ ...location, radius: ACTIVATION_RADIUS });
+    waypointsManager.addWaypoint({ ...location, radius: radiusValue });
     setCanModifyAlarm(false);
   };
 
@@ -175,7 +175,7 @@ const MapMenu = ({ route, navigation }) => {
               key={index}
               title="Destination"
               center={marker}
-              radius={ACTIVATION_RADIUS}
+              radius={radiusValue}
               waypointType={WAYPOINT_TYPE.DESTINATION}
             />
           ))}
@@ -184,7 +184,7 @@ const MapMenu = ({ route, navigation }) => {
             <WaypointIndicator
               title="Preview"
               center={previewLocation}
-              radius={ACTIVATION_RADIUS}
+              radius={radiusValue}
               waypointType={WAYPOINT_TYPE.PREVIEW}
             />
           )}
