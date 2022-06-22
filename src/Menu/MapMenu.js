@@ -47,17 +47,9 @@ const MapMenu = ({ route, navigation }) => {
   const alarmManager = AlarmManager();
   const waypointsManager = WaypointsManager();
   const mapRef = useRef(null);
-  const [radiusValue, setRadiusValue] = useState(0); //internal default radius value from settings
-  const [wpRadiusValue, setWpRadiusValue] = useState(''); //waypoint radius value that can be changed from MapMenu
+  const [settingRadius, setSettingRadius] = useState(0); //internal default radius value from settings, retrieve during select location
+  const [wpRadius, setWpRadius] = useState(''); //waypoint radius value that can be changed from MapMenu
 
-  useEffect(() => {
-    getData('radius').then((value) => {
-      setRadiusValue(value);
-      if (wpRadiusValue == '') {
-        setWpRadiusValue(value);
-      }
-    });
-  });
   //Define geofencing task for expo-location. Must be defined in top level scope
   TaskManager.defineTask('GEOFENCING_TASK', ({ data: { region, eventType }, error }) => {
     if (eventType === GeofencingEventType.Enter) {
@@ -114,6 +106,8 @@ const MapMenu = ({ route, navigation }) => {
 
   //function to get user to confirm is this the destination they want to set as alarm
   const setLocConfirmation = (dest) => {
+    getData('radius').then(value => setSettingRadius(parseFloat(value))); //update the radius value from setting
+    console.log(settingRadius);
     setPreviewLocation(dest);
     setPromptVisible(true);
     mapRef.current.animateCamera({ center: dest, zoom: 15, duration: 500 });
@@ -122,7 +116,7 @@ const MapMenu = ({ route, navigation }) => {
   //Removes the alarm set and removes all waypoints
   const unsetAlarm = () => {
     waypointsManager.clearWaypoints();
-    setWpRadiusValue(radiusValue); //to reset value for next waypoint
+    setWpRadius(''); //to reset value for next waypoint
     setCanModifyAlarm(true);
     // setReachedDestination(false);
     // alarmManager.stopAlarm();
@@ -142,8 +136,9 @@ const MapMenu = ({ route, navigation }) => {
   };
 
   const addDestination = (location) => {
-    waypointsManager.addWaypoint({ ...location, radius: wpRadiusValue });
+    waypointsManager.addWaypoint({ ...location, radius: wpRadius == '' ? settingRadius : wpRadius });
     setCanModifyAlarm(false);
+    setWpRadius(''); //reset wpRadius after adding
   };
 
   useEffect(() => {
@@ -193,7 +188,7 @@ const MapMenu = ({ route, navigation }) => {
               key={index}
               title="Destination"
               center={marker}
-              radius={marker.radius}
+              radius={marker.radius} 
               waypointType={WAYPOINT_TYPE.DESTINATION}
             />
           ))}
@@ -202,7 +197,7 @@ const MapMenu = ({ route, navigation }) => {
             <WaypointIndicator
               title="Preview"
               center={previewLocation}
-              radius={wpRadiusValue == '' ? radiusValue : wpRadiusValue}
+              radius={ wpRadius == '' ? settingRadius : wpRadius }
               waypointType={WAYPOINT_TYPE.PREVIEW}
             />
           )}
@@ -221,14 +216,14 @@ const MapMenu = ({ route, navigation }) => {
           </View>
         )}
 
-        {canModifyAlarm && (
-          <View>
+{canModifyAlarm && (
+          <View style={{position: 'absolute', top: 90, left: 10}}>
             <TextInput
               style={styles.wpTextInput}
               mode="outlined"
               label="Activation Radius"
-              value={wpRadiusValue}
-              onChangeText={setWpRadiusValue}
+              value={wpRadius}
+              onChangeText={setWpRadius}
               right={<TextInput.Affix text="meters" />}
               keyboardType="numeric"
             />
@@ -262,7 +257,7 @@ const MapMenu = ({ route, navigation }) => {
           onConfirmPrompt={() => {
             addDestination(previewLocation);
             setPromptVisible(false);
-            setWpRadiusValue(radiusValue); //to reset value for next waypoint
+            setWpRadius(settingRadius); //to reset value for next waypoint
           }}
           onCancelPrompt={() => setPromptVisible(false)}
         />
@@ -326,11 +321,7 @@ const styles = StyleSheet.create({
     top: 10,
   },
   wpTextInput: {
-    position: 'absolute',
     height: 50,
     width: 170,
-    margin: 0,
-    left: 10,
-    bottom: 530, //top prop not working
   },
 });

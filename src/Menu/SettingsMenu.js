@@ -2,30 +2,41 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Button, Text, TextInput } from 'react-native-paper';
 import { getData, storeData } from '../utils/AsyncStorage';
+import PropTypes from 'prop-types';
 
 //activation radius is currently only set in confirm location, should change to on load screen
 const SettingsMenu = () => {
-  const [radiusText, setRadiusText] = useState(0);
-  const [radiusValue, setRadiusValue] = useState(0);
+  const [radiusText, setRadiusText] = useState(0); //text for radius setting input
+  const [radiusValue, setRadiusValue] = useState(0); //radius that is displayed in app, also the current setting value
 
   useEffect(() => {
     getData('radius').then((radius) => setRadiusValue(radius));
   });
 
+  const SettingsButton = (props) => {
+    return (
+      <Button
+          style={styles.Button}
+          mode="contained"
+          onPress={() => {
+            if (radiusText == '') {
+              alert('No value keyed in!')
+            } else {
+              storeData(props.keyValue, radiusText);
+              setRadiusValue(radiusText);
+              setRadiusText('');
+            }
+          }}
+        >
+          confirm
+        </Button>
+    )
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Radius: {radiusValue}</Text>
-      <Button
-        style={styles.Button}
-        mode="contained"
-        onPress={() => {
-          storeData('radius', radiusText);
-          setRadiusValue(radiusText);
-          setRadiusText('');
-        }}
-      >
-        confirm
-      </Button>
+      <SettingsButton keyValue={'radius'}/>
       <TextInput
         style={styles.textInput}
         placeholder="Enter Activation Radius"
