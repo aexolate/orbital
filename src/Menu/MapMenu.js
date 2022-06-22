@@ -14,7 +14,7 @@ import * as TaskManager from 'expo-task-manager';
 import { GeofencingEventType } from 'expo-location';
 import { AlarmManager } from '../../AlarmManager.js';
 import { WaypointsManager } from '../utils/WaypointsManager.js';
-import { Provider as PaperProvider, FAB, List, HelperText } from 'react-native-paper';
+import { Provider as PaperProvider, FAB, List, HelperText, Button } from 'react-native-paper';
 import CONSTANTS from '../constants/Constants.js';
 import SnackbarHint from '../components/SnackbarHint.js';
 import SearchbarLocation from '../components/SearchbarLocation.js';
@@ -27,6 +27,8 @@ import WaypointsList from '../components/WaypointsList.js';
 import { WAYPOINT_TYPE } from '../constants/WaypointEnum.js';
 import { DatabaseManager } from '../utils/DatabaseManager';
 import PropTypes from 'prop-types';
+import Constants from 'expo-constants';
+import Dimensions  from 'react-native';
 
 const MapMenu = ({ route, navigation }) => {
   const [status, requestPermission] = Location.useForegroundPermissions();
@@ -36,7 +38,7 @@ const MapMenu = ({ route, navigation }) => {
   const [favDialogVisible, setFavDialogVisible] = React.useState(false);
   const [previewLocation, setPreviewLocation] = useState(CONSTANTS.LOCATIONS.DEFAULT);
   const [distanceToDest, setDistanceToDest] = useState(Infinity);
-  const [canModifyAlarm, setCanModifyAlarm] = useState(true); //Indicates whether new waypoints can be added
+  //const [canModifyAlarm, setCanModifyAlarm] = useState(true); //Indicates whether new waypoints can be added
   const [reachedDestination, setReachedDestination] = useState(false); //Indicates whether the user has been in radius of destination
   const alarmManager = AlarmManager();
   const waypointsManager = WaypointsManager();
@@ -91,7 +93,7 @@ const MapMenu = ({ route, navigation }) => {
 
   //selecting destination via longpress
   const selectLocLongPress = (mapEvent) => {
-    if (!canModifyAlarm) return; //Do nothing if not allowed to set new waypoints
+    //if (!canModifyAlarm) return; //Do nothing if not allowed to set new waypoints
 
     const destination = {
       latitude: mapEvent.coordinate.latitude,
@@ -110,7 +112,7 @@ const MapMenu = ({ route, navigation }) => {
   //Removes the alarm set and removes all waypoints
   const unsetAlarm = () => {
     waypointsManager.clearWaypoints();
-    setCanModifyAlarm(true);
+    //setCanModifyAlarm(true);
     // setReachedDestination(false);
     // alarmManager.stopAlarm();
   };
@@ -118,7 +120,7 @@ const MapMenu = ({ route, navigation }) => {
   //Dismiss the ringing alarm
   const dismissAlarm = () => {
     if (waypointsManager.waypoints.length == 0) {
-      setCanModifyAlarm(true);
+      //setCanModifyAlarm(true);
     }
     setReachedDestination(false);
     alarmManager.stopAlarm();
@@ -130,7 +132,7 @@ const MapMenu = ({ route, navigation }) => {
 
   const addDestination = (location) => {
     waypointsManager.addWaypoint({ ...location, radius: ACTIVATION_RADIUS });
-    setCanModifyAlarm(false);
+    //setCanModifyAlarm(false);
   };
 
   useEffect(() => {
@@ -143,7 +145,7 @@ const MapMenu = ({ route, navigation }) => {
 
     //Allow new waypoints to be added if there are no waypoints set
     if (waypointsManager.waypoints.length == 0) {
-      setCanModifyAlarm(true);
+      //setCanModifyAlarm(true);
     }
 
     //Handles geofencing when the waypoints are modified
@@ -161,7 +163,7 @@ const MapMenu = ({ route, navigation }) => {
   }, [waypointsManager.waypoints]);
 
   const addAlarmToFavourites = (title) => {
-    dbManager.insertAlarm(title, waypointsManager.waypoints);
+    dbManager.insertAlarm((title == '' ? 'Untitled' : title), waypointsManager.waypoints);
     Alert.alert('Favourites', 'Current alarm has been added to favourites');
   };
 
@@ -176,7 +178,7 @@ const MapMenu = ({ route, navigation }) => {
           initialCamera={CONSTANTS.MAP_CAMERA.SINGAPORE}
           zoomControlEnabled={true}
           showsUserLocation={true}
-          mapPadding={{}}
+          mapPadding={{ top: 35 }}
           onUserLocationChange={onUserLocationChange}
           onLongPress={(mapEvent) => selectLocLongPress(mapEvent.nativeEvent)}
         >
@@ -202,7 +204,9 @@ const MapMenu = ({ route, navigation }) => {
 
         {waypointsManager.waypoints.length > 0 && !reachedDestination && (
           <View>
-            <InfoBox distance={distanceToDest} onCancelAlarm={unsetAlarm} />
+            <InfoBox distance={distanceToDest} 
+              onCancelAlarm={unsetAlarm}
+              onSaveAlarm={() => setFavDialogVisible(true)} />
             <WaypointsList
               waypoints={waypointsManager.waypoints}
               gotoWP={(coords) => {
@@ -213,7 +217,7 @@ const MapMenu = ({ route, navigation }) => {
           </View>
         )}
 
-        {!canModifyAlarm && waypointsManager.waypoints.length > 0 && !reachedDestination && (
+        {/* {!canModifyAlarm && waypointsManager.waypoints.length > 0 && !reachedDestination && (
           <FAB
             style={styles.fab}
             label="ADD WAYPOINT"
@@ -231,7 +235,7 @@ const MapMenu = ({ route, navigation }) => {
             theme={{ colors: { accent: 'yellow' } }}
             onPress={() => setFavDialogVisible(true)}
           />
-        )}
+        )} */}
 
         <FavouritesDialog
           visible={favDialogVisible}
@@ -242,14 +246,12 @@ const MapMenu = ({ route, navigation }) => {
           onDismiss={() => setFavDialogVisible(false)}
         />
 
-        {canModifyAlarm && (
-          <View style={styles.searchBar}>
-            <SearchbarLocation onResultReady={(loc) => setLocConfirmation(loc)} />
-            <HelperText style={{ backgroundColor: 'white' }}>
-              or long-press the map to select location
-            </HelperText>
-          </View>
-        )}
+        <View style={styles.searchBar}>
+          <SearchbarLocation onResultReady={(loc) => setLocConfirmation(loc)} />
+          <HelperText style={{ backgroundColor: 'white' }}>
+            or long-press the map to select location
+          </HelperText>
+        </View>
 
         {/* <SnackbarHint /> */}
 
@@ -263,6 +265,18 @@ const MapMenu = ({ route, navigation }) => {
           }}
           onCancelPrompt={() => setPromptVisible(false)}
         />
+
+        <Button
+          icon="menu"
+          color="white"
+          mode="contained"
+          onPress={() => {
+            navigation.openDrawer();
+          }}
+          style={{ position: 'absolute', top: Constants.statusBarHeight, left: 10 }}
+        >
+          Menu
+        </Button>
       </View>
     </PaperProvider>
   );
@@ -291,19 +305,20 @@ const styles = StyleSheet.create({
   searchBar: {
     position: 'absolute',
     width: '85%',
-    opacity: 0.95,
-    paddingLeft: 10,
-    paddingTop: 10,
-    //alignSelf: 'center',
+    opacity: 0.98,
+    //paddingLeft: 10,
+    paddingTop: 100,
+    alignSelf: 'center',
   },
   infoBox: {
     position: 'absolute',
     alignItems: 'center',
-    opacity: 0.9,
-    width: '90%',
-    bottom: '15%',
-    alignSelf: 'center',
-    elevation: 4,
+    opacity: 0.90,
+    // bottom: 80,
+    // left: 10,
+    bottom: 0,
+    paddingBottom: 90,
+    paddingLeft: 10,
   },
   alarmBox: {
     position: 'absolute',
