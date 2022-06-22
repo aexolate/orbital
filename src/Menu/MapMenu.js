@@ -14,7 +14,7 @@ import * as TaskManager from 'expo-task-manager';
 import { GeofencingEventType } from 'expo-location';
 import { AlarmManager } from '../../AlarmManager.js';
 import { WaypointsManager } from '../utils/WaypointsManager.js';
-import { Provider as PaperProvider, FAB, List, HelperText } from 'react-native-paper';
+import { Provider as PaperProvider, FAB, List, HelperText, Button } from 'react-native-paper';
 import CONSTANTS from '../constants/Constants.js';
 import SnackbarHint from '../components/SnackbarHint.js';
 import SearchbarLocation from '../components/SearchbarLocation.js';
@@ -161,7 +161,7 @@ const MapMenu = ({ route, navigation }) => {
   }, [waypointsManager.waypoints]);
 
   const addAlarmToFavourites = (title) => {
-    dbManager.insertAlarm(title, waypointsManager.waypoints);
+    dbManager.insertAlarm((title == '' ? 'Untitled' : title), waypointsManager.waypoints);
     Alert.alert('Favourites', 'Current alarm has been added to favourites');
   };
 
@@ -170,13 +170,14 @@ const MapMenu = ({ route, navigation }) => {
     <PaperProvider>
       {/* <StatusBar barStyle="dark-content" backgroundColor={'transparent'} translucent={true} /> */}
       <View style={styles.container}>
+
         <MapView
           ref={mapRef}
           style={styles.map}
           initialCamera={CONSTANTS.MAP_CAMERA.SINGAPORE}
           zoomControlEnabled={true}
           showsUserLocation={true}
-          mapPadding={{}}
+          mapPadding={{ top: 20 }}
           onUserLocationChange={onUserLocationChange}
           onLongPress={(mapEvent) => selectLocLongPress(mapEvent.nativeEvent)}
         >
@@ -201,17 +202,18 @@ const MapMenu = ({ route, navigation }) => {
         </MapView>
 
         {waypointsManager.waypoints.length > 0 && !reachedDestination && (
-          <View>
+          <View style={styles.infoBox}>
             <InfoBox distance={distanceToDest} onCancelAlarm={unsetAlarm} />
-            <WaypointsList
-              waypoints={waypointsManager.waypoints}
-              gotoWP={(coords) => {
-                mapRef.current.animateCamera({ center: coords, zoom: 15, duration: 500 });
-              }}
-              deleteWP={(coords) => waypointsManager.removeWaypoint(coords)}
-            />
           </View>
         )}
+
+        <WaypointsList
+          waypoints={waypointsManager.waypoints}
+          gotoWP={(coords) => {
+            mapRef.current.animateCamera({ center: coords, zoom: 15, duration: 500 });
+          }}
+          deleteWP={(coords) => waypointsManager.removeWaypoint(coords)}
+        />
 
         {!canModifyAlarm && waypointsManager.waypoints.length > 0 && !reachedDestination && (
           <FAB
@@ -242,6 +244,7 @@ const MapMenu = ({ route, navigation }) => {
           onDismiss={() => setFavDialogVisible(false)}
         />
 
+
         {canModifyAlarm && (
           <View style={styles.searchBar}>
             <SearchbarLocation onResultReady={(loc) => setLocConfirmation(loc)} />
@@ -263,6 +266,10 @@ const MapMenu = ({ route, navigation }) => {
           }}
           onCancelPrompt={() => setPromptVisible(false)}
         />
+
+        <Button icon='menu' color='white' mode='contained' onPress={() => { navigation.openDrawer(); }} style={{ position: 'absolute', top: 30, left: 10 }}>
+          Menu
+        </Button>
       </View>
     </PaperProvider>
   );
@@ -291,19 +298,20 @@ const styles = StyleSheet.create({
   searchBar: {
     position: 'absolute',
     width: '85%',
-    opacity: 0.95,
-    paddingLeft: 10,
-    paddingTop: 10,
-    //alignSelf: 'center',
+    opacity: 0.98,
+    //paddingLeft: 10,
+    paddingTop: 90,
+    alignSelf: 'center',
   },
   infoBox: {
     position: 'absolute',
     alignItems: 'center',
-    opacity: 0.9,
-    width: '90%',
-    bottom: '15%',
-    alignSelf: 'center',
-    elevation: 4,
+    opacity: 0.90,
+    // bottom: 80,
+    // left: 10,
+    bottom: 0,
+    paddingBottom: 90,
+    paddingLeft: 10,
   },
   alarmBox: {
     position: 'absolute',
