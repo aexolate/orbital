@@ -14,6 +14,9 @@ const InfoBox = (props) => {
           <Button style={{alignContent: 'center', justifyContent: 'center'}} icon="cancel" color="darkred" mode="contained" onPress={props.onCancelAlarm}>
             Cancel
           </Button>
+          <Button style={{alignContent: 'center', justifyContent: 'center'}} icon="star" color="yellow" mode="contained" onPress={props.onSaveAlarm}>
+            Save
+          </Button>
         </View>
       </Card.Content>
     </Card>
@@ -22,5 +25,6 @@ const InfoBox = (props) => {
 InfoBox.propTypes = {
   distance: PropTypes.any.isRequired,
   onCancelAlarm: PropTypes.func.isRequired,
+  onSaveAlarm: PropTypes.func.isRequired,
 };
 export default InfoBox;

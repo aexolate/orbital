@@ -27,6 +27,8 @@ import WaypointsList from '../components/WaypointsList.js';
 import { WAYPOINT_TYPE } from '../constants/WaypointEnum.js';
 import { DatabaseManager } from '../utils/DatabaseManager';
 import PropTypes from 'prop-types';
+import Constants from 'expo-constants';
+import Dimensions  from 'react-native';
 
 const MapMenu = ({ route, navigation }) => {
   const [status, requestPermission] = Location.useForegroundPermissions();
@@ -36,7 +38,7 @@ const MapMenu = ({ route, navigation }) => {
   const [favDialogVisible, setFavDialogVisible] = React.useState(false);
   const [previewLocation, setPreviewLocation] = useState(CONSTANTS.LOCATIONS.DEFAULT);
   const [distanceToDest, setDistanceToDest] = useState(Infinity);
-  const [canModifyAlarm, setCanModifyAlarm] = useState(true); //Indicates whether new waypoints can be added
+  //const [canModifyAlarm, setCanModifyAlarm] = useState(true); //Indicates whether new waypoints can be added
   const [reachedDestination, setReachedDestination] = useState(false); //Indicates whether the user has been in radius of destination
   const alarmManager = AlarmManager();
   const waypointsManager = WaypointsManager();
@@ -91,7 +93,7 @@ const MapMenu = ({ route, navigation }) => {
 
   //selecting destination via longpress
   const selectLocLongPress = (mapEvent) => {
-    if (!canModifyAlarm) return; //Do nothing if not allowed to set new waypoints
+    //if (!canModifyAlarm) return; //Do nothing if not allowed to set new waypoints
 
     const destination = {
       latitude: mapEvent.coordinate.latitude,
@@ -110,7 +112,7 @@ const MapMenu = ({ route, navigation }) => {
   //Removes the alarm set and removes all waypoints
   const unsetAlarm = () => {
     waypointsManager.clearWaypoints();
-    setCanModifyAlarm(true);
+    //setCanModifyAlarm(true);
     // setReachedDestination(false);
     // alarmManager.stopAlarm();
   };
@@ -118,7 +120,7 @@ const MapMenu = ({ route, navigation }) => {
   //Dismiss the ringing alarm
   const dismissAlarm = () => {
     if (waypointsManager.waypoints.length == 0) {
-      setCanModifyAlarm(true);
+      //setCanModifyAlarm(true);
     }
     setReachedDestination(false);
     alarmManager.stopAlarm();
@@ -130,7 +132,7 @@ const MapMenu = ({ route, navigation }) => {
 
   const addDestination = (location) => {
     waypointsManager.addWaypoint({ ...location, radius: ACTIVATION_RADIUS });
-    setCanModifyAlarm(false);
+    //setCanModifyAlarm(false);
   };
 
   useEffect(() => {
@@ -143,7 +145,7 @@ const MapMenu = ({ route, navigation }) => {
 
     //Allow new waypoints to be added if there are no waypoints set
     if (waypointsManager.waypoints.length == 0) {
-      setCanModifyAlarm(true);
+      //setCanModifyAlarm(true);
     }
 
     //Handles geofencing when the waypoints are modified
@@ -170,14 +172,13 @@ const MapMenu = ({ route, navigation }) => {
     <PaperProvider>
       {/* <StatusBar barStyle="dark-content" backgroundColor={'transparent'} translucent={true} /> */}
       <View style={styles.container}>
-
         <MapView
           ref={mapRef}
           style={styles.map}
           initialCamera={CONSTANTS.MAP_CAMERA.SINGAPORE}
           zoomControlEnabled={true}
           showsUserLocation={true}
-          mapPadding={{ top: 20 }}
+          mapPadding={{ top: 35 }}
           onUserLocationChange={onUserLocationChange}
           onLongPress={(mapEvent) => selectLocLongPress(mapEvent.nativeEvent)}
         >
@@ -202,20 +203,21 @@ const MapMenu = ({ route, navigation }) => {
         </MapView>
 
         {waypointsManager.waypoints.length > 0 && !reachedDestination && (
-          <View style={styles.infoBox}>
-            <InfoBox distance={distanceToDest} onCancelAlarm={unsetAlarm} />
+          <View>
+            <InfoBox distance={distanceToDest} 
+              onCancelAlarm={unsetAlarm}
+              onSaveAlarm={() => setFavDialogVisible(true)} />
+            <WaypointsList
+              waypoints={waypointsManager.waypoints}
+              gotoWP={(coords) => {
+                mapRef.current.animateCamera({ center: coords, zoom: 15, duration: 500 });
+              }}
+              deleteWP={(coords) => waypointsManager.removeWaypoint(coords)}
+            />
           </View>
         )}
 
-        <WaypointsList
-          waypoints={waypointsManager.waypoints}
-          gotoWP={(coords) => {
-            mapRef.current.animateCamera({ center: coords, zoom: 15, duration: 500 });
-          }}
-          deleteWP={(coords) => waypointsManager.removeWaypoint(coords)}
-        />
-
-        {!canModifyAlarm && waypointsManager.waypoints.length > 0 && !reachedDestination && (
+        {/* {!canModifyAlarm && waypointsManager.waypoints.length > 0 && !reachedDestination && (
           <FAB
             style={styles.fab}
             label="ADD WAYPOINT"
@@ -233,7 +235,7 @@ const MapMenu = ({ route, navigation }) => {
             theme={{ colors: { accent: 'yellow' } }}
             onPress={() => setFavDialogVisible(true)}
           />
-        )}
+        )} */}
 
         <FavouritesDialog
           visible={favDialogVisible}
@@ -244,15 +246,12 @@ const MapMenu = ({ route, navigation }) => {
           onDismiss={() => setFavDialogVisible(false)}
         />
 
-
-        {canModifyAlarm && (
-          <View style={styles.searchBar}>
-            <SearchbarLocation onResultReady={(loc) => setLocConfirmation(loc)} />
-            <HelperText style={{ backgroundColor: 'white' }}>
-              or long-press the map to select location
-            </HelperText>
-          </View>
-        )}
+        <View style={styles.searchBar}>
+          <SearchbarLocation onResultReady={(loc) => setLocConfirmation(loc)} />
+          <HelperText style={{ backgroundColor: 'white' }}>
+            or long-press the map to select location
+          </HelperText>
+        </View>
 
         {/* <SnackbarHint /> */}
 
@@ -267,7 +266,15 @@ const MapMenu = ({ route, navigation }) => {
           onCancelPrompt={() => setPromptVisible(false)}
         />
 
-        <Button icon='menu' color='white' mode='contained' onPress={() => { navigation.openDrawer(); }} style={{ position: 'absolute', top: 30, left: 10 }}>
+        <Button
+          icon="menu"
+          color="white"
+          mode="contained"
+          onPress={() => {
+            navigation.openDrawer();
+          }}
+          style={{ position: 'absolute', top: Constants.statusBarHeight, left: 10 }}
+        >
           Menu
         </Button>
       </View>
@@ -300,7 +307,7 @@ const styles = StyleSheet.create({
     width: '85%',
     opacity: 0.98,
     //paddingLeft: 10,
-    paddingTop: 90,
+    paddingTop: 100,
     alignSelf: 'center',
   },
   infoBox: {
