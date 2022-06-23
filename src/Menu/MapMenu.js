@@ -1,13 +1,5 @@
 import React, { useEffect, useState, ReactElement, useRef } from 'react';
-import {
-  Platform,
-  StyleSheet,
-  View,
-  StatusBar,
-  TouchableOpacity,
-  useColorScheme,
-  Alert,
-} from 'react-native';
+import { StyleSheet, View, StatusBar, Alert } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
@@ -16,7 +8,6 @@ import { AlarmManager } from '../../AlarmManager.js';
 import { WaypointsManager } from '../utils/WaypointsManager.js';
 import {
   Provider as PaperProvider,
-  FAB,
   List,
   HelperText,
   Text,
@@ -24,7 +15,6 @@ import {
   TextInput,
 } from 'react-native-paper';
 import CONSTANTS from '../constants/Constants.js';
-import SnackbarHint from '../components/SnackbarHint.js';
 import SearchbarLocation from '../components/SearchbarLocation.js';
 import WaypointIndicator from '../components/WaypointIndicator.js';
 import AlarmBox from '../components/AlarmBox.js';
@@ -36,7 +26,7 @@ import { WAYPOINT_TYPE } from '../constants/WaypointEnum.js';
 import { DatabaseManager } from '../utils/DatabaseManager';
 import PropTypes from 'prop-types';
 import Constants from 'expo-constants';
-import Dimensions  from 'react-native';
+import Dimensions from 'react-native';
 import { getData } from '../utils/AsyncStorage.js';
 import { Value } from 'react-native-reanimated';
 
@@ -65,23 +55,26 @@ const MapMenu = ({ route, navigation }) => {
 
       //Indicates the user has reached destination and displays AlarmBox and plays the alarm
       setReachedDestination(true);
-      alarmManager.playAlarm();
     }
   });
-
-  React.useEffect(() => {
-    if (route.params?.requests) {
-      route.params.requests.map((r) => {
-        addDestination(r.coords);
-      });
-    }
-  }, [route.params?.requests]);
 
   //Initializing Function
   useEffect(() => {
     alarmManager.setupAudio();
     checkRequestLocationPerms();
   }, []);
+
+  useEffect(() => {
+    route.params?.requests.map((r) => addDestination(r.coords));
+  }, [route.params?.requests]);
+
+  useEffect(() => {
+    if (reachedDestination) {
+      alarmManager.playAlarm();
+    } else {
+      alarmManager.stopAlarm();
+    }
+  }, [reachedDestination]);
 
   const checkRequestLocationPerms = () => {
     requestPermission()
@@ -125,26 +118,16 @@ const MapMenu = ({ route, navigation }) => {
     waypointsManager.clearWaypoints();
     //setCanModifyAlarm(true);
     setWpRadius(''); //to reset value for next waypoint
-    // setReachedDestination(false);
-    // alarmManager.stopAlarm();
   };
 
   //Dismiss the ringing alarm
-  const dismissAlarm = () => {
-    if (waypointsManager.waypoints.length == 0) {
-      //setCanModifyAlarm(true);
-    }
-    setReachedDestination(false);
-    alarmManager.stopAlarm();
-  };
+  const dismissAlarm = () => setReachedDestination(false);
 
   const onUserLocationChange = (location) => {
     setDistanceToDest(waypointsManager.distanceToNearestWP(location.nativeEvent.coordinate));
   };
 
   const addDestination = (location) => {
-    //waypointsManager.addWaypoint({ ...location, radius: ACTIVATION_RADIUS });
-    //setCanModifyAlarm(false);
     waypointsManager.addWaypoint({
       ...location,
       radius: wpRadius == '' ? settingRadius : parseInt(wpRadius),
@@ -158,11 +141,6 @@ const MapMenu = ({ route, navigation }) => {
       Location.getLastKnownPositionAsync().then((locationObj) => {
         setDistanceToDest(waypointsManager.distanceToNearestWP(locationObj.coords));
       });
-    }
-
-    //Allow new waypoints to be added if there are no waypoints set
-    if (waypointsManager.waypoints.length == 0) {
-      //setCanModifyAlarm(true);
     }
 
     //Handles geofencing when the waypoints are modified
@@ -180,14 +158,13 @@ const MapMenu = ({ route, navigation }) => {
   }, [waypointsManager.waypoints]);
 
   const addAlarmToFavourites = (title) => {
-    dbManager.insertAlarm((title == '' ? 'Untitled' : title), waypointsManager.waypoints);
+    dbManager.insertAlarm(title == '' ? 'Untitled' : title, waypointsManager.waypoints);
     Alert.alert('Favourites', 'Current alarm has been added to favourites');
   };
 
   //Render
   return (
     <PaperProvider>
-      {/* <StatusBar barStyle="dark-content" backgroundColor={'transparent'} translucent={true} /> */}
       <View style={styles.container}>
         <MapView
           ref={mapRef}
@@ -248,30 +225,6 @@ const MapMenu = ({ route, navigation }) => {
           />
         </View>
 
-        {/* {!canModifyAlarm && waypointsManager.waypoints.length > 0 && !reachedDestination && (
-        {canModifyAlarm && (
-        )}
-
-        {!canModifyAlarm && waypointsManager.waypoints.length > 0 && !reachedDestination && (
-          <FAB
-            style={styles.fab}
-            label="ADD WAYPOINT"
-            icon="map-marker-plus"
-            theme={{ colors: { accent: 'teal' } }}
-            onPress={() => setCanModifyAlarm(true)}
-          />
-        )}
-
-        {waypointsManager.waypoints.length > 0 && (
-          <FAB
-            style={styles.fabFav}
-            label="FAVOURITE"
-            icon="star"
-            theme={{ colors: { accent: 'yellow' } }}
-            onPress={() => setFavDialogVisible(true)}
-          />
-        )} */}
-
         <FavouritesDialog
           visible={favDialogVisible}
           onConfirm={(title) => {
@@ -287,8 +240,6 @@ const MapMenu = ({ route, navigation }) => {
             or long-press the map to select location
           </HelperText>
         </View>
-
-        {/* <SnackbarHint /> */}
 
         {reachedDestination && <AlarmBox onDismissAlarm={dismissAlarm} />}
 
@@ -306,10 +257,8 @@ const MapMenu = ({ route, navigation }) => {
           icon="menu"
           color="white"
           mode="contained"
-          onPress={() => {
-            navigation.openDrawer();
-          }}
-          style={{ position: 'absolute', top: Constants.statusBarHeight, left: 10 }}
+          onPress={() => navigation.openDrawer()}
+          style={styles.menuButton}
         >
           Menu
         </Button>
@@ -349,7 +298,7 @@ const styles = StyleSheet.create({
   infoBox: {
     position: 'absolute',
     alignItems: 'center',
-    opacity: 0.90,
+    opacity: 0.9,
     // bottom: 80,
     // left: 10,
     bottom: 0,
@@ -383,5 +332,10 @@ const styles = StyleSheet.create({
     height: 50,
     width: 170,
     top: 100,
+  },
+  menuButton: {
+    position: 'absolute',
+    top: Constants.statusBarHeight,
+    left: 10,
   },
 });
