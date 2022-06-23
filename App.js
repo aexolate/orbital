@@ -7,9 +7,9 @@ import { getData, storeData } from './src/utils/AsyncStorage.js';
 const App = () => {
   //initialize default radius for new users, otherwise retrieve last saved value
   useEffect(() => {
-    getData('radius').then((value) => {
+    getData("radius").then((value) => {
       if (value == null) {
-        storeData('radius', 500);
+        storeData("radius", 500);
       }
     });
   }, []);
