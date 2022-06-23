@@ -106,7 +106,7 @@ const MapMenu = ({ route, navigation }) => {
 
   //function to get user to confirm is this the destination they want to set as alarm
   const setLocConfirmation = (dest) => {
-    getData('radius').then(value => setSettingRadius(parseFloat(value))); //update the radius value from setting
+    getData('radius').then((value) => setSettingRadius(parseFloat(value))); //update the radius value from setting
     console.log(settingRadius);
     setPreviewLocation(dest);
     setPromptVisible(true);
@@ -136,7 +136,10 @@ const MapMenu = ({ route, navigation }) => {
   };
 
   const addDestination = (location) => {
-    waypointsManager.addWaypoint({ ...location, radius: wpRadius == '' ? settingRadius : wpRadius });
+    waypointsManager.addWaypoint({
+      ...location,
+      radius: wpRadius == '' ? settingRadius : wpRadius,
+    });
     setCanModifyAlarm(false);
     setWpRadius(''); //reset wpRadius after adding
   };
@@ -188,7 +191,7 @@ const MapMenu = ({ route, navigation }) => {
               key={index}
               title="Destination"
               center={marker}
-              radius={marker.radius} 
+              radius={marker.radius}
               waypointType={WAYPOINT_TYPE.DESTINATION}
             />
           ))}
@@ -197,7 +200,7 @@ const MapMenu = ({ route, navigation }) => {
             <WaypointIndicator
               title="Preview"
               center={previewLocation}
-              radius={ wpRadius == '' ? settingRadius : wpRadius }
+              radius={wpRadius == '' ? settingRadius : wpRadius}
               waypointType={WAYPOINT_TYPE.PREVIEW}
             />
           )}
@@ -216,8 +219,8 @@ const MapMenu = ({ route, navigation }) => {
           </View>
         )}
 
-{canModifyAlarm && (
-          <View style={{position: 'absolute', top: 90, left: 10}}>
+        {canModifyAlarm && (
+          <View style={{ position: 'absolute', top: 90, left: 10 }}>
             <TextInput
               style={styles.wpTextInput}
               mode="outlined"

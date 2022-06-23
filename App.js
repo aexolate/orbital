@@ -12,7 +12,7 @@ const App = () => {
         storeData('radius', 500);
       }
     });
-  },[]);
+  }, []);
 
   return (
     <NavigationContainer>

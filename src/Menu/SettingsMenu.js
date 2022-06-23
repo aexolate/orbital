@@ -16,27 +16,27 @@ const SettingsMenu = () => {
   const SettingsButton = (props) => {
     return (
       <Button
-          style={styles.Button}
-          mode="contained"
-          onPress={() => {
-            if (radiusText == '') {
-              alert('No value keyed in!')
-            } else {
-              storeData(props.keyValue, radiusText);
-              setRadiusValue(radiusText);
-              setRadiusText('');
-            }
-          }}
-        >
-          confirm
-        </Button>
-    )
-  }
+        style={styles.Button}
+        mode="contained"
+        onPress={() => {
+          if (radiusText == '') {
+            alert('No value keyed in!');
+          } else {
+            storeData(props.keyValue, radiusText);
+            setRadiusValue(radiusText);
+            setRadiusText('');
+          }
+        }}
+      >
+        confirm
+      </Button>
+    );
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Radius: {radiusValue}</Text>
-      <SettingsButton keyValue={'radius'}/>
+      <SettingsButton keyValue={'radius'} />
       <TextInput
         style={styles.textInput}
         placeholder="Enter Activation Radius"
