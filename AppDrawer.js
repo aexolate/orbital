@@ -10,7 +10,7 @@ const Drawer = createDrawerNavigator();
 const AppDrawer = () => {
   return (
     <Drawer.Navigator useLegacyImplementation>
-      <Drawer.Screen name="Map" component={MapMenu} />
+      <Drawer.Screen name="Map" component={MapMenu} initialParams={{ activationRdius: 500 }} />
       <Drawer.Screen name="Settings" component={SettingsMenu} />
       <Drawer.Screen name="Directions" component={DirectionsMenu} />
       <Drawer.Screen name="Permissions" component={PermissionsMenu} />
