@@ -14,7 +14,15 @@ import * as TaskManager from 'expo-task-manager';
 import { GeofencingEventType } from 'expo-location';
 import { AlarmManager } from '../../AlarmManager.js';
 import { WaypointsManager } from '../utils/WaypointsManager.js';
-import { Provider as PaperProvider, FAB, List, HelperText, Button } from 'react-native-paper';
+import {
+  Provider as PaperProvider,
+  FAB,
+  List,
+  HelperText,
+  Text,
+  Button,
+  TextInput,
+} from 'react-native-paper';
 import CONSTANTS from '../constants/Constants.js';
 import SnackbarHint from '../components/SnackbarHint.js';
 import SearchbarLocation from '../components/SearchbarLocation.js';
@@ -29,6 +37,8 @@ import { DatabaseManager } from '../utils/DatabaseManager';
 import PropTypes from 'prop-types';
 import Constants from 'expo-constants';
 import Dimensions  from 'react-native';
+import { getData } from '../utils/AsyncStorage.js';
+import { Value } from 'react-native-reanimated';
 
 const MapMenu = ({ route, navigation }) => {
   const [status, requestPermission] = Location.useForegroundPermissions();
@@ -44,9 +54,8 @@ const MapMenu = ({ route, navigation }) => {
   const waypointsManager = WaypointsManager();
   const dbManager = DatabaseManager();
   const mapRef = useRef(null);
-
-  //Distance to destination for alarm to activate
-  const ACTIVATION_RADIUS = 500;
+  const [settingRadius, setSettingRadius] = useState(0); //internal default radius value from settings, retrieve during select location
+  const [wpRadius, setWpRadius] = useState(''); //waypoint radius value that can be changed from MapMenu
 
   //Define geofencing task for expo-location. Must be defined in top level scope
   TaskManager.defineTask('GEOFENCING_TASK', ({ data: { region, eventType }, error }) => {
@@ -104,6 +113,8 @@ const MapMenu = ({ route, navigation }) => {
 
   //function to get user to confirm is this the destination they want to set as alarm
   const setLocConfirmation = (dest) => {
+    getData('radius').then((value) => setSettingRadius(parseFloat(value))); //update the radius value from setting
+    console.log(settingRadius);
     setPreviewLocation(dest);
     setPromptVisible(true);
     mapRef.current.animateCamera({ center: dest, zoom: 15, duration: 500 });
@@ -113,6 +124,7 @@ const MapMenu = ({ route, navigation }) => {
   const unsetAlarm = () => {
     waypointsManager.clearWaypoints();
     //setCanModifyAlarm(true);
+    setWpRadius(''); //to reset value for next waypoint
     // setReachedDestination(false);
     // alarmManager.stopAlarm();
   };
@@ -131,8 +143,13 @@ const MapMenu = ({ route, navigation }) => {
   };
 
   const addDestination = (location) => {
-    waypointsManager.addWaypoint({ ...location, radius: ACTIVATION_RADIUS });
+    //waypointsManager.addWaypoint({ ...location, radius: ACTIVATION_RADIUS });
     //setCanModifyAlarm(false);
+    waypointsManager.addWaypoint({
+      ...location,
+      radius: wpRadius == '' ? settingRadius : parseInt(wpRadius),
+    });
+    setWpRadius(''); //reset wpRadius after adding
   };
 
   useEffect(() => {
@@ -187,7 +204,7 @@ const MapMenu = ({ route, navigation }) => {
               key={index}
               title="Destination"
               center={marker}
-              radius={ACTIVATION_RADIUS}
+              radius={marker.radius}
               waypointType={WAYPOINT_TYPE.DESTINATION}
             />
           ))}
@@ -196,7 +213,7 @@ const MapMenu = ({ route, navigation }) => {
             <WaypointIndicator
               title="Preview"
               center={previewLocation}
-              radius={ACTIVATION_RADIUS}
+              radius={wpRadius == '' ? settingRadius : parseInt(wpRadius)}
               waypointType={WAYPOINT_TYPE.PREVIEW}
             />
           )}
@@ -204,9 +221,11 @@ const MapMenu = ({ route, navigation }) => {
 
         {waypointsManager.waypoints.length > 0 && !reachedDestination && (
           <View>
-            <InfoBox distance={distanceToDest} 
+            <InfoBox
+              distance={distanceToDest}
               onCancelAlarm={unsetAlarm}
-              onSaveAlarm={() => setFavDialogVisible(true)} />
+              onSaveAlarm={() => setFavDialogVisible(true)}
+            />
             <WaypointsList
               waypoints={waypointsManager.waypoints}
               gotoWP={(coords) => {
@@ -217,7 +236,23 @@ const MapMenu = ({ route, navigation }) => {
           </View>
         )}
 
+        <View style={{ position: 'absolute', top: 90, left: 10 }}>
+          <TextInput
+            style={styles.wpTextInput}
+            mode="outlined"
+            label="Activation Radius"
+            value={wpRadius}
+            onChangeText={setWpRadius}
+            right={<TextInput.Affix text="meters" />}
+            keyboardType="numeric"
+          />
+        </View>
+
         {/* {!canModifyAlarm && waypointsManager.waypoints.length > 0 && !reachedDestination && (
+        {canModifyAlarm && (
+        )}
+
+        {!canModifyAlarm && waypointsManager.waypoints.length > 0 && !reachedDestination && (
           <FAB
             style={styles.fab}
             label="ADD WAYPOINT"
@@ -262,6 +297,7 @@ const MapMenu = ({ route, navigation }) => {
           onConfirmPrompt={() => {
             addDestination(previewLocation);
             setPromptVisible(false);
+            setWpRadius(settingRadius); //to reset value for next waypoint
           }}
           onCancelPrompt={() => setPromptVisible(false)}
         />
@@ -342,5 +378,10 @@ const styles = StyleSheet.create({
     margin: 0,
     left: 190,
     top: 10,
+  },
+  wpTextInput: {
+    height: 50,
+    width: 170,
+    top: 100,
   },
 });
