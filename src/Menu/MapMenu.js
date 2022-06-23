@@ -6,14 +6,7 @@ import * as TaskManager from 'expo-task-manager';
 import { GeofencingEventType } from 'expo-location';
 import { AlarmManager } from '../../AlarmManager.js';
 import { WaypointsManager } from '../utils/WaypointsManager.js';
-import {
-  Provider as PaperProvider,
-  List,
-  HelperText,
-  Text,
-  Button,
-  TextInput,
-} from 'react-native-paper';
+import { Provider as PaperProvider, HelperText, Text, Button, TextInput } from 'react-native-paper';
 import CONSTANTS from '../constants/Constants.js';
 import SearchbarLocation from '../components/SearchbarLocation.js';
 import WaypointIndicator from '../components/WaypointIndicator.js';
@@ -29,6 +22,7 @@ import Constants from 'expo-constants';
 import Dimensions from 'react-native';
 import { getData } from '../utils/AsyncStorage.js';
 import { Value } from 'react-native-reanimated';
+import { MenuButton } from '../components';
 
 const MapMenu = ({ route, navigation }) => {
   const [status, requestPermission] = Location.useForegroundPermissions();
@@ -44,8 +38,8 @@ const MapMenu = ({ route, navigation }) => {
   const waypointsManager = WaypointsManager();
   const dbManager = DatabaseManager();
   const mapRef = useRef(null);
-  const [settingRadius, setSettingRadius] = useState(0); //internal default radius value from settings, retrieve during select location
-  const [wpRadius, setWpRadius] = useState(''); //waypoint radius value that can be changed from MapMenu
+  const [settingRadius, setSettingRadius] = useState(500); //internal default radius value from settings, retrieve during select location
+  const [wpRadius, setWpRadius] = useState(500); //waypoint radius value that can be changed from MapMenu
 
   //Define geofencing task for expo-location. Must be defined in top level scope
   TaskManager.defineTask('GEOFENCING_TASK', ({ data: { region, eventType }, error }) => {
@@ -62,6 +56,7 @@ const MapMenu = ({ route, navigation }) => {
   useEffect(() => {
     alarmManager.setupAudio();
     checkRequestLocationPerms();
+    getData('radius').then((val) => setWpRadius(parseInt(val)));
   }, []);
 
   useEffect(() => {
@@ -106,33 +101,32 @@ const MapMenu = ({ route, navigation }) => {
 
   //function to get user to confirm is this the destination they want to set as alarm
   const setLocConfirmation = (dest) => {
-    getData('radius').then((value) => setSettingRadius(parseFloat(value))); //update the radius value from setting
-    console.log(settingRadius);
-    setPreviewLocation(dest);
-    setPromptVisible(true);
-    mapRef.current.animateCamera({ center: dest, zoom: 15, duration: 500 });
+    getData('radius').then((value) => {
+      setSettingRadius(parseFloat(value));
+      setPreviewLocation(dest);
+      setPromptVisible(true);
+      mapRef.current.animateCamera({ center: dest, zoom: 15, duration: 500 });
+    });
   };
 
   //Removes the alarm set and removes all waypoints
   const unsetAlarm = () => {
     waypointsManager.clearWaypoints();
-    //setCanModifyAlarm(true);
-    setWpRadius(''); //to reset value for next waypoint
   };
 
   //Dismiss the ringing alarm
   const dismissAlarm = () => setReachedDestination(false);
 
   const onUserLocationChange = (location) => {
-    setDistanceToDest(waypointsManager.distanceToNearestWP(location.nativeEvent.coordinate));
+    const curLatLng = location.nativeEvent.coordinate;
+    setDistanceToDest(waypointsManager.distanceToNearestWP(curLatLng));
   };
 
   const addDestination = (location) => {
     waypointsManager.addWaypoint({
       ...location,
-      radius: wpRadius == '' ? settingRadius : parseInt(wpRadius),
+      radius: wpRadius,
     });
-    setWpRadius(''); //reset wpRadius after adding
   };
 
   useEffect(() => {
@@ -190,7 +184,7 @@ const MapMenu = ({ route, navigation }) => {
             <WaypointIndicator
               title="Preview"
               center={previewLocation}
-              radius={wpRadius == '' ? settingRadius : parseInt(wpRadius)}
+              radius={wpRadius}
               waypointType={WAYPOINT_TYPE.PREVIEW}
             />
           )}
@@ -213,18 +207,6 @@ const MapMenu = ({ route, navigation }) => {
           </View>
         )}
 
-        <View style={{ position: 'absolute', top: 90, left: 10 }}>
-          <TextInput
-            style={styles.wpTextInput}
-            mode="outlined"
-            label="Activation Radius"
-            value={wpRadius}
-            onChangeText={setWpRadius}
-            right={<TextInput.Affix text="meters" />}
-            keyboardType="numeric"
-          />
-        </View>
-
         <FavouritesDialog
           visible={favDialogVisible}
           onConfirm={(title) => {
@@ -236,9 +218,16 @@ const MapMenu = ({ route, navigation }) => {
 
         <View style={styles.searchBar}>
           <SearchbarLocation onResultReady={(loc) => setLocConfirmation(loc)} />
-          <HelperText style={{ backgroundColor: 'white' }}>
-            or long-press the map to select location
-          </HelperText>
+          <TextInput
+            dense
+            style={styles.radiusTextInput}
+            mode="outlined"
+            label="Activation Radius"
+            value={`${wpRadius}`}
+            onChangeText={(txt) => setWpRadius(parseInt(txt))}
+            right={<TextInput.Affix text="meters" />}
+            keyboardType="numeric"
+          />
         </View>
 
         {reachedDestination && <AlarmBox onDismissAlarm={dismissAlarm} />}
@@ -248,7 +237,7 @@ const MapMenu = ({ route, navigation }) => {
           onConfirmPrompt={() => {
             addDestination(previewLocation);
             setPromptVisible(false);
-            setWpRadius(settingRadius); //to reset value for next waypoint
+            //setWpRadius(settingRadius); //to reset value for next waypoint
           }}
           onCancelPrompt={() => setPromptVisible(false)}
         />
@@ -279,19 +268,10 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
-  input: {
-    flex: 1,
-    borderColor: 'black',
-    borderWidth: 4,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
   searchBar: {
     position: 'absolute',
-    width: '85%',
+    width: '80%',
     opacity: 0.98,
-    //paddingLeft: 10,
     paddingTop: 100,
     alignSelf: 'center',
   },
@@ -316,26 +296,12 @@ const styles = StyleSheet.create({
     top: '30%',
     elevation: 4,
   },
-  fab: {
-    position: 'absolute',
-    margin: 0,
-    left: 10,
-    top: 10,
-  },
-  fabFav: {
-    position: 'absolute',
-    margin: 0,
-    left: 190,
-    top: 10,
-  },
-  wpTextInput: {
-    height: 50,
-    width: 170,
-    top: 100,
-  },
   menuButton: {
     position: 'absolute',
     top: Constants.statusBarHeight,
     left: 10,
+  },
+  radiusTextInput: {
+    width: 155,
   },
 });
