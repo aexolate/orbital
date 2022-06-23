@@ -16,7 +16,7 @@ const SettingsMenu = () => {
   const SettingsButton = (props) => {
     return (
       <Button
-        style={styles.Button}
+        style={styles.button}
         mode="contained"
         onPress={() => {
           if (radiusText == '') {
@@ -39,7 +39,6 @@ const SettingsMenu = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Radius: {radiusValue}</Text>
-      <SettingsButton keyValue={'radius'} />
       <TextInput
         style={styles.textInput}
         placeholder="Enter Activation Radius"
@@ -47,6 +46,7 @@ const SettingsMenu = () => {
         onChangeText={setRadiusText}
         keyboardType="numeric"
       />
+      <SettingsButton keyValue={'radius'} />
     </View>
   );
 };
@@ -55,15 +55,22 @@ export default SettingsMenu;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    alignItems: 'center',
   },
   text: {
-    flex: 1,
+    fontSize: 20,
+    top: 10,
+    left: 10,
+    alignSelf: 'flex-start',
   },
   textInput: {
-    flex: 1,
+    height: 50,
+    width: 400,
+    top: 18,
   },
   button: {
-    flex: 1,
+    height: 40,
+    width: 400,
+    top: 25,
   },
 });
