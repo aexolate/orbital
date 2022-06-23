@@ -4,7 +4,6 @@ import { TextInput, Button, Divider, ActivityIndicator } from 'react-native-pape
 import MapView from 'react-native-maps';
 import { GOOGLE_MAPS_API_KEY } from '@env';
 import { decode } from '@mapbox/polyline';
-import { useNavigation } from '@react-navigation/native';
 import PropTypes from 'prop-types';
 import * as Location from 'expo-location';
 
@@ -29,7 +28,6 @@ const DirectionsMenu = ({ navigation }) => {
 
     try {
       const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${start}&destination=${end}&mode=transit&key=${GOOGLE_MAPS_API_KEY}`;
-      //console.log(url);
       const response = fetch(url)
         .then((res) => res.json())
         .then((resJson) => {

@@ -6,7 +6,7 @@ import * as TaskManager from 'expo-task-manager';
 import { GeofencingEventType } from 'expo-location';
 import { AlarmManager } from '../../AlarmManager.js';
 import { WaypointsManager } from '../utils/WaypointsManager.js';
-import { Provider as PaperProvider, HelperText, Text, Button, TextInput } from 'react-native-paper';
+import { Provider as PaperProvider, Text, Button, TextInput } from 'react-native-paper';
 import CONSTANTS from '../constants/Constants.js';
 import SearchbarLocation from '../components/SearchbarLocation.js';
 import WaypointIndicator from '../components/WaypointIndicator.js';
@@ -237,7 +237,6 @@ const MapMenu = ({ route, navigation }) => {
           onConfirmPrompt={() => {
             addDestination(previewLocation);
             setPromptVisible(false);
-            //setWpRadius(settingRadius); //to reset value for next waypoint
           }}
           onCancelPrompt={() => setPromptVisible(false)}
         />
@@ -279,22 +278,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     alignItems: 'center',
     opacity: 0.9,
-    // bottom: 80,
-    // left: 10,
     bottom: 0,
     paddingBottom: 90,
     paddingLeft: 10,
-  },
-  alarmBox: {
-    position: 'absolute',
-    backgroundColor: 'white',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '90%',
-    height: '40%',
-    alignSelf: 'center',
-    top: '30%',
-    elevation: 4,
   },
   menuButton: {
     position: 'absolute',
