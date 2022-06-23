@@ -138,7 +138,7 @@ const MapMenu = ({ route, navigation }) => {
   const addDestination = (location) => {
     waypointsManager.addWaypoint({
       ...location,
-      radius: wpRadius == '' ? settingRadius : wpRadius,
+      radius: wpRadius == '' ? settingRadius : parseInt(wpRadius),
     });
     setCanModifyAlarm(false);
     setWpRadius(''); //reset wpRadius after adding
@@ -200,7 +200,7 @@ const MapMenu = ({ route, navigation }) => {
             <WaypointIndicator
               title="Preview"
               center={previewLocation}
-              radius={wpRadius == '' ? settingRadius : wpRadius}
+              radius={wpRadius == '' ? settingRadius : parseInt(wpRadius)}
               waypointType={WAYPOINT_TYPE.PREVIEW}
             />
           )}
