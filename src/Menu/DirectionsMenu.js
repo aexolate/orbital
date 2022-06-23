@@ -9,8 +9,6 @@ import PropTypes from 'prop-types';
 import * as Location from 'expo-location';
 
 const DirectionsMenu = ({ navigation }) => {
-  //https://maps.googleapis.com/maps/api/directions/json?origin=670507&destination=NUS&mode=driving&altnernatives=true&key=YOUR_API_KEY
-
   const [originText, setOriginText] = React.useState('');
   const [destinationText, setDestinationText] = React.useState('');
   const [coords, setCoords] = React.useState([]);

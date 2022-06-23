@@ -12,7 +12,7 @@ const WaypointsList = (props) => {
   };
 
   return (
-    <List.Accordion title="Waypoints" left={(props) => <List.Icon {...props} icon="map-marker" />}>
+    <List.Accordion title="Waypoints" left={(props) => <List.Icon {...props} icon="map-marker"  />}>
       {props.waypoints.map((coords, index) => (
         <List.Item
           key={index}

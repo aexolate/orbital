@@ -29,3 +29,14 @@ export const WaypointsManager = () => {
   };
 };
 export default WaypointsManager;
+
+// type LatLng = {
+//   latitude: Number,
+//   longitude: Number,
+// }
+
+// type Waypoint = {
+//   title: String,
+//   coords: LatLng,
+//   radius: Number,
+// }
