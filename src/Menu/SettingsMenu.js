@@ -50,6 +50,10 @@ const SettingsMenu = () => {
 
 export default SettingsMenu;
 
+SettingsMenu.propTypes = {
+  keyValue: PropTypes.any.isRequired,
+};
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
