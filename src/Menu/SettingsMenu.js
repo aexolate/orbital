@@ -32,6 +32,9 @@ const SettingsMenu = () => {
       </Button>
     );
   };
+  SettingsButton.propTypes = {
+    keyValue: PropTypes.any.isRequired,
+  };
 
   return (
     <View style={styles.container}>
@@ -49,10 +52,6 @@ const SettingsMenu = () => {
 };
 
 export default SettingsMenu;
-
-SettingsMenu.propTypes = {
-  keyValue: PropTypes.any.isRequired,
-};
 
 const styles = StyleSheet.create({
   container: {
