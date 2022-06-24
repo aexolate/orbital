@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
   },
   box: {
     backgroundColor: 'white',
-    padding: 20, 
-    borderWidth: 1
+    padding: 20,
+    borderWidth: 1,
   },
 });

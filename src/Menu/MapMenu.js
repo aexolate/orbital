@@ -13,6 +13,7 @@ import WaypointIndicator from '../components/WaypointIndicator.js';
 import AlarmBox from '../components/AlarmBox.js';
 import PromptBox from '../components/PromptBox.js';
 import InfoBox from '../components/InfoBox.js';
+import RadiusTextInput from '../components/RadiusTextInput.js';
 import FavouritesDialog from '../components/FavouritesDialog.js';
 import WaypointsList from '../components/WaypointsList.js';
 import { WAYPOINT_TYPE } from '../constants/WaypointEnum.js';
@@ -21,8 +22,7 @@ import PropTypes from 'prop-types';
 import Constants from 'expo-constants';
 import Dimensions from 'react-native';
 import { getData } from '../utils/AsyncStorage.js';
-import { Value } from 'react-native-reanimated';
-import { MenuButton } from '../components';
+import { useIsFocused } from '@react-navigation/native';
 
 const MapMenu = ({ route, navigation }) => {
   const [status, requestPermission] = Location.useForegroundPermissions();
@@ -40,6 +40,7 @@ const MapMenu = ({ route, navigation }) => {
   const mapRef = useRef(null);
   const [settingRadius, setSettingRadius] = useState(500); //internal default radius value from settings, retrieve during select location
   const [wpRadius, setWpRadius] = useState(500); //waypoint radius value that can be changed from MapMenu
+  const isFocused = useIsFocused();
 
   //Define geofencing task for expo-location. Must be defined in top level scope
   TaskManager.defineTask('GEOFENCING_TASK', ({ data: { region, eventType }, error }) => {
@@ -64,6 +65,13 @@ const MapMenu = ({ route, navigation }) => {
   useEffect(() => {
     route.params?.requests.map((r) => addDestination(r.coords));
   }, [route.params?.requests]);
+
+  useEffect(() => {
+    if (isFocused) {
+      //Set default radius to be from settings
+      getData('radius').then((val) => setWpRadius(parseInt(val)));
+    }
+  }, [isFocused]);
 
   useEffect(() => {
     if (reachedDestination) {
@@ -217,16 +225,9 @@ const MapMenu = ({ route, navigation }) => {
 
         <View style={styles.searchBar}>
           <SearchbarLocation onResultReady={(loc) => setLocConfirmation(loc)} />
-          <TextInput
-            dense
-            style={styles.radiusTextInput}
-            mode="outlined"
-            label="Activation Radius"
-            value={`${wpRadius}`}
-            onChangeText={(txt) => setWpRadius(parseInt(txt))}
-            right={<TextInput.Affix text="meters" />}
-            keyboardType="numeric"
-          />
+          <View style={styles.radiusTextInput}>
+            <RadiusTextInput onRadiusChange={(r) => setWpRadius(r)} />
+          </View>
         </View>
 
         {reachedDestination && <AlarmBox onDismissAlarm={dismissAlarm} />}
