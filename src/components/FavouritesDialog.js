@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { View, StyleSheet } from 'react-native';
 import { Button, Dialog, Portal, TextInput } from 'react-native-paper';
 import PropTypes from 'prop-types';
 
@@ -13,8 +12,8 @@ const FavouritesDialog = (props) => {
   };
 
   React.useEffect(() => {
-    if(props.visible) {
-      setText('');  //clear the text when the dialog is opened
+    if (props.visible) {
+      setText(''); //clear the text when the dialog is opened
     }
   }, [props.visible]);
 
@@ -23,8 +22,12 @@ const FavouritesDialog = (props) => {
       <Dialog visible={props.visible} onDismiss={props.onDismiss}>
         <Dialog.Title>Add Favourites</Dialog.Title>
         <Dialog.Content>
-          <TextInput label="Alarm Title" placeholder="Enter a name for this alarm" 
-            value={text} onChangeText={text => setText(text)} />
+          <TextInput
+            label="Alarm Title"
+            placeholder="Enter a name for this alarm"
+            value={text}
+            onChangeText={(text) => setText(text)}
+          />
         </Dialog.Content>
         <Dialog.Actions>
           <Button onPress={props.onDismiss}>Cancel</Button>

@@ -1,18 +1,17 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, Alert, Keyboard } from 'react-native';
 import { TextInput, Button, Divider, ActivityIndicator } from 'react-native-paper';
 import MapView from 'react-native-maps';
 import { GOOGLE_MAPS_API_KEY } from '@env';
 import { decode } from '@mapbox/polyline';
-import { useNavigation } from '@react-navigation/native';
 import PropTypes from 'prop-types';
 import * as Location from 'expo-location';
 
 const DirectionsMenu = ({ navigation }) => {
-  const [originText, setOriginText] = React.useState('');
-  const [destinationText, setDestinationText] = React.useState('');
-  const [coords, setCoords] = React.useState([]);
-  const [markers, setMarkers] = React.useState([]);
+  const [originText, setOriginText] = useState('');
+  const [destinationText, setDestinationText] = useState('');
+  const [coords, setCoords] = useState([]);
+  const [markers, setMarkers] = useState([]);
   const mapRef = useRef(null);
 
   useEffect(() => {
@@ -29,7 +28,6 @@ const DirectionsMenu = ({ navigation }) => {
 
     try {
       const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${start}&destination=${end}&mode=transit&key=${GOOGLE_MAPS_API_KEY}`;
-      //console.log(url);
       const response = fetch(url)
         .then((res) => res.json())
         .then((resJson) => {

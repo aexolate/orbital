@@ -20,7 +20,7 @@ export const AlarmManager = () => {
 
   //Stops playing the alarm
   const stopAlarm = async () => {
-    await sound.stopAsync();
+    await sound?.stopAsync();
     Vibration.cancel();
   };
 
@@ -33,7 +33,7 @@ export const AlarmManager = () => {
 
     //BUG: isPlaying is always false
     if (!status.isPlaying) {
-      await sound.playAsync();
+      await sound?.playAsync();
       //Vibration
       let VIBRATION_PATTERN = [200, 200];
       let VIBRATION_REPEAT = true;

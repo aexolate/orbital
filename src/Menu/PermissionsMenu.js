@@ -1,5 +1,5 @@
 import * as Location from 'expo-location';
-import { Linking, StyleSheet, View, BackHandler } from 'react-native';
+import { Linking, StyleSheet, View } from 'react-native';
 import React, { useEffect } from 'react';
 import { Provider as PaperProvider, Button, Text } from 'react-native-paper';
 import PropTypes from 'prop-types';
