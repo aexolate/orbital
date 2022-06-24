@@ -2,9 +2,11 @@ import React from 'react';
 import { TextInput } from 'react-native-paper';
 import PropTypes from 'prop-types';
 import { getData } from '../utils/AsyncStorage.js';
+import { useIsFocused } from '@react-navigation/native';
 
 const ReadiusTextInput = (props) => {
   const [text, setText] = React.useState('');
+  const isFocused = useIsFocused();
 
   React.useEffect(() => {
     const isNum = /^\d+$/.test(text);
@@ -14,9 +16,15 @@ const ReadiusTextInput = (props) => {
     }
   }, [text]);
 
-  React.useEffect(() => {
+  const updateRadius = () => {
     getData('radius').then((val) => setText(val));
-  }, []);
+  };
+
+  React.useEffect(() => {
+    if (isFocused) {
+      updateRadius();
+    }
+  }, [isFocused]);
 
   return (
     <TextInput
