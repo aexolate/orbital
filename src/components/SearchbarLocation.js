@@ -13,6 +13,11 @@ const LocationSearchbar = (props) => {
   }, []);
 
   const searchLocation = async () => {
+    //Do not send geocode request if textbox is empty
+    if (searchText == '') {
+      return;
+    }
+
     await Location.geocodeAsync(searchText, { useGoogleMaps: true })
       .then((result) => {
         if (result.length == 0) {

@@ -28,8 +28,8 @@ const MapMenu = ({ route, navigation }) => {
   const [status, requestPermission] = Location.useForegroundPermissions();
   const [statusBG, requestPermissionBG] = Location.useBackgroundPermissions();
 
-  const [promptVisible, setPromptVisible] = React.useState(false);
-  const [favDialogVisible, setFavDialogVisible] = React.useState(false);
+  const [promptVisible, setPromptVisible] = useState(false);
+  const [favDialogVisible, setFavDialogVisible] = useState(false);
   const [previewLocation, setPreviewLocation] = useState(CONSTANTS.LOCATIONS.DEFAULT);
   const [distanceToDest, setDistanceToDest] = useState(Infinity);
   //const [canModifyAlarm, setCanModifyAlarm] = useState(true); //Indicates whether new waypoints can be added
@@ -56,6 +56,8 @@ const MapMenu = ({ route, navigation }) => {
   useEffect(() => {
     alarmManager.setupAudio();
     checkRequestLocationPerms();
+
+    //Set default radius to be from settings
     getData('radius').then((val) => setWpRadius(parseInt(val)));
   }, []);
 
@@ -90,8 +92,6 @@ const MapMenu = ({ route, navigation }) => {
 
   //selecting destination via longpress
   const selectLocLongPress = (mapEvent) => {
-    //if (!canModifyAlarm) return; //Do nothing if not allowed to set new waypoints
-
     const destination = {
       latitude: mapEvent.coordinate.latitude,
       longitude: mapEvent.coordinate.longitude,
@@ -102,7 +102,6 @@ const MapMenu = ({ route, navigation }) => {
   //function to get user to confirm is this the destination they want to set as alarm
   const setLocConfirmation = (dest) => {
     getData('radius').then((value) => {
-      setSettingRadius(parseFloat(value));
       setPreviewLocation(dest);
       setPromptVisible(true);
       mapRef.current.animateCamera({ center: dest, zoom: 15, duration: 500 });

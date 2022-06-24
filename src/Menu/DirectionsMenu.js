@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, Alert, Keyboard } from 'react-native';
 import { TextInput, Button, Divider, ActivityIndicator } from 'react-native-paper';
 import MapView from 'react-native-maps';
@@ -8,10 +8,10 @@ import PropTypes from 'prop-types';
 import * as Location from 'expo-location';
 
 const DirectionsMenu = ({ navigation }) => {
-  const [originText, setOriginText] = React.useState('');
-  const [destinationText, setDestinationText] = React.useState('');
-  const [coords, setCoords] = React.useState([]);
-  const [markers, setMarkers] = React.useState([]);
+  const [originText, setOriginText] = useState('');
+  const [destinationText, setDestinationText] = useState('');
+  const [coords, setCoords] = useState([]);
+  const [markers, setMarkers] = useState([]);
   const mapRef = useRef(null);
 
   useEffect(() => {

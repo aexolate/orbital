@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
-import { Button, FAB, Divider } from 'react-native-paper';
+import { Button, FAB, Divider, List } from 'react-native-paper';
 import * as SQLite from 'expo-sqlite';
 import { DatabaseManager } from '../utils/DatabaseManager';
 import PropTypes from 'prop-types';
@@ -59,7 +59,7 @@ const FavouritesMenu = ({ navigation }) => {
 
       <ScrollView showsVerticalScrollIndicator={true} persistentScrollbar={true}>
         {items?.map((data, index) => (
-          <View key={index} style={{ backgroundColor: 'white', padding: 20, borderWidth: 2 }}>
+          <View key={index} style={styles.box}>
             <Text style={styles.alarmName}>{data.name}</Text>
             <Divider></Divider>
             <Text>{JSON.parse(data.waypoints).length} Waypoints</Text>
@@ -102,5 +102,10 @@ const styles = StyleSheet.create({
   alarmName: {
     fontWeight: 'bold',
     fontSize: 20,
+  },
+  box: {
+    backgroundColor: 'white',
+    padding: 20, 
+    borderWidth: 1
   },
 });
