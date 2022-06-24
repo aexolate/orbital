@@ -40,7 +40,6 @@ const MapMenu = ({ route, navigation }) => {
   const mapRef = useRef(null);
   const [settingRadius, setSettingRadius] = useState(500); //internal default radius value from settings, retrieve during select location
   const [wpRadius, setWpRadius] = useState(500); //waypoint radius value that can be changed from MapMenu
-  const isFocused = useIsFocused();
 
   //Define geofencing task for expo-location. Must be defined in top level scope
   TaskManager.defineTask('GEOFENCING_TASK', ({ data: { region, eventType }, error }) => {
@@ -57,21 +56,11 @@ const MapMenu = ({ route, navigation }) => {
   useEffect(() => {
     alarmManager.setupAudio();
     checkRequestLocationPerms();
-
-    //Set default radius to be from settings
-    getData('radius').then((val) => setWpRadius(parseInt(val)));
   }, []);
 
   useEffect(() => {
     route.params?.requests.map((r) => addDestination(r.coords));
   }, [route.params?.requests]);
-
-  useEffect(() => {
-    if (isFocused) {
-      //Set default radius to be from settings
-      getData('radius').then((val) => setWpRadius(parseInt(val)));
-    }
-  }, [isFocused]);
 
   useEffect(() => {
     if (reachedDestination) {
