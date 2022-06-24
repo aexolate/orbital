@@ -49,11 +49,13 @@ const FavouritesMenu = ({ navigation }) => {
 
   return (
     <View style={{ flex: 1 }}>
-      {items?.length == 0 &&
+      {items?.length == 0 && (
         <View style={{ padding: 25 }}>
-          <Text style={{ fontWeight: 'bold', fontSize: 20 }}>Add alarms to your favourites by clicking the Favourite button after setting your alarm</Text>
+          <Text style={{ fontWeight: 'bold', fontSize: 20 }}>
+            Add alarms to your favourites by clicking the Favourite button after setting your alarm
+          </Text>
         </View>
-      }
+      )}
 
       <ScrollView showsVerticalScrollIndicator={true} persistentScrollbar={true}>
         {items?.map((data, index) => (
@@ -66,18 +68,21 @@ const FavouritesMenu = ({ navigation }) => {
               <Button
                 mode="contained"
                 color="green"
-                icon='map-check'
+                icon="map-check"
                 onPress={() => setAlarm(JSON.parse(data.waypoints))}
               >
                 Set Alarm
               </Button>
-              <Button mode="contained" icon='delete' color="darkred" onPress={() => removeAlarm(data.id)}>
+              <Button
+                mode="contained"
+                icon="delete"
+                color="darkred"
+                onPress={() => removeAlarm(data.id)}
+              >
                 Remove
               </Button>
             </View>
-            
           </View>
-          
         ))}
       </ScrollView>
 

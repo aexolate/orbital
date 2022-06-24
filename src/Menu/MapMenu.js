@@ -36,7 +36,7 @@ import { WAYPOINT_TYPE } from '../constants/WaypointEnum.js';
 import { DatabaseManager } from '../utils/DatabaseManager';
 import PropTypes from 'prop-types';
 import Constants from 'expo-constants';
-import Dimensions  from 'react-native';
+import Dimensions from 'react-native';
 import { getData } from '../utils/AsyncStorage.js';
 import { Value } from 'react-native-reanimated';
 
@@ -180,7 +180,7 @@ const MapMenu = ({ route, navigation }) => {
   }, [waypointsManager.waypoints]);
 
   const addAlarmToFavourites = (title) => {
-    dbManager.insertAlarm((title == '' ? 'Untitled' : title), waypointsManager.waypoints);
+    dbManager.insertAlarm(title == '' ? 'Untitled' : title, waypointsManager.waypoints);
     Alert.alert('Favourites', 'Current alarm has been added to favourites');
   };
 
@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
   infoBox: {
     position: 'absolute',
     alignItems: 'center',
-    opacity: 0.90,
+    opacity: 0.9,
     // bottom: 80,
     // left: 10,
     bottom: 0,
