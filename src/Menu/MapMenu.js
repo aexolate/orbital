@@ -71,20 +71,17 @@ const MapMenu = ({ route, navigation }) => {
   }, [reachedDestination]);
 
   const checkRequestLocationPerms = () => {
-    requestPermission()
-      .then((response) => {
-        if (response.granted) {
-          requestPermissionBG();
-        }
-      })
-      .then(() => {
+    requestPermission().then((response) => {
+      requestPermissionBG().then(() => {
         Location.getBackgroundPermissionsAsync().then((perm) => {
           if (!perm.granted) {
+            console.log(perm);
             //Navigate user to permissions if BG location not granted
             navigation.navigate('Permissions');
           }
         });
       });
+    });
   };
 
   //selecting destination via longpress
