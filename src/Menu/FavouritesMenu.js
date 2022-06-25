@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
-import { Button, FAB, Divider } from 'react-native-paper';
+import { Button, FAB, Divider, List } from 'react-native-paper';
 import * as SQLite from 'expo-sqlite';
 import { DatabaseManager } from '../utils/DatabaseManager';
 import PropTypes from 'prop-types';
@@ -49,15 +49,17 @@ const FavouritesMenu = ({ navigation }) => {
 
   return (
     <View style={{ flex: 1 }}>
-      {items?.length == 0 &&
+      {items?.length == 0 && (
         <View style={{ padding: 25 }}>
-          <Text style={{ fontWeight: 'bold', fontSize: 20 }}>Add alarms to your favourites by clicking the Favourite button after setting your alarm</Text>
+          <Text style={{ fontWeight: 'bold', fontSize: 20 }}>
+            Add alarms to your favourites by clicking the Favourite button after setting your alarm
+          </Text>
         </View>
-      }
+      )}
 
       <ScrollView showsVerticalScrollIndicator={true} persistentScrollbar={true}>
         {items?.map((data, index) => (
-          <View key={index} style={{ backgroundColor: 'white', padding: 20, borderWidth: 2 }}>
+          <View key={index} style={styles.box}>
             <Text style={styles.alarmName}>{data.name}</Text>
             <Divider></Divider>
             <Text>{JSON.parse(data.waypoints).length} Waypoints</Text>
@@ -66,18 +68,21 @@ const FavouritesMenu = ({ navigation }) => {
               <Button
                 mode="contained"
                 color="green"
-                icon='map-check'
+                icon="map-check"
                 onPress={() => setAlarm(JSON.parse(data.waypoints))}
               >
                 Set Alarm
               </Button>
-              <Button mode="contained" icon='delete' color="darkred" onPress={() => removeAlarm(data.id)}>
+              <Button
+                mode="contained"
+                icon="delete"
+                color="darkred"
+                onPress={() => removeAlarm(data.id)}
+              >
                 Remove
               </Button>
             </View>
-            
           </View>
-          
         ))}
       </ScrollView>
 
@@ -97,5 +102,10 @@ const styles = StyleSheet.create({
   alarmName: {
     fontWeight: 'bold',
     fontSize: 20,
+  },
+  box: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderWidth: 1,
   },
 });
