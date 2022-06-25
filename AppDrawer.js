@@ -19,8 +19,8 @@ const AppDrawer = () => {
       <Drawer.Screen name="Map" component={MapMenu} options={{ headerShown: false }} />
       <Drawer.Screen name="Settings" component={SettingsMenu} />
       <Drawer.Screen name="Directions" component={DirectionsMenu} />
-      <Drawer.Screen name="Permissions" component={PermissionsMenu} />
       <Drawer.Screen name="Favourites" component={FavouritesMenu} />
+      <Drawer.Screen name="Permissions" component={PermissionsMenu} />
     </Drawer.Navigator>
   );
 };

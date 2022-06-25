@@ -6,11 +6,14 @@ import PropTypes from 'prop-types';
 
 //activation radius is currently only set in confirm location, should change to on load screen
 const SettingsMenu = () => {
+  const DEFAULT_RADIUS = 500;
   const [radiusText, setRadiusText] = useState(''); //text for radius setting input
-  const [radiusValue, setRadiusValue] = useState(0); //radius that is displayed in app, also the current setting value
-
+  const [radiusValue, setRadiusValue] = useState(DEFAULT_RADIUS); //radius that is displayed in app, also the current setting value
+  
   useEffect(() => {
-    getData('radius').then((radius) => setRadiusValue(radius));
+    getData('radius').then((radius) => {
+      setRadiusValue(radius == null ? DEFAULT_RADIUS : radius);
+    });
   }, []);
 
   const SettingsButton = (props) => {

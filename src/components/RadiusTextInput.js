@@ -19,7 +19,7 @@ const ReadiusTextInput = (props) => {
 
   const updateRadius = () => {
     getData('radius').then((val) => {
-      setText(val == null ? DEFAULT_RADIUS : val.toString());
+      setText(val == null ? DEFAULT_RADIUS.toString() : val.toString());
     });
   };
 

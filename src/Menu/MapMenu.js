@@ -152,6 +152,7 @@ const MapMenu = ({ route, navigation }) => {
   //Render
   return (
     <PaperProvider>
+      <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
       <View style={styles.container}>
         <MapView
           ref={mapRef}
