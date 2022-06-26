@@ -98,6 +98,7 @@ const MapMenu = ({ route, navigation }) => {
 
   //function to get user to confirm is this the destination they want to set as alarm
   const setLocConfirmation = (dest) => {
+    console.log(dest)
     getData('radius').then((value) => {
       setPreviewLocation(dest);
       setPromptVisible(true);
