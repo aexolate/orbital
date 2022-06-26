@@ -4,7 +4,7 @@ export default {
     slug: 'reachliao',
     version: '1.1.0',
     orientation: 'portrait',
-    icon: './assets/icon.png',
+    icon: './assets/icon2.png',
     userInterfaceStyle: 'light',
     splash: {
       image: './assets/splash2.png',
@@ -22,7 +22,7 @@ export default {
     android: {
       userInterfaceStyle: 'light',
       adaptiveIcon: {
-        foregroundImage: './assets/adaptive-icon.png',
+        foregroundImage: './assets/adaptive-icon2.png',
         backgroundColor: '#FFFFFF',
       },
       package: 'com.reachliao',
