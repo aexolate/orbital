@@ -95,11 +95,9 @@ const MapMenu = ({ route, navigation }) => {
 
   //function to get user to confirm is this the destination they want to set as alarm
   const setLocConfirmation = (dest) => {
-    getData('radius').then((value) => {
-      setPreviewLocation(dest);
-      setPromptVisible(true);
-      mapRef.current.animateCamera({ center: dest, zoom: 15, duration: 500 });
-    });
+    setPreviewLocation(dest);
+    setPromptVisible(true);
+    mapRef.current.animateCamera({ center: dest, zoom: 15, duration: 500 });
   };
 
   //Removes the alarm set and removes all waypoints
@@ -116,6 +114,11 @@ const MapMenu = ({ route, navigation }) => {
   };
 
   const addDestination = (location) => {
+    if (wpRadius <= 0) {
+      Alert.alert("Error", "Radius must be greater than 0 meters");
+      return;
+    }
+
     waypointsManager.addWaypoint({
       ...location,
       radius: wpRadius,
