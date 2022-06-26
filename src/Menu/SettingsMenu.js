@@ -22,8 +22,9 @@ const SettingsMenu = () => {
         style={styles.button}
         mode="contained"
         onPress={() => {
-          if (radiusText == '') {
-            alert('No value keyed in!');
+          const isNum = /^\d+$/.test(radiusText);
+          if (!isNum || !(parseInt(radiusText) > 0)) {
+            alert('Invalid Radius');
           } else {
             storeData(props.keyValue, radiusText);
             setRadiusValue(radiusText);
