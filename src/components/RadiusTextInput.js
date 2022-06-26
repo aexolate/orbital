@@ -7,6 +7,7 @@ import { useIsFocused } from '@react-navigation/native';
 const ReadiusTextInput = (props) => {
   const [text, setText] = React.useState('');
   const isFocused = useIsFocused();
+  const DEFAULT_RADIUS = 500;
 
   React.useEffect(() => {
     const isNum = /^\d+$/.test(text);
@@ -17,7 +18,9 @@ const ReadiusTextInput = (props) => {
   }, [text]);
 
   const updateRadius = () => {
-    getData('radius').then((val) => setText(val));
+    getData('radius').then((val) => {
+      setText(val == null ? DEFAULT_RADIUS.toString() : val.toString());
+    });
   };
 
   React.useEffect(() => {

@@ -71,20 +71,17 @@ const MapMenu = ({ route, navigation }) => {
   }, [reachedDestination]);
 
   const checkRequestLocationPerms = () => {
-    requestPermission()
-      .then((response) => {
-        if (response.granted) {
-          requestPermissionBG();
-        }
-      })
-      .then(() => {
+    requestPermission().then((response) => {
+      requestPermissionBG().then(() => {
         Location.getBackgroundPermissionsAsync().then((perm) => {
           if (!perm.granted) {
+            console.log(perm);
             //Navigate user to permissions if BG location not granted
             navigation.navigate('Permissions');
           }
         });
       });
+    });
   };
 
   //selecting destination via longpress
@@ -98,11 +95,9 @@ const MapMenu = ({ route, navigation }) => {
 
   //function to get user to confirm is this the destination they want to set as alarm
   const setLocConfirmation = (dest) => {
-    getData('radius').then((value) => {
-      setPreviewLocation(dest);
-      setPromptVisible(true);
-      mapRef.current.animateCamera({ center: dest, zoom: 15, duration: 500 });
-    });
+    setPreviewLocation(dest);
+    setPromptVisible(true);
+    mapRef.current.animateCamera({ center: dest, zoom: 15, duration: 500 });
   };
 
   //Removes the alarm set and removes all waypoints
@@ -119,6 +114,11 @@ const MapMenu = ({ route, navigation }) => {
   };
 
   const addDestination = (location) => {
+    if (wpRadius <= 0) {
+      Alert.alert("Error", "Radius must be greater than 0 meters");
+      return;
+    }
+
     waypointsManager.addWaypoint({
       ...location,
       radius: wpRadius,
@@ -155,6 +155,7 @@ const MapMenu = ({ route, navigation }) => {
   //Render
   return (
     <PaperProvider>
+      <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
       <View style={styles.container}>
         <MapView
           ref={mapRef}
