@@ -3,6 +3,12 @@ import { View, StyleSheet } from 'react-native';
 import { Button, Text, TextInput } from 'react-native-paper';
 import { getData, storeData } from '../utils/AsyncStorage';
 import PropTypes from 'prop-types';
+import * as MediaLibrary from 'expo-media-library';
+
+const getPermission = async () => {
+  const permission = await MediaLibrary.getPermissionsAsync();
+  console.log(permission);
+};
 
 //activation radius is currently only set in confirm location, should change to on load screen
 const SettingsMenu = () => {
@@ -12,6 +18,7 @@ const SettingsMenu = () => {
   
   useEffect(() => {
     getData('radius').then((radius) => {
+      getPermission();
       setRadiusValue(radius == null ? DEFAULT_RADIUS : radius);
     });
   }, []);
