@@ -106,7 +106,7 @@ const DirectionsMenu = ({ navigation }) => {
               key={index}
               coordinate={m.coords}
               title={m.title}
-              description="test"
+              //description="test"
             ></MapView.Marker>
           ))}
 
