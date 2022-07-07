@@ -115,7 +115,7 @@ const MapMenu = ({ route, navigation }) => {
 
   const addDestination = (location) => {
     if (wpRadius <= 0) {
-      Alert.alert("Error", "Radius must be greater than 0 meters");
+      Alert.alert('Error', 'Radius must be greater than 0 meters');
       return;
     }
 
