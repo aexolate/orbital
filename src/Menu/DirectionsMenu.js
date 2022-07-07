@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, Alert, Keyboard } from 'react-native';
+import { View, Text, Alert, Keyboard, StatusBar } from 'react-native';
 import { TextInput, Button, Divider, ActivityIndicator } from 'react-native-paper';
 import MapView from 'react-native-maps';
 import { GOOGLE_MAPS_API_KEY } from '@env';
@@ -59,6 +59,13 @@ const DirectionsMenu = ({ navigation }) => {
     }
   };
 
+  const clearPreview = () => {
+    setMarkers([]);
+    setCoords([]);
+    setOriginText('');
+    setDestinationText('');
+  };
+
   const setAlarm = () => {
     if (markers.length == 0) {
       Alert.alert('No waypoints found', 'Please search for directions with transit stops', [
@@ -81,10 +88,12 @@ const DirectionsMenu = ({ navigation }) => {
   };
 
   return (
-    <View style={{ flex: 1, padding: 10 }}>
+    <View style={{ flex: 1, padding: 5 }}>
+      
       <TextInput
         label="Origin"
         mode="outlined"
+        dense
         value={originText}
         onChangeText={(txt) => setOriginText(txt)}
         right={<TextInput.Icon name="crosshairs-gps" onPress={setOriginToCurrent} />}
@@ -92,14 +101,24 @@ const DirectionsMenu = ({ navigation }) => {
       <TextInput
         label="Destination"
         mode="outlined"
+        dense
         value={destinationText}
         onChangeText={(txt) => setDestinationText(txt)}
       />
-      <Button mode="contained" onPress={() => searchDirections(originText, destinationText)}>
-        Search
-      </Button>
 
-      <View style={{ flex: 1, padding: 10 }}>
+      <View style={{paddingTop: 5, flexDirection: 'row', justifyContent: 'space-between'}}>
+        <Button mode="contained" color='darkblue' style={{width: 115}} icon='magnify' onPress={() => searchDirections(originText, destinationText)}>
+          Search
+        </Button>
+        <Button mode="contained" color='darkred' style={{width: 115}} icon='close' onPress={clearPreview}>
+          Clear
+        </Button>
+        <Button mode="contained" color='green' disabled={markers.length == 0} style={{width: 130}} icon='check-outline' onPress={setAlarm}>
+          Set Alarm
+        </Button>
+      </View>
+
+      <View style={{ flex: 1, paddingTop: 10 }}>
         <MapView ref={mapRef} zoomControlEnabled showsUserLocation style={{ flex: 1 }}>
           {markers.map((m, index) => (
             <MapView.Marker
@@ -116,9 +135,6 @@ const DirectionsMenu = ({ navigation }) => {
             strokeColor={'rgba(0, 132, 184, 0.8)'}
           />
         </MapView>
-        <Button color="green" mode="contained" onPress={setAlarm}>
-          Set Alarms
-        </Button>
       </View>
     </View>
   );
