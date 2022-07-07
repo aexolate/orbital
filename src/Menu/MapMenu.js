@@ -259,9 +259,9 @@ const styles = StyleSheet.create({
   },
   searchBar: {
     position: 'absolute',
-    width: '80%',
+    width: '90%',
     opacity: 0.98,
-    paddingTop: 100,
+    paddingTop: Constants.statusBarHeight + 45,
     alignSelf: 'center',
   },
   infoBox: {

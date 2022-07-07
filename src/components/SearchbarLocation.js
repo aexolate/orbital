@@ -41,7 +41,7 @@ const LocationSearchbar = (props) => {
         value={searchText}
       />
       <HelperText style={{ backgroundColor: 'white' }}>
-        or long-press the map to select location
+        or long-press the map to start setting alarm
       </HelperText>
     </View>
   );
