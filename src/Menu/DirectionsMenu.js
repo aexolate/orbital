@@ -123,21 +123,14 @@ const DirectionsMenu = ({ navigation }) => {
         <Button
           mode="contained"
           color="darkblue"
+          disabled={originText == '' || destinationText == ''}
           style={{ width: 115 }}
           icon="magnify"
           onPress={() => searchDirections(originText, destinationText)}
         >
           Search
         </Button>
-        <Button
-          mode="contained"
-          color="darkred"
-          style={{ width: 115 }}
-          icon="close"
-          onPress={clearPreview}
-        >
-          Clear
-        </Button>
+
         <Button
           mode="contained"
           color="green"
@@ -148,6 +141,17 @@ const DirectionsMenu = ({ navigation }) => {
         >
           Set Alarm
         </Button>
+
+        <Button
+          mode="contained"
+          color="darkred"
+          style={{ width: 115 }}
+          icon="close"
+          onPress={clearPreview}
+        >
+          Clear
+        </Button>
+
       </View>
 
       <View style={{ flex: 1, paddingTop: 10 }}>
@@ -169,9 +173,8 @@ const DirectionsMenu = ({ navigation }) => {
         </MapView>
       </View>
 
-      <View style={{ maxHeight: 150 }}>
+      <View style={{ maxHeight: 150, padding: 5 }}>
         <ScrollView persistentScrollbar={true}>
-          {/* <Text style={{ fontWeight: 'bold', fontSize: 18 }}>Directions</Text> */}
           {directions.map((d, idx) => (
             <Surface key={idx} style={styles.surface} elevation={4}>
               <Text>{d}</Text>
@@ -190,7 +193,6 @@ const styles = StyleSheet.create({
   surface: {
     padding: 8,
     height: 55,
-    //alignItems: 'center',
     justifyContent: 'center',
   },
 });
