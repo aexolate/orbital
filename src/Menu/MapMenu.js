@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: '80%',
     opacity: 0.98,
-    paddingTop: Constants.statusBarHeight + 55,
+    paddingTop: Constants.statusBarHeight + 60,
     alignSelf: 'center',
   },
   infoBox: {
@@ -304,12 +304,12 @@ const styles = StyleSheet.create({
   },
   menuButton: {
     position: 'absolute',
-    top: Constants.statusBarHeight + 5,
+    top: Constants.statusBarHeight + 10,
     left: 10,
   },
   waypointsButton: {
     position: 'absolute',
-    top: Constants.statusBarHeight + 5,
+    top: Constants.statusBarHeight + 10,
     right: 60
   },
   actionsBar: {
