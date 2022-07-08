@@ -6,7 +6,7 @@ import * as TaskManager from 'expo-task-manager';
 import { GeofencingEventType } from 'expo-location';
 import { AlarmManager } from '../../AlarmManager.js';
 import { WaypointsManager } from '../utils/WaypointsManager.js';
-import { Provider as PaperProvider, Text, Button, Colors } from 'react-native-paper';
+import { Provider as PaperProvider, Text, Button, Colors, Drawer } from 'react-native-paper';
 import CONSTANTS from '../constants/Constants.js';
 import SearchbarLocation from '../components/SearchbarLocation.js';
 import WaypointIndicator from '../components/WaypointIndicator.js';
@@ -178,7 +178,7 @@ const MapMenu = ({ route, navigation }) => {
           initialCamera={CONSTANTS.MAP_CAMERA.SINGAPORE}
           zoomControlEnabled={true}
           showsUserLocation={true}
-          mapPadding={{ top: 35 }}
+          mapPadding={{ top: Constants.statusBarHeight }}
           onUserLocationChange={onUserLocationChange}
           onLongPress={(mapEvent) => selectLocLongPress(mapEvent.nativeEvent)}
         >
@@ -215,7 +215,7 @@ const MapMenu = ({ route, navigation }) => {
         </View>
 
         {waypointsManager.waypoints.length > 0 && !reachedDestination && (
-          <View style={styles.infoBox2}>
+          <View style={styles.infoBox}>
             <InfoBox
               distance={distanceToDest}
               onCancelAlarm={unsetAlarm}
@@ -270,6 +270,7 @@ const MapMenu = ({ route, navigation }) => {
         >
           Waypoints
         </Button>
+
       </View>
     </PaperProvider>
   );
@@ -291,33 +292,33 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: '80%',
     opacity: 0.98,
-    paddingTop: Constants.statusBarHeight + 45,
+    paddingTop: Constants.statusBarHeight + 55,
     alignSelf: 'center',
   },
-  infoBox2: {
+  infoBox: {
     position: 'absolute',
     width: '80%',
     opacity: 0.95,
     top: 170,
     alignSelf: 'center',
   },
-  infoBox: {
-    position: 'absolute',
-    alignItems: 'center',
-    opacity: 0.9,
-    bottom: 0,
-    paddingBottom: 90,
-    paddingLeft: 10,
-  },
   menuButton: {
     position: 'absolute',
-    top: Constants.statusBarHeight,
+    top: Constants.statusBarHeight + 5,
     left: 10,
   },
   waypointsButton: {
     position: 'absolute',
-    top: Constants.statusBarHeight,
-    right: 60,
+    top: Constants.statusBarHeight + 5,
+    right: 60
+  },
+  actionsBar: {
+    position: 'absolute',
+    top: Constants.statusBarHeight + 140,
+    left: '10%',
+    //width: '100%',
+    flexDirection: 'column',
+    justifyContent: 'space-around'
   },
   radiusTextInput: {
     width: 155,
