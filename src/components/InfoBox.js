@@ -9,7 +9,7 @@ const InfoBox = (props) => {
       <Card.Content>
         <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
           <Text style={{ fontWeight: 'bold', fontSize: 17 }}>
-            {'Distance Remaining: \n' + (props.distance / 1000).toFixed(2) + ' km'}
+            {'Distance Remaining \n' + (props.distance / 1000).toFixed(2) + ' km'}
           </Text>
           <Button
             style={{ alignContent: 'center', justifyContent: 'center' }}
@@ -20,6 +20,7 @@ const InfoBox = (props) => {
           >
             Cancel
           </Button>
+          <View style={{width: 5}}/>
           <Button
             style={{ alignContent: 'center', justifyContent: 'center' }}
             icon="star"

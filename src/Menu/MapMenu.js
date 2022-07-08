@@ -215,9 +215,9 @@ const MapMenu = ({ route, navigation }) => {
 
         <View style={styles.searchBar}>
           <SearchbarLocation onResultReady={(loc) => setLocConfirmation(loc)} />
-          <View style={styles.radiusTextInput}>
+          {/* <View style={styles.radiusTextInput}>
             <RadiusTextInput onRadiusChange={(r) => setWpRadius(r)} />
-          </View>
+          </View> */}
         </View>
 
         {reachedDestination && <AlarmBox onDismissAlarm={dismissAlarm} />}
@@ -228,6 +228,7 @@ const MapMenu = ({ route, navigation }) => {
             addDestination(previewLocation);
             setPromptVisible(false);
           }}
+          onRadiusChange={(r) => setWpRadius(r)}
           onCancelPrompt={() => setPromptVisible(false)}
         />
 
