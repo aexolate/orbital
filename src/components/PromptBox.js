@@ -10,7 +10,9 @@ const PromptBox = (props) => {
     props.visible && (
       <View style={{ padding: 10 }}>
         <View style={{ alignItems: 'center', padding: 5, paddingBottom: 10 }}>
-          <Text style={{ fontSize: 16, fontWeight: 'bold' }}>Would you like to set this as your destination?</Text>
+          <Text style={{ fontSize: 16, fontWeight: 'bold' }}>
+            Would you like to set this as your destination?
+          </Text>
         </View>
 
         <Divider />

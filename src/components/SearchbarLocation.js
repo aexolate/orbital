@@ -5,7 +5,7 @@ import { GOOGLE_MAPS_API_KEY } from '@env';
 import { View, Alert } from 'react-native';
 import PropTypes from 'prop-types';
 
-const LocationSearchbar = (props) => {
+const SearchbarLocation = (props) => {
   const [searchText, setSearchText] = useState('');
 
   useEffect(() => {
@@ -47,8 +47,8 @@ const LocationSearchbar = (props) => {
   );
 };
 
-LocationSearchbar.propTypes = {
+SearchbarLocation.propTypes = {
   onResultReady: PropTypes.func,
 };
 
-export default LocationSearchbar;
+export default SearchbarLocation;

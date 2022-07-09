@@ -1,44 +1,38 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { StyleSheet, View, StatusBar, Alert } from 'react-native';
+import { Provider as PaperProvider, Button, Colors } from 'react-native-paper';
 import MapView from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
-//import { GeofencingEventType } from 'expo-location';
 import { AlarmManager } from '../../AlarmManager.js';
-//import { WaypointsManager } from '../utils/WaypointsManager.js';
-import { Provider as PaperProvider, Text, Button, Colors } from 'react-native-paper';
 import CONSTANTS from '../constants/Constants.js';
-import SearchbarLocation from '../components/SearchbarLocation.js';
-//import WaypointIndicator from '../components/WaypointIndicator.js';
-//import AlarmBox from '../components/AlarmBox.js';
-import PromptBox from '../components/PromptBox.js';
-import InfoBox from '../components/InfoBox.js';
-//import FavouritesDialog from '../components/FavouritesDialog.js';
-import WaypointsModal from '../components/WaypointsModal.js';
 import { WAYPOINT_TYPE } from '../constants/WaypointEnum.js';
-//import { DatabaseManager } from '../utils/DatabaseManager';
 import PropTypes from 'prop-types';
 import Constants from 'expo-constants';
-import { AlarmBox, WaypointIndicator, FavouritesDialog } from '../components';
+import {
+  AlarmBox,
+  WaypointIndicator,
+  FavouritesDialog,
+  SearchbarLocation,
+  PromptBox,
+  InfoBox,
+  WaypointsModal,
+} from '../components';
 import { DatabaseManager, WaypointsManager } from '../utils';
 
 const MapMenu = ({ route, navigation }) => {
-  const [status, requestPermission] = Location.useForegroundPermissions();
-  const [statusBG, requestPermissionBG] = Location.useBackgroundPermissions();
-
   const [promptVisible, setPromptVisible] = useState(false);
   const [favDialogVisible, setFavDialogVisible] = useState(false);
   const [previewLocation, setPreviewLocation] = useState(CONSTANTS.LOCATIONS.DEFAULT);
   const [distanceToDest, setDistanceToDest] = useState(Infinity);
-  //const [canModifyAlarm, setCanModifyAlarm] = useState(true); //Indicates whether new waypoints can be added
   const [reachedDestination, setReachedDestination] = useState(false); //Indicates whether the user has been in radius of destination
+
   const alarmManager = AlarmManager();
   const waypointsManager = WaypointsManager();
   const dbManager = DatabaseManager();
-  const mapRef = useRef(null);
-  //const [settingRadius, setSettingRadius] = useState(500); //internal default radius value from settings, retrieve during select location
-  const [wpRadius, setWpRadius] = useState(500); //waypoint radius value that can be changed from MapMenu
 
+  const mapRef = useRef(null);
+  const [wpRadius, setWpRadius] = useState(500); //waypoint radius value that can be changed from MapMenu
   const [WPListVisible, setWPListVisible] = useState(false);
 
   //Define geofencing task for expo-location. Must be defined in top level scope
@@ -75,7 +69,6 @@ const MapMenu = ({ route, navigation }) => {
       Location.requestBackgroundPermissionsAsync().then(() => {
         Location.getBackgroundPermissionsAsync().then((perm) => {
           if (!perm.granted) {
-            console.log(perm);
             //Navigate user to permissions if BG location not granted
             navigation.navigate('Permissions');
           }
@@ -125,7 +118,7 @@ const MapMenu = ({ route, navigation }) => {
     waypointsManager.addWaypoint({
       ...location,
       radius: wpRadius,
-      title: name === undefined ? 'untitled': name,
+      title: name === undefined ? 'untitled' : name,
     });
   };
 
@@ -258,13 +251,12 @@ const MapMenu = ({ route, navigation }) => {
           icon="map-marker-path"
           color={Colors.blue800}
           mode="contained"
-          disabled={waypointsManager.waypoints == 0}
+          disabled={waypointsManager.getWaypointCount() <= 0}
           onPress={() => setWPListVisible(true)}
           style={styles.waypointsButton}
         >
           Waypoints
         </Button>
-
       </View>
     </PaperProvider>
   );
@@ -304,7 +296,7 @@ const styles = StyleSheet.create({
   waypointsButton: {
     position: 'absolute',
     top: Constants.statusBarHeight + 10,
-    right: 60
+    right: 60,
   },
   actionsBar: {
     position: 'absolute',
@@ -312,7 +304,7 @@ const styles = StyleSheet.create({
     left: '10%',
     //width: '100%',
     flexDirection: 'column',
-    justifyContent: 'space-around'
+    justifyContent: 'space-around',
   },
   radiusTextInput: {
     width: 155,

@@ -48,7 +48,6 @@ const WaypointsModal = (props) => {
           <Button mode="contained" onPress={props.onDismissModal} color={Colors.red600}>
             Close
           </Button>
-
         </View>
       </Modal>
     </Portal>
