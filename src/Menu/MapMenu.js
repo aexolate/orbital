@@ -1,30 +1,26 @@
-import React, { useEffect, useState, ReactElement, useRef } from 'react';
-import { StyleSheet, View, StatusBar, Alert, TouchableOpacity } from 'react-native';
-import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
+import React, { useEffect, useState, useRef } from 'react';
+import { StyleSheet, View, StatusBar, Alert } from 'react-native';
+import MapView from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
-import { GeofencingEventType } from 'expo-location';
+//import { GeofencingEventType } from 'expo-location';
 import { AlarmManager } from '../../AlarmManager.js';
-import { WaypointsManager } from '../utils/WaypointsManager.js';
-import { Provider as PaperProvider, Text, Button, Colors, Drawer } from 'react-native-paper';
+//import { WaypointsManager } from '../utils/WaypointsManager.js';
+import { Provider as PaperProvider, Text, Button, Colors } from 'react-native-paper';
 import CONSTANTS from '../constants/Constants.js';
 import SearchbarLocation from '../components/SearchbarLocation.js';
-import WaypointIndicator from '../components/WaypointIndicator.js';
-import AlarmBox from '../components/AlarmBox.js';
+//import WaypointIndicator from '../components/WaypointIndicator.js';
+//import AlarmBox from '../components/AlarmBox.js';
 import PromptBox from '../components/PromptBox.js';
 import InfoBox from '../components/InfoBox.js';
-import RadiusTextInput from '../components/RadiusTextInput.js';
-import FavouritesDialog from '../components/FavouritesDialog.js';
+//import FavouritesDialog from '../components/FavouritesDialog.js';
 import WaypointsModal from '../components/WaypointsModal.js';
-import WaypointsList from '../components/WaypointsList.js';
 import { WAYPOINT_TYPE } from '../constants/WaypointEnum.js';
-import { DatabaseManager } from '../utils/DatabaseManager';
+//import { DatabaseManager } from '../utils/DatabaseManager';
 import PropTypes from 'prop-types';
 import Constants from 'expo-constants';
-import Dimensions from 'react-native';
-import { getData } from '../utils/AsyncStorage.js';
-import { useIsFocused } from '@react-navigation/native';
-import { ScrollView } from 'react-native-gesture-handler';
+import { AlarmBox, WaypointIndicator, FavouritesDialog } from '../components';
+import { DatabaseManager, WaypointsManager } from '../utils';
 
 const MapMenu = ({ route, navigation }) => {
   const [status, requestPermission] = Location.useForegroundPermissions();
@@ -40,14 +36,14 @@ const MapMenu = ({ route, navigation }) => {
   const waypointsManager = WaypointsManager();
   const dbManager = DatabaseManager();
   const mapRef = useRef(null);
-  const [settingRadius, setSettingRadius] = useState(500); //internal default radius value from settings, retrieve during select location
+  //const [settingRadius, setSettingRadius] = useState(500); //internal default radius value from settings, retrieve during select location
   const [wpRadius, setWpRadius] = useState(500); //waypoint radius value that can be changed from MapMenu
 
   const [WPListVisible, setWPListVisible] = useState(false);
 
   //Define geofencing task for expo-location. Must be defined in top level scope
   TaskManager.defineTask('GEOFENCING_TASK', ({ data: { region, eventType }, error }) => {
-    if (eventType === GeofencingEventType.Enter) {
+    if (eventType === Location.GeofencingEventType.Enter) {
       //Removes the waypoint that the user just entered
       waypointsManager.removeWaypoint(region);
 
@@ -75,8 +71,8 @@ const MapMenu = ({ route, navigation }) => {
   }, [reachedDestination]);
 
   const checkRequestLocationPerms = () => {
-    requestPermission().then((response) => {
-      requestPermissionBG().then(() => {
+    Location.requestForegroundPermissionsAsync().then((response) => {
+      Location.requestBackgroundPermissionsAsync().then(() => {
         Location.getBackgroundPermissionsAsync().then((perm) => {
           if (!perm.granted) {
             console.log(perm);
@@ -120,7 +116,7 @@ const MapMenu = ({ route, navigation }) => {
     setDistanceToDest(waypointsManager.distanceToNearestWP(curLatLng));
   };
 
-  const addDestination = (location) => {
+  const addDestination = (location, name) => {
     if (wpRadius <= 0) {
       Alert.alert('Error', 'Radius must be greater than 0 meters');
       return;
@@ -129,6 +125,7 @@ const MapMenu = ({ route, navigation }) => {
     waypointsManager.addWaypoint({
       ...location,
       radius: wpRadius,
+      title: name === undefined ? 'untitled': name,
     });
   };
 
@@ -209,7 +206,7 @@ const MapMenu = ({ route, navigation }) => {
               addDestination(previewLocation);
               setPromptVisible(false);
             }}
-            onRadiusChange={(r) => setWpRadius(r)}
+            onRadiusChange={(rad) => setWpRadius(rad)}
             onCancelPrompt={() => setPromptVisible(false)}
           />
         </View>
@@ -235,9 +232,6 @@ const MapMenu = ({ route, navigation }) => {
 
         <View style={styles.searchBar}>
           <SearchbarLocation onResultReady={(loc) => setLocConfirmation(loc)} />
-          {/* <View style={styles.radiusTextInput}>
-            <RadiusTextInput onRadiusChange={(r) => setWpRadius(r)} />
-          </View> */}
         </View>
 
         {reachedDestination && <AlarmBox onDismissAlarm={dismissAlarm} />}
@@ -299,7 +293,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: '80%',
     opacity: 0.95,
-    top: 170,
+    top: Constants.statusBarHeight + 140,
     alignSelf: 'center',
   },
   menuButton: {

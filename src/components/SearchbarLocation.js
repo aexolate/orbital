@@ -27,7 +27,7 @@ const LocationSearchbar = (props) => {
         props.onResultReady({ latitude: result[0].latitude, longitude: result[0].longitude });
       })
       .catch((error) => {
-        console.log(error);
+        console.error(error);
       });
   };
 

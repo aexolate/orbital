@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, ScrollView, TouchableOpacity, Text } from 'react-native';
+import { View, ScrollView } from 'react-native';
 import { Portal, Button, Modal, List, Colors, IconButton } from 'react-native-paper';
 import PropTypes from 'prop-types';
 

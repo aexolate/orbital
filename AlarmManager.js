@@ -26,8 +26,6 @@ export const AlarmManager = () => {
 
   //Activates the alarm
   const playAlarm = async () => {
-    console.log('play alarm');
-
     if (sound == null) {
       console.error('setupAudio() must be called');
       return;
