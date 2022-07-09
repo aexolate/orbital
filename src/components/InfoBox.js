@@ -8,7 +8,7 @@ const InfoBox = (props) => {
     <Card mode="outlined">
       <Card.Content>
         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ fontWeight: 'bold', fontSize: 17 }}>
+          <Text style={{ fontWeight: 'bold', fontSize: 18 }}>
             {'Distance Remaining: ' + (props.distance / 1000).toFixed(2) + 'km'}
           </Text>
 

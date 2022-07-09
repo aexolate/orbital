@@ -204,7 +204,7 @@ const MapMenu = ({ route, navigation }) => {
           />
         </View>
 
-        {waypointsManager.waypoints.length > 0 && !reachedDestination && (
+        {waypointsManager.getWaypointCount() > 0 && !reachedDestination && !promptVisible && (
           <View style={styles.infoBox}>
             <InfoBox
               distance={distanceToDest}
@@ -285,7 +285,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: '80%',
     opacity: 0.95,
-    top: Constants.statusBarHeight + 140,
+    //top: Constants.statusBarHeight + 140,
+    bottom: '15%',
     alignSelf: 'center',
   },
   menuButton: {
