@@ -4,11 +4,11 @@ import { distanceBetween } from '../utils/distance.js';
 export const WaypointsManager = () => {
   const [waypoints, setWaypoints] = React.useState([]);
 
-  const addWaypoint = (coord) => setWaypoints((wp) => [...wp, coord]);
+  const addWaypoint = (waypoint) => setWaypoints((wp) => [...wp, waypoint]);
 
-  const removeWaypoint = (coord) => {
+  const removeWaypoint = (waypoint) => {
     setWaypoints((wp) =>
-      wp.filter((x) => !(x.latitude == coord.latitude && x.longitude == coord.longitude)),
+      wp.filter((x) => !(x.latitude == waypoint.latitude && x.longitude == waypoint.longitude)),
     );
   };
 
@@ -37,6 +37,7 @@ export default WaypointsManager;
 
 // type Waypoint = {
 //   title: String,
-//   coords: LatLng,
+//   latitude: Number,
+//   longitude: Number,
 //   radius: Number,
 // }
