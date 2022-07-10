@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, Alert, Keyboard, StatusBar, ScrollView, StyleSheet } from 'react-native';
 import { TextInput, Button, Divider, ActivityIndicator, Surface } from 'react-native-paper';
-import MapView from 'react-native-maps';
+import MapView, { Marker, Polyline } from 'react-native-maps';
 import { GOOGLE_MAPS_API_KEY } from '@env';
 import { decode } from '@mapbox/polyline';
 import PropTypes from 'prop-types';
@@ -156,15 +156,15 @@ const DirectionsMenu = ({ navigation }) => {
       <View style={{ flex: 1, paddingTop: 10 }}>
         <MapView ref={mapRef} zoomControlEnabled showsUserLocation style={{ flex: 1 }}>
           {markers.map((m, index) => (
-            <MapView.Marker
+            <Marker
               key={index}
               coordinate={m.coords}
               title={m.title}
               //description="test"
-            ></MapView.Marker>
+            ></Marker>
           ))}
 
-          <MapView.Polyline
+          <Polyline
             coordinates={coords}
             strokeWidth={6}
             strokeColor={'rgba(0, 132, 184, 0.8)'}
@@ -175,7 +175,7 @@ const DirectionsMenu = ({ navigation }) => {
       <View style={{ maxHeight: 150, padding: 5 }}>
         <ScrollView persistentScrollbar={true}>
           {directions.map((d, idx) => (
-            <Surface key={idx} style={styles.surface} elevation={4}>
+            <Surface key={idx} style={styles.surface}>
               <Text>{d}</Text>
             </Surface>
           ))}
