@@ -1,5 +1,5 @@
 import React from 'react';
-import { distanceBetween } from '../utils/distance.js';
+import { distanceBetween } from '../utils/distance';
 
 export type Waypoint = {
     title: string;
