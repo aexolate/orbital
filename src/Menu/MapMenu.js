@@ -37,6 +37,11 @@ const MapMenu = ({ route, navigation }) => {
 
   //Define geofencing task for expo-location. Must be defined in top level scope
   TaskManager.defineTask('GEOFENCING_TASK', ({ data: { region, eventType }, error }) => {
+    if (error) {
+      Alert.alert('TASK ERROR', error.message); //This error should not happen
+      return;
+    }
+    
     if (eventType === Location.GeofencingEventType.Enter) {
       //Removes the waypoint that the user just entered
       waypointsManager.removeWaypoint(region);
@@ -65,14 +70,18 @@ const MapMenu = ({ route, navigation }) => {
   }, [reachedDestination]);
 
   const checkRequestLocationPerms = () => {
-    Location.requestForegroundPermissionsAsync().then((response) => {
+    //The background permission must be only requested AFTER foreground permission
+    Location.requestForegroundPermissionsAsync().then(() => {
       Location.requestBackgroundPermissionsAsync().then(() => {
+
+        //Check if user granted both permission after requesting
         Location.getBackgroundPermissionsAsync().then((perm) => {
           if (!perm.granted) {
             //Navigate user to permissions if BG location not granted
             navigation.navigate('Permissions');
           }
         });
+        
       });
     });
   };
