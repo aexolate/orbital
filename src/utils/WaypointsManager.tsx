@@ -1,23 +1,44 @@
 import React from 'react';
 import { distanceBetween } from '../utils/distance.js';
 
+export type Waypoint = {
+    title: string;
+    latitude: number;
+    longitude: number;
+    radius: number;
+}
+
+export type LatLng = {
+    latitude: number;
+    longitude: number;
+}
+
 export const WaypointsManager = () => {
-  const [waypoints, setWaypoints] = React.useState([]);
+  const [waypoints, setWaypoints] = React.useState<Waypoint[]>([]);
 
-  const addWaypoint = (waypoint) => setWaypoints((wp) => [...wp, waypoint]);
+  //Removes all the stored waypoints
+  const clearWaypoints = () => setWaypoints([]);
 
-  const removeWaypoint = (waypoint) => {
+  //Returns the number of waypoints stored
+  const getWaypointCount = () => waypoints.length;
+
+  /**
+   * Add a waypoint to the storage
+   * @param waypoint Waypoint to be added
+   */
+  const addWaypoint = (waypoint : Waypoint) => setWaypoints((cur) => [...cur, waypoint]);
+
+  //Remove waypoint(s) with the same coordinate from storage 
+  const removeWaypoint = (coords : LatLng) => {
     setWaypoints((wp) =>
-      wp.filter((x) => !(x.latitude == waypoint.latitude && x.longitude == waypoint.longitude)),
+      wp.filter((x) => !(x.latitude == coords.latitude && x.longitude == coords.longitude)),
     );
   };
 
-  const clearWaypoints = () => setWaypoints([]);
-
-  const getWaypointCount = () => waypoints.length;
-
-  const distanceToNearestWP = (curLocation) =>
-    Math.min(...waypoints.map((wp) => distanceBetween(wp, curLocation)));
+  //Returns the distance to the nearest waypoint from a provided coordinate
+  const distanceToNearestWP = (coords : LatLng) => {
+    return Math.min(...waypoints.map((wp) => distanceBetween(wp, coords)));
+  }
 
   return {
     addWaypoint,
@@ -29,15 +50,3 @@ export const WaypointsManager = () => {
   };
 };
 export default WaypointsManager;
-
-// type LatLng = {
-//   latitude: Number,
-//   longitude: Number,
-// }
-
-// type Waypoint = {
-//   title: String,
-//   latitude: Number,
-//   longitude: Number,
-//   radius: Number,
-// }
