@@ -41,7 +41,7 @@ const MapMenu = ({ route, navigation }) => {
       Alert.alert('TASK ERROR', error.message); //This error should not happen
       return;
     }
-    
+
     if (eventType === Location.GeofencingEventType.Enter) {
       //Removes the waypoint that the user just entered
       waypointsManager.removeWaypoint(region);
@@ -73,7 +73,6 @@ const MapMenu = ({ route, navigation }) => {
     //The background permission must be only requested AFTER foreground permission
     Location.requestForegroundPermissionsAsync().then(() => {
       Location.requestBackgroundPermissionsAsync().then(() => {
-
         //Check if user granted both permission after requesting
         Location.getBackgroundPermissionsAsync().then((perm) => {
           if (!perm.granted) {
@@ -81,7 +80,6 @@ const MapMenu = ({ route, navigation }) => {
             navigation.navigate('Permissions');
           }
         });
-        
       });
     });
   };

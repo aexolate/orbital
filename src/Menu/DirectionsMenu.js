@@ -151,7 +151,6 @@ const DirectionsMenu = ({ navigation }) => {
         >
           Clear
         </Button>
-
       </View>
 
       <View style={{ flex: 1, paddingTop: 10 }}>

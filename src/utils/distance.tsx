@@ -1,11 +1,13 @@
+import { LatLng } from './WaypointsManager';
+
 /**
  * Calculates the great-circle distance between two coordinates using haversine formula
  * i.e. shortest distance over earth's surface
  * @param {LatLng} c1 First Coordinate
  * @param {LatLng} c2 Second Coordinate
- * @returns {Number} distance
+ * @returns {Number} distance between the two coordinates
  */
-export const distanceBetween = (c1, c2) => {
+export const distanceBetween = (c1: LatLng, c2: LatLng): number => {
   let lat1 = c1.latitude;
   let lon1 = c1.longitude;
   let lat2 = c2.latitude;
