@@ -1,7 +1,7 @@
 import React from 'react';
 import { TextInput } from 'react-native-paper';
 import PropTypes from 'prop-types';
-import { getData } from '../utils/AsyncStorage.js';
+import { getData } from '../utils/AsyncStorage';
 import { useIsFocused } from '@react-navigation/native';
 
 const ReadiusTextInput = (props) => {

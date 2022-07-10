@@ -14,7 +14,7 @@ export const DatabaseManager = () => {
   }, []);
 
   //Removes the alarm from DB based on its ID
-  const removeAlarm = (id) => {
+  const removeAlarm = (id: string | number) => {
     return db.transaction((tx) => {
       tx.executeSql('DELETE FROM favourites WHERE id=(?)', [id]);
     });
