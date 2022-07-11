@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, Alert, Keyboard, StatusBar, ScrollView, StyleSheet } from 'react-native';
-import { TextInput, Button, Divider, ActivityIndicator, Surface } from 'react-native-paper';
+import { View, Text, Alert, Keyboard, ScrollView, StyleSheet } from 'react-native';
+import { TextInput, Button, Surface } from 'react-native-paper';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import { GOOGLE_MAPS_API_KEY } from '@env';
 import { decode } from '@mapbox/polyline';
@@ -19,7 +19,7 @@ const DirectionsMenu = ({ navigation }) => {
     mapRef.current.fitToCoordinates(coords);
   }, [coords]);
 
-  const searchDirections = (start, end) => {
+  const searchDirections = (start: string, end: string) => {
     if (!start || !end) {
       Alert.alert('Missing Values', 'Input your origin and destination', [{ text: 'OK' }]);
       return;
@@ -29,7 +29,7 @@ const DirectionsMenu = ({ navigation }) => {
 
     try {
       const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${start}&destination=${end}&mode=transit&key=${GOOGLE_MAPS_API_KEY}`;
-      const response = fetch(url)
+      fetch(url)
         .then((res) => res.json())
         .then((resJson) => {
           if (resJson.status != 'OK') {
@@ -81,13 +81,6 @@ const DirectionsMenu = ({ navigation }) => {
   };
 
   const setAlarm = () => {
-    if (markers.length == 0) {
-      Alert.alert('No waypoints found', 'Please search for directions with transit stops', [
-        { text: 'OK' },
-      ]);
-      return;
-    }
-
     Alert.alert('Confirm', 'Are you sure you want to set the following waypoints?', [
       { text: 'OK', onPress: () => navigation.navigate('Map', { requests: markers }) },
       { text: 'Cancel' },
@@ -156,19 +149,10 @@ const DirectionsMenu = ({ navigation }) => {
       <View style={{ flex: 1, paddingTop: 10 }}>
         <MapView ref={mapRef} zoomControlEnabled showsUserLocation style={{ flex: 1 }}>
           {markers.map((m, index) => (
-            <Marker
-              key={index}
-              coordinate={m.coords}
-              title={m.title}
-              //description="test"
-            ></Marker>
+            <Marker key={index} coordinate={m.coords} title={m.title}></Marker>
           ))}
 
-          <Polyline
-            coordinates={coords}
-            strokeWidth={6}
-            strokeColor={'rgba(0, 132, 184, 0.8)'}
-          />
+          <Polyline coordinates={coords} strokeWidth={6} strokeColor={'rgba(0, 132, 184, 0.8)'} />
         </MapView>
       </View>
 
