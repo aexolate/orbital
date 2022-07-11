@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, Alert, Keyboard } from 'react-native';
-import { TextInput, Button, Divider, ActivityIndicator } from 'react-native-paper';
+import { View, Text, Alert, Keyboard, StatusBar, ScrollView, StyleSheet } from 'react-native';
+import { TextInput, Button, Divider, ActivityIndicator, Surface } from 'react-native-paper';
 import MapView from 'react-native-maps';
 import { GOOGLE_MAPS_API_KEY } from '@env';
 import { decode } from '@mapbox/polyline';
@@ -13,6 +13,7 @@ const DirectionsMenu = ({ navigation }) => {
   const [coords, setCoords] = useState([]);
   const [markers, setMarkers] = useState([]);
   const mapRef = useRef(null);
+  const [directions, setDirections] = useState([]);
 
   useEffect(() => {
     mapRef.current.fitToCoordinates(coords);
@@ -36,6 +37,8 @@ const DirectionsMenu = ({ navigation }) => {
             return;
           }
 
+          setDirections([]);
+
           //Coordinates used to draw the path from origin to destination
           const polyline = resJson.routes[0].overview_polyline.points;
           const points = decode(polyline).map((point) => {
@@ -47,6 +50,16 @@ const DirectionsMenu = ({ navigation }) => {
           const markers = resJson.routes[0].legs[0].steps
             .filter((s) => s.travel_mode == 'TRANSIT')
             .map((s) => {
+              const distance = s.distance.text;
+              const duration = s.duration.text;
+              const departure = s.transit_details.departure_stop.name;
+              const arrival = s.transit_details.arrival_stop.name;
+              const line = s.transit_details.line.name;
+
+              const checkpoint =
+                line + ' | ' + distance + ' | ' + duration + '\n' + departure + ' -> ' + arrival;
+              setDirections((dirs) => [...dirs, checkpoint]);
+
               return {
                 coords: { latitude: s.end_location.lat, longitude: s.end_location.lng },
                 title: s.transit_details.line.name + ' | ' + s.transit_details.arrival_stop.name,
@@ -57,6 +70,14 @@ const DirectionsMenu = ({ navigation }) => {
     } catch (error) {
       Alert.alert('Error', error, [{ text: 'OK' }]);
     }
+  };
+
+  const clearPreview = () => {
+    setMarkers([]);
+    setCoords([]);
+    setOriginText('');
+    setDestinationText('');
+    setDirections([]);
   };
 
   const setAlarm = () => {
@@ -81,10 +102,11 @@ const DirectionsMenu = ({ navigation }) => {
   };
 
   return (
-    <View style={{ flex: 1, padding: 10 }}>
+    <View style={{ flex: 1, padding: 5 }}>
       <TextInput
         label="Origin"
         mode="outlined"
+        dense
         value={originText}
         onChangeText={(txt) => setOriginText(txt)}
         right={<TextInput.Icon name="crosshairs-gps" onPress={setOriginToCurrent} />}
@@ -92,14 +114,46 @@ const DirectionsMenu = ({ navigation }) => {
       <TextInput
         label="Destination"
         mode="outlined"
+        dense
         value={destinationText}
         onChangeText={(txt) => setDestinationText(txt)}
       />
-      <Button mode="contained" onPress={() => searchDirections(originText, destinationText)}>
-        Search
-      </Button>
 
-      <View style={{ flex: 1, padding: 10 }}>
+      <View style={{ paddingTop: 5, flexDirection: 'row', justifyContent: 'space-between' }}>
+        <Button
+          mode="contained"
+          color="darkblue"
+          disabled={originText == '' || destinationText == ''}
+          style={{ width: 115 }}
+          icon="magnify"
+          onPress={() => searchDirections(originText, destinationText)}
+        >
+          Search
+        </Button>
+
+        <Button
+          mode="contained"
+          color="green"
+          disabled={markers.length == 0}
+          style={{ width: 130 }}
+          icon="check-outline"
+          onPress={setAlarm}
+        >
+          Set Alarm
+        </Button>
+
+        <Button
+          mode="contained"
+          color="darkred"
+          style={{ width: 115 }}
+          icon="close"
+          onPress={clearPreview}
+        >
+          Clear
+        </Button>
+      </View>
+
+      <View style={{ flex: 1, paddingTop: 10 }}>
         <MapView ref={mapRef} zoomControlEnabled showsUserLocation style={{ flex: 1 }}>
           {markers.map((m, index) => (
             <MapView.Marker
@@ -116,9 +170,16 @@ const DirectionsMenu = ({ navigation }) => {
             strokeColor={'rgba(0, 132, 184, 0.8)'}
           />
         </MapView>
-        <Button color="green" mode="contained" onPress={setAlarm}>
-          Set Alarms
-        </Button>
+      </View>
+
+      <View style={{ maxHeight: 150, padding: 5 }}>
+        <ScrollView persistentScrollbar={true}>
+          {directions.map((d, idx) => (
+            <Surface key={idx} style={styles.surface} elevation={4}>
+              <Text>{d}</Text>
+            </Surface>
+          ))}
+        </ScrollView>
       </View>
     </View>
   );
@@ -127,3 +188,10 @@ DirectionsMenu.propTypes = {
   navigation: PropTypes.any.isRequired,
 };
 export default DirectionsMenu;
+const styles = StyleSheet.create({
+  surface: {
+    padding: 8,
+    height: 55,
+    justifyContent: 'center',
+  },
+});

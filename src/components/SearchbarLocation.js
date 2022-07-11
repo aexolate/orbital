@@ -5,7 +5,7 @@ import { GOOGLE_MAPS_API_KEY } from '@env';
 import { View, Alert } from 'react-native';
 import PropTypes from 'prop-types';
 
-const LocationSearchbar = (props) => {
+const SearchbarLocation = (props) => {
   const [searchText, setSearchText] = useState('');
 
   useEffect(() => {
@@ -27,7 +27,7 @@ const LocationSearchbar = (props) => {
         props.onResultReady({ latitude: result[0].latitude, longitude: result[0].longitude });
       })
       .catch((error) => {
-        console.log(error);
+        console.error(error);
       });
   };
 
@@ -41,14 +41,14 @@ const LocationSearchbar = (props) => {
         value={searchText}
       />
       <HelperText style={{ backgroundColor: 'white' }}>
-        or long-press the map to select location
+        or long-press the map to start setting alarm
       </HelperText>
     </View>
   );
 };
 
-LocationSearchbar.propTypes = {
+SearchbarLocation.propTypes = {
   onResultReady: PropTypes.func,
 };
 
-export default LocationSearchbar;
+export default SearchbarLocation;

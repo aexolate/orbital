@@ -2,7 +2,7 @@ import 'react-native-gesture-handler'; //MUST BE AT THE TOP OF APP.JS
 import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import AppDrawer from './AppDrawer.js';
-import { getData, storeData } from './src/utils/AsyncStorage.js';
+import { getData, storeData } from './src/utils/AsyncStorage';
 
 const App = () => {
   //initialize default radius for new users, otherwise retrieve last saved value
