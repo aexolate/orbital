@@ -1,5 +1,5 @@
 import React from 'react';
-import { Banner, Button, Divider } from 'react-native-paper';
+import { Button, Divider } from 'react-native-paper';
 import { View, Text } from 'react-native';
 import PropTypes from 'prop-types';
 import RadiusTextInput from '../components/RadiusTextInput';

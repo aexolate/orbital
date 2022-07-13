@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import MapView from 'react-native-maps';
+import { Circle, Marker } from 'react-native-maps';
 import PropTypes from 'prop-types';
 
 const WaypointIndicator = (props) => {
@@ -8,14 +8,14 @@ const WaypointIndicator = (props) => {
 
   return (
     <View>
-      <MapView.Circle
+      <Circle
         radius={props.radius}
         center={props.center}
         strokeWidth={2}
         strokeColor={waypointType.color}
         fillColor={waypointType.fillColor}
       />
-      <MapView.Marker
+      <Marker
         coordinate={props.center}
         pinColor={waypointType.fillColor}
         title={props.title}
