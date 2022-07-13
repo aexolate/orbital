@@ -15,11 +15,7 @@ const WaypointIndicator = (props) => {
         strokeColor={waypointType.color}
         fillColor={waypointType.fillColor}
       />
-      <Marker
-        coordinate={props.center}
-        pinColor={waypointType.fillColor}
-        title={props.title}
-      />
+      <Marker coordinate={props.center} pinColor={waypointType.fillColor} title={props.title} />
     </View>
   );
 };

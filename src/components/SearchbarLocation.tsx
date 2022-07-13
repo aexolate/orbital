@@ -40,7 +40,7 @@ const SearchbarLocation = (props) => {
         onChangeText={setSearchText}
         value={searchText}
       />
-      <HelperText type='info' style={{ backgroundColor: 'white' }}>
+      <HelperText type="info" style={{ backgroundColor: 'white' }}>
         or long-press the map to start setting alarm
       </HelperText>
     </View>
