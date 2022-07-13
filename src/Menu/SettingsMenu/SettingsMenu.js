@@ -4,7 +4,7 @@ import { Button, Text, TextInput } from 'react-native-paper';
 import { useIsFocused } from '@react-navigation/native';
 import { getData, storeData } from '../../utils/AsyncStorage';
 import PropTypes from 'prop-types';
- 
+
 //activation radius is currently only set in confirm location, should change to on load screen
 const SettingsMenu = ({ navigation }) => {
   const DEFAULT_RADIUS = 500;
@@ -12,7 +12,7 @@ const SettingsMenu = ({ navigation }) => {
   const [radiusValue, setRadiusValue] = useState(DEFAULT_RADIUS); //radius that is displayed in app, also the current setting value
   const [songText, setSongText] = useState('');
   const isFocused = useIsFocused();
- 
+
   useEffect(() => {
     getData('radius').then((radius) => {
       setRadiusValue(radius == null ? DEFAULT_RADIUS : radius);
@@ -21,12 +21,12 @@ const SettingsMenu = ({ navigation }) => {
 
   useEffect(() => {
     if (isFocused) {
-      getData('song').then(song => {
+      getData('song').then((song) => {
         setSongText(song.name);
       });
     }
   }, [isFocused]);
- 
+
   const SettingsButton = (props) => {
     return (
       <Button
@@ -50,7 +50,7 @@ const SettingsMenu = ({ navigation }) => {
   SettingsButton.propTypes = {
     keyValue: PropTypes.string.isRequired,
   };
- 
+
   return (
     <View style={styles.container}>
       <Text style={styles.radiusText}>Default Activation Radius: {radiusValue} meters</Text>
@@ -66,8 +66,8 @@ const SettingsMenu = ({ navigation }) => {
       <Button
         style={styles.audioButton}
         mode="contained"
-        onPress={ () => {
-          navigation.navigate("Audio");
+        onPress={() => {
+          navigation.navigate('Audio');
         }}
       >
         Set Audio
@@ -75,9 +75,13 @@ const SettingsMenu = ({ navigation }) => {
     </View>
   );
 };
- 
+
 export default SettingsMenu;
- 
+
+SettingsMenu.propTypes = {
+  navigation: PropTypes.object,
+};
+
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
@@ -85,7 +89,7 @@ const styles = StyleSheet.create({
   },
   radiusText: {
     fontSize: 19,
-    top: 10, 
+    top: 10,
   },
   textInput: {
     height: 50,
@@ -100,11 +104,11 @@ const styles = StyleSheet.create({
   audioText: {
     fontSize: 19,
     top: 35,
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
   },
   audioButton: {
     height: 40,
     width: 400,
     top: 50,
-  }
+  },
 });

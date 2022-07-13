@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import AppDrawer from './AppDrawer.js';
 import { getData, storeData } from './src/utils/AsyncStorage';
-import CONSTANTS from './src/Constants/constants'
+import CONSTANTS from './src/Constants/constants';
 
 const App = () => {
   //initialize default settings for new users, otherwise retrieve last saved value
@@ -17,7 +17,7 @@ const App = () => {
       if (value == null) {
         storeData('song', CONSTANTS.MUSIC.song1);
       }
-    })
+    });
   }, []);
 
   return (

@@ -12,9 +12,7 @@ export default {
     },
   },
   MUSIC: {
-    song1: { name: 'morning glory',
-             path: require('../../assets/morning_glory.mp3')},
-    song2: { name: 'old phone',
-             path: require('../../assets/old_phone.mp3')},
-  }
+    song1: { name: 'morning glory', path: require('../../assets/morning_glory.mp3') },
+    song2: { name: 'old phone', path: require('../../assets/old_phone.mp3') },
+  },
 };

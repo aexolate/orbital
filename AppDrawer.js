@@ -5,9 +5,9 @@ import SettingsStackMenu from './src/Menu/SettingsMenu/SettingsStackMenu';
 import DirectionsMenu from './src/Menu/DirectionsMenu';
 import PermissionsMenu from './src/Menu/PermissionsMenu';
 import FavouritesMenu from './src/Menu/FavouritesMenu';
- 
+
 const Drawer = createDrawerNavigator();
- 
+
 const AppDrawer = () => {
   return (
     <Drawer.Navigator
@@ -24,5 +24,5 @@ const AppDrawer = () => {
     </Drawer.Navigator>
   );
 };
- 
+
 export default AppDrawer;
