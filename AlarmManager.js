@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Vibration } from 'react-native';
 import { Audio } from 'expo-av';
 
-export const AlarmManager = (prop) => {
+export const AlarmManager = () => {
   const [sound, setSound] = useState(null);
   const [status, setStatus] = useState(null);
 

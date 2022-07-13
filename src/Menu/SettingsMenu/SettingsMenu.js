@@ -17,9 +17,6 @@ const SettingsMenu = ({ navigation }) => {
     getData('radius').then((radius) => {
       setRadiusValue(radius == null ? DEFAULT_RADIUS : radius);
     });
-    /*getData('song').then(song => {
-      setSongText(song.name);
-    });*/
   }, []);
 
   useEffect(() => {
