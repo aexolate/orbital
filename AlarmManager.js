@@ -24,7 +24,7 @@ export const AlarmManager = () => {
     setSound(sound);
     setStatus(status);
     await sound.setIsLoopingAsync(true);
-  }
+  };
 
   //Stops playing the alarm
   const stopAlarm = async () => {
