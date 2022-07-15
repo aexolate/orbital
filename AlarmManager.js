@@ -18,9 +18,7 @@ export const AlarmManager = () => {
 
   const loadAudio = async () => {
     const song = await getData('song');
-    console.log('MAP LOADED SONG: ', song);
     const { sound, status } = await Audio.Sound.createAsync(song.path);
-    console.log('MAP LOADED SOUND/STATUS: ', sound, status);
     setSound(sound);
     setStatus(status);
     await sound.setIsLoopingAsync(true);
