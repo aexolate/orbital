@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Vibration } from 'react-native';
 import { Audio } from 'expo-av';
+import { getData } from './src/utils/AsyncStorage';
 
 export const AlarmManager = () => {
   const [sound, setSound] = useState(null);
@@ -12,11 +13,18 @@ export const AlarmManager = () => {
       staysActiveInBackground: true,
     });
 
-    const { sound, status } = await Audio.Sound.createAsync(require('./assets/morning_glory.mp3'));
+    loadAudio();
+  };
+
+  const loadAudio = async () => {
+    const song = await getData('song');
+    console.log('MAP LOADED SONG: ', song);
+    const { sound, status } = await Audio.Sound.createAsync(song.path);
+    console.log('MAP LOADED SOUND/STATUS: ', sound, status);
     setSound(sound);
     setStatus(status);
     await sound.setIsLoopingAsync(true);
-  };
+  }
 
   //Stops playing the alarm
   const stopAlarm = async () => {
@@ -41,6 +49,6 @@ export const AlarmManager = () => {
     }
   };
 
-  return { setupAudio, stopAlarm, playAlarm };
+  return { setupAudio, loadAudio, stopAlarm, playAlarm };
 };
 export default AlarmManager;
