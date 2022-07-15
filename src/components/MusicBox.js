@@ -30,6 +30,7 @@ const MusicBox = (props) => {
   //method to set audio as main alarm
   const setAudio = () => {
     storeData('song', props.song);
+    handleAudioPlay();
     navigation.navigate('Main');
   };
 
