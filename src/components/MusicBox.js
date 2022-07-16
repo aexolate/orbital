@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { Alert, View, StyleSheet, Dimensions } from 'react-native';
 import { Audio } from 'expo-av';
 import { Button, Text } from 'react-native-paper';
 import PropTypes from 'prop-types';
@@ -24,7 +24,6 @@ const MusicBox = (props) => {
   useFocusEffect(
     React.useCallback(() => {
       return async () => {
-        console.log('unmount', isPlaying);
         if (playbackStatus.current.isPlaying) {
           const status = await playbackSound.current.stopAsync();
           status.isPlaying = false; //for IOS delay issues
@@ -47,7 +46,8 @@ const MusicBox = (props) => {
   //method to set audio as main alarm
   const setAudio = () => {
     storeData('song', props.song);
-    navigation.navigate('Main');
+    Alert.alert('Alarm song set!', 'The alarm song is now ' + props.song.name + '!');
+    navigation.navigate('Map');
   };
 
   //method to handle playing and stopping of audio in this component
