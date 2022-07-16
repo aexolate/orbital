@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Button } from 'react-native-paper';
 import MusicBox from '../../components/MusicBox';
-import CONSTANTS from '../../Constants/constants.js';
+import CONSTANTS from '../../constants/Constants.js';
 import PropTypes from 'prop-types';
 
 const SettingsAudioMenu = ({ navigation }) => {

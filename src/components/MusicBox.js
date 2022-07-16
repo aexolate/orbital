@@ -1,53 +1,73 @@
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, FlatList, Dimensions } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, StyleSheet, Dimensions } from 'react-native';
 import { Audio } from 'expo-av';
-import { Button, Text, TextInput } from 'react-native-paper';
+import { Button, Text } from 'react-native-paper';
 import PropTypes from 'prop-types';
 import { Ionicons } from '@expo/vector-icons';
-import { getData, storeData } from '../utils/AsyncStorage';
-import { useNavigation } from '@react-navigation/native';
+import { storeData } from '../utils/AsyncStorage';
+import { useNavigation, useFocusEffect, useIsFocused } from '@react-navigation/native';
 
 const MusicBox = (props) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [playbackSound, setPlaybackSound] = useState(null);
-  const [playbackStatus, setPlaybackStatus] = useState(null);
+  const playbackSound = useRef(null);
+  const playbackStatus = useRef(null);
+
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
 
   useEffect(() => {
-    if (playbackSound == null) {
+    if (playbackSound.current == null) {
       initializeAudio();
     }
   }, []);
 
+ 
+  useFocusEffect(
+    React.useCallback(() => {
+      return async () => {
+        console.log("unmount", isPlaying);
+        if (playbackStatus.current.isPlaying) {
+          const status = await playbackSound.current.stopAsync();
+          status.isPlaying = false; //for IOS delay issues
+          setIsPlaying(false);
+          playbackStatus.current = status; 
+          return; 
+        }      
+      };
+    }, [])
+  );
+
   //method to initiliaze audio
   const initializeAudio = async () => {
     const { sound, status } = await Audio.Sound.createAsync(props.song.path);
-    await sound.setIsLoopingAsync(true);
-    setPlaybackSound(sound);
-    setPlaybackStatus(status);
+    sound.setIsLoopingAsync(true);
+    playbackSound.current = sound;
+    playbackStatus.current = status;
   };
 
   //method to set audio as main alarm
   const setAudio = () => {
     storeData('song', props.song);
-    handleAudioPlay();
     navigation.navigate('Main');
   };
 
   //method to handle playing and stopping of audio in this component
   const handleAudioPlay = async () => {
-    if (playbackStatus.isPlaying) {
-      const status = await playbackSound?.stopAsync();
+
+    if (playbackStatus.current.isPlaying) {
+      const status = await playbackSound.current.stopAsync();
       status.isPlaying = false; //for IOS delay issues
       setIsPlaying(false);
-      return setPlaybackStatus(status);
+      playbackStatus.current = status; 
+      return; 
     }
 
-    if (!playbackStatus.isPlaying) {
-      const status = await playbackSound?.playAsync();
+    if (!playbackStatus.current.isPlaying) {
+      const status = await playbackSound.current.playAsync();
       status.isPlaying = true; //for IOS delay issues
       setIsPlaying(true);
-      return setPlaybackStatus(status);
+      playbackStatus.current = status;
+      return;
     }
   };
 

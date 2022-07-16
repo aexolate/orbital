@@ -5,8 +5,8 @@ import MapView from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 import { AlarmManager } from '../../AlarmManager.js';
-import CONSTANTS from '../Constants/constants.js';
-import { WAYPOINT_TYPE } from '../Constants/WaypointEnum.js';
+import CONSTANTS from '../constants/Constants.js';
+import { WAYPOINT_TYPE } from '../constants/WaypointEnum.js';
 import PropTypes from 'prop-types';
 import Constants from 'expo-constants';
 import {
