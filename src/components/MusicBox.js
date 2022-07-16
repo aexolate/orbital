@@ -21,20 +21,19 @@ const MusicBox = (props) => {
     }
   }, []);
 
- 
   useFocusEffect(
     React.useCallback(() => {
       return async () => {
-        console.log("unmount", isPlaying);
+        console.log('unmount', isPlaying);
         if (playbackStatus.current.isPlaying) {
           const status = await playbackSound.current.stopAsync();
           status.isPlaying = false; //for IOS delay issues
           setIsPlaying(false);
-          playbackStatus.current = status; 
-          return; 
-        }      
+          playbackStatus.current = status;
+          return;
+        }
       };
-    }, [])
+    }, []),
   );
 
   //method to initiliaze audio
@@ -53,13 +52,12 @@ const MusicBox = (props) => {
 
   //method to handle playing and stopping of audio in this component
   const handleAudioPlay = async () => {
-
     if (playbackStatus.current.isPlaying) {
       const status = await playbackSound.current.stopAsync();
       status.isPlaying = false; //for IOS delay issues
       setIsPlaying(false);
-      playbackStatus.current = status; 
-      return; 
+      playbackStatus.current = status;
+      return;
     }
 
     if (!playbackStatus.current.isPlaying) {
