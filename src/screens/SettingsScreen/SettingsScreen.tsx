@@ -38,7 +38,7 @@ const SettingsMenu = ({ navigation }) => {
             alert('Invalid Radius');
           } else {
             storeData(props.keyValue, radiusText);
-            setRadiusValue(radiusText);
+            setRadiusValue(parseInt(radiusText));
             setRadiusText('');
           }
         }}
