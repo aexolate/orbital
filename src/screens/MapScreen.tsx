@@ -20,6 +20,7 @@ import {
 } from '../components';
 import { DatabaseManager, WaypointsManager } from '../utils';
 import { LocationRegion } from 'expo-location';
+import { useIsFocused } from '@react-navigation/native';
 
 const MapMenu = ({ route, navigation }) => {
   const [promptVisible, setPromptVisible] = useState(false);
@@ -31,6 +32,7 @@ const MapMenu = ({ route, navigation }) => {
   const alarmManager = AlarmManager();
   const waypointsManager = WaypointsManager();
   const dbManager = DatabaseManager();
+  const isFocused = useIsFocused();
 
   const mapRef = useRef(null);
   const [wpRadius, setWpRadius] = useState(500); //waypoint radius value that can be changed from MapMenu
@@ -77,6 +79,12 @@ const MapMenu = ({ route, navigation }) => {
       alarmManager.stopAlarm();
     }
   }, [reachedDestination]);
+
+  useEffect(() => {
+    if (isFocused) {
+      alarmManager.loadAudio();
+    }
+  }, [isFocused]);
 
   const checkRequestLocationPerms = () => {
     //The background permission must be only requested AFTER foreground permission
