@@ -11,4 +11,8 @@ export default {
       zoom: 10,
     },
   },
+  MUSIC: {
+    song1: { name: 'morning glory', path: require('../../assets/songs/morning_glory.mp3') },
+    song2: { name: 'old phone', path: require('../../assets/songs/old_phone.mp3') },
+  },
 };
