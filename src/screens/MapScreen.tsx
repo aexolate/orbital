@@ -19,7 +19,10 @@ import {
   WaypointsModal,
 } from '../components';
 import { DatabaseManager, WaypointsManager } from '../utils';
+<<<<<<< HEAD:src/screens/MapScreen.tsx
 import { LocationRegion } from 'expo-location';
+=======
+>>>>>>> 4a218bea70dd4c167d0702ab4e06f1949f196cf1:src/Menu/MapMenu.js
 import { useIsFocused } from '@react-navigation/native';
 
 const MapMenu = ({ route, navigation }) => {
