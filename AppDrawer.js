@@ -1,7 +1,7 @@
 import React from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import MapScreen from './src/screens/MapScreen';
-import SettingsStackMenu from './src/screens/SettingsMenu/SettingsStackMenu';
+import SettingsStackScreen from './src/screens/SettingsScreen/SettingsStackScreen';
 import DirectionsScreen from './src/screens/DirectionsScreen';
 import PermissionsScreen from './src/screens/PermissionsScreen';
 import FavouritesScreen from './src/screens/FavouritesScreen';
@@ -17,7 +17,7 @@ const AppDrawer = () => {
       }}
     >
       <Drawer.Screen name="Map" component={MapScreen} options={{ headerShown: false }} />
-      <Drawer.Screen name="Settings" component={SettingsStackMenu} />
+      <Drawer.Screen name="Settings" component={SettingsStackScreen} />
       <Drawer.Screen name="Directions" component={DirectionsScreen} />
       <Drawer.Screen name="Favourites" component={FavouritesScreen} />
       <Drawer.Screen name="Permissions" component={PermissionsScreen} />
