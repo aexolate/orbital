@@ -1,6 +1,6 @@
 import * as Location from 'expo-location';
 import { Linking, StyleSheet, View } from 'react-native';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Provider as PaperProvider, Button, Text } from 'react-native-paper';
 import PropTypes from 'prop-types';
 
@@ -85,8 +85,5 @@ PermissionsMenu.propTypes = {
 const styles = StyleSheet.create({
   block: {
     marginVertical: 25,
-  },
-  button: {
-    mode: 'contained',
   },
 });

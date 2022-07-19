@@ -19,6 +19,7 @@ import {
   WaypointsModal,
 } from '../components';
 import { DatabaseManager, WaypointsManager } from '../utils';
+import { LocationRegion } from 'expo-location';
 import { useIsFocused } from '@react-navigation/native';
 
 const MapMenu = ({ route, navigation }) => {
@@ -37,21 +38,29 @@ const MapMenu = ({ route, navigation }) => {
   const [wpRadius, setWpRadius] = useState(500); //waypoint radius value that can be changed from MapMenu
   const [WPListVisible, setWPListVisible] = useState(false);
 
-  //Define geofencing task for expo-location. Must be defined in top level scope
-  TaskManager.defineTask('GEOFENCING_TASK', ({ data: { region, eventType }, error }) => {
-    if (error) {
-      Alert.alert('TASK ERROR', error.message); //This error should not happen
-      return;
-    }
+  type GeofencingTask = {
+    eventType: Location.GeofencingEventType;
+    region: LocationRegion;
+  };
 
-    if (eventType === Location.GeofencingEventType.Enter) {
-      //Removes the waypoint that the user just entered
-      waypointsManager.removeWaypoint(region);
+  //Define geofencing task for expo-location
+  TaskManager.defineTask(
+    'GEOFENCING_TASK',
+    ({ data: { region, eventType }, error }: TaskManager.TaskManagerTaskBody<GeofencingTask>) => {
+      if (error) {
+        Alert.alert('TASK ERROR', error.message); //This error should not happen
+        return;
+      }
 
-      //Indicates the user has reached destination and displays AlarmBox and plays the alarm
-      setReachedDestination(true);
-    }
-  });
+      if (eventType === Location.GeofencingEventType.Enter) {
+        //Removes the waypoint that the user just entered
+        waypointsManager.removeWaypoint(region);
+
+        //Indicates the user has reached destination and displays AlarmBox and plays the alarm
+        setReachedDestination(true);
+      }
+    },
+  );
 
   //Initializing Function
   useEffect(() => {
@@ -60,7 +69,7 @@ const MapMenu = ({ route, navigation }) => {
   }, []);
 
   useEffect(() => {
-    route.params?.requests.map((r) => addDestination(r.coords));
+    route.params?.requests.map((wp) => addDestination(wp.coords, wp.title));
   }, [route.params?.requests]);
 
   useEffect(() => {
@@ -183,7 +192,7 @@ const MapMenu = ({ route, navigation }) => {
           initialCamera={CONSTANTS.MAP_CAMERA.SINGAPORE}
           zoomControlEnabled={true}
           showsUserLocation={true}
-          mapPadding={{ top: Constants.statusBarHeight }}
+          mapPadding={{ top: Constants.statusBarHeight, bottom: 0, right: 0, left: 0 }}
           onUserLocationChange={onUserLocationChange}
           onLongPress={(mapEvent) => selectLocLongPress(mapEvent.nativeEvent)}
         >
@@ -211,7 +220,7 @@ const MapMenu = ({ route, navigation }) => {
           <PromptBox
             visible={promptVisible}
             onConfirmPrompt={() => {
-              addDestination(previewLocation);
+              addDestination(previewLocation, 'untitled');
               setPromptVisible(false);
             }}
             onRadiusChange={(rad) => setWpRadius(rad)}

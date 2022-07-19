@@ -1,6 +1,6 @@
-import { distanceBetween } from '../src/utils/distance.js';
+import { distanceBetween } from '../src/utils/';
 
-describe('WaypointsManager', () => {
+describe('distanceBetween', () => {
   it('sameCoords', () => {
     const c1 = { latitude: 0, longitude: 0 };
     const c2 = { latitude: 0, longitude: 0 };
