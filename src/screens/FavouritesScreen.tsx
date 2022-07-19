@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
-import { Button, FAB, Divider, List } from 'react-native-paper';
-import * as SQLite from 'expo-sqlite';
+import { Button, Divider } from 'react-native-paper';
 import { DatabaseManager } from '../utils/DatabaseManager';
 import PropTypes from 'prop-types';
 import { useIsFocused } from '@react-navigation/native';
@@ -85,11 +84,6 @@ const FavouritesMenu = ({ navigation }) => {
           </View>
         ))}
       </ScrollView>
-
-      {/* <Text>Debugging Buttons - remove in release</Text>
-      <Button onPress={() => dbManager.clearTable()}>clear</Button>
-      <Button onPress={() => dbManager.printTable()}>print</Button>
-      <Button onPress={test}>test</Button> */}
     </View>
   );
 };

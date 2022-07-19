@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { getData } from '../utils/AsyncStorage';
 import { useIsFocused } from '@react-navigation/native';
 
-const ReadiusTextInput = (props) => {
+const RadiusTextInput = (props) => {
   const [text, setText] = React.useState('');
   const isFocused = useIsFocused();
   const DEFAULT_RADIUS = 500;
@@ -41,8 +41,8 @@ const ReadiusTextInput = (props) => {
     />
   );
 };
-ReadiusTextInput.propTypes = {
+RadiusTextInput.propTypes = {
   onRadiusChange: PropTypes.func,
 };
 
-export default ReadiusTextInput;
+export default RadiusTextInput;

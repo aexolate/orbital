@@ -1,10 +1,10 @@
 import React from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import MapMenu from './src/Menu/MapMenu';
-import SettingsMenu from './src/Menu/SettingsMenu';
-import DirectionsMenu from './src/Menu/DirectionsMenu';
-import PermissionsMenu from './src/Menu/PermissionsMenu';
-import FavouritesMenu from './src/Menu/FavouritesMenu';
+import MapScreen from './src/screens/MapScreen';
+import SettingsStackScreen from './src/screens/SettingsScreen/SettingsStackScreen';
+import DirectionsScreen from './src/screens/DirectionsScreen';
+import PermissionsScreen from './src/screens/PermissionsScreen';
+import FavouritesScreen from './src/screens/FavouritesScreen';
 
 const Drawer = createDrawerNavigator();
 
@@ -16,11 +16,11 @@ const AppDrawer = () => {
         headerShown: true,
       }}
     >
-      <Drawer.Screen name="Map" component={MapMenu} options={{ headerShown: false }} />
-      <Drawer.Screen name="Settings" component={SettingsMenu} />
-      <Drawer.Screen name="Directions" component={DirectionsMenu} />
-      <Drawer.Screen name="Favourites" component={FavouritesMenu} />
-      <Drawer.Screen name="Permissions" component={PermissionsMenu} />
+      <Drawer.Screen name="Map" component={MapScreen} options={{ headerShown: false }} />
+      <Drawer.Screen name="Settings" component={SettingsStackScreen} />
+      <Drawer.Screen name="Directions" component={DirectionsScreen} />
+      <Drawer.Screen name="Favourites" component={FavouritesScreen} />
+      <Drawer.Screen name="Permissions" component={PermissionsScreen} />
     </Drawer.Navigator>
   );
 };
