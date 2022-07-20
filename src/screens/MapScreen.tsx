@@ -21,6 +21,7 @@ import {
 import { DatabaseManager, WaypointsManager } from '../utils';
 import { LocationRegion } from 'expo-location';
 import { useIsFocused } from '@react-navigation/native';
+import FailSafe from '../../FailSafe.js';
 
 const MapMenu = ({ route, navigation }) => {
   const [promptVisible, setPromptVisible] = useState(false);
@@ -33,6 +34,7 @@ const MapMenu = ({ route, navigation }) => {
   const waypointsManager = WaypointsManager();
   const dbManager = DatabaseManager();
   const isFocused = useIsFocused();
+  const failsafe = FailSafe();
 
   const mapRef = useRef(null);
   const [wpRadius, setWpRadius] = useState(500); //waypoint radius value that can be changed from MapMenu
@@ -65,7 +67,7 @@ const MapMenu = ({ route, navigation }) => {
   //Initializing Function
   useEffect(() => {
     alarmManager.setupAudio();
-    checkRequestLocationPerms();
+    //checkRequestLocationPerms();
   }, []);
 
   useEffect(() => {
@@ -83,10 +85,11 @@ const MapMenu = ({ route, navigation }) => {
   useEffect(() => {
     if (isFocused) {
       alarmManager.loadAudio();
+      failsafe.checkRequestLocationPerms();
     }
   }, [isFocused]);
 
-  const checkRequestLocationPerms = () => {
+  /*const checkRequestLocationPerms = () => {
     //The background permission must be only requested AFTER foreground permission
     Location.requestForegroundPermissionsAsync().then(() => {
       Location.requestBackgroundPermissionsAsync().then(() => {
@@ -99,7 +102,7 @@ const MapMenu = ({ route, navigation }) => {
         });
       });
     });
-  };
+  }; */
 
   //selecting destination via longpress
   const selectLocLongPress = (mapEvent) => {
@@ -149,9 +152,16 @@ const MapMenu = ({ route, navigation }) => {
   useEffect(() => {
     //Updates the distance when waypoints are modified
     if (waypointsManager.waypoints.length > 0) {
+      failsafe.clearValues(); //clear distance and speed values
+      failsafe.startTrackPosition(); //start failsafe
       Location.getLastKnownPositionAsync().then((locationObj) => {
         setDistanceToDest(waypointsManager.distanceToNearestWP(locationObj.coords));
       });
+    }
+
+    //Stops tracking user for failsafe if no waypoints
+    if (waypointsManager.waypoints.length == 0) {
+      failsafe.stopTrackPosition();
     }
 
     //Handles geofencing when the waypoints are modified
