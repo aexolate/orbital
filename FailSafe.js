@@ -10,10 +10,11 @@ const TIME_INTERVAL = 10000; //in milliseconds
 
 export const FailSafe = () => {
   const [permissionsIsGranted, setPermissionIsGranted] = useState(false);
-  const [timeTravelled, setTimeTravelled] = useState(0);
+  const [timeTravelled, setTimeTravelled] = useState(1);
   const [distanceTravelled, setDistanceTravelled] = useState(0);
   const [previousLocation, setPreviousLocation] = useState(null);
   const [isLocationLost, setIsLocationLost] = useState(false);
+  const [distanceRemaining, setDistanceRemaining] = useState(0);
   const navigation = useNavigation();
 
   //background task that tracks user's travel distance & speed and activates failsafe if location lost
@@ -52,7 +53,8 @@ export const FailSafe = () => {
       //activate failsafe if location is lost
       if (isLocationLost) {
         let speed = Math.max(distanceTravelled / timeTravelled);
-        failSafeAlarm(speed);
+        let approxTime = Math.min(speed * distanceRemaining);
+        failSafeAlarm(approxTime);
       }
     }
   });
@@ -65,6 +67,11 @@ export const FailSafe = () => {
         Alert.alert('ALARM SOUNDED!');
       }
     }, timeLeft);
+  };
+
+  //set distance remaining
+  const storeDistanceRemain = (value) => {
+    setDistanceRemaining(value);
   };
 
   //check for tracking permissions
@@ -110,11 +117,17 @@ export const FailSafe = () => {
   //clear distance travelled, time taken & previous location
   const clearValues = () => {
     setDistanceTravelled(0);
-    setTimeTravelled(0);
+    setTimeTravelled(1);
     setPreviousLocation(null);
   };
 
-  return { checkRequestLocationPerms, startTrackPosition, stopTrackPosition, clearValues };
+  return {
+    checkRequestLocationPerms,
+    startTrackPosition,
+    stopTrackPosition,
+    clearValues,
+    storeDistanceRemain,
+  };
 };
 
 export default FailSafe;

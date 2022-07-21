@@ -67,7 +67,7 @@ const MapMenu = ({ route, navigation }) => {
   //Initializing Function
   useEffect(() => {
     alarmManager.setupAudio();
-    //checkRequestLocationPerms();
+    //checkRequestLocationPerms(); //shifted to isFocused useEffect
   }, []);
 
   useEffect(() => {
@@ -88,6 +88,10 @@ const MapMenu = ({ route, navigation }) => {
       failsafe.checkRequestLocationPerms();
     }
   }, [isFocused]);
+
+  useEffect(() => {
+    failsafe.storeDistanceRemain(distanceToDest);
+  }, [distanceToDest]);
 
   /*const checkRequestLocationPerms = () => {
     //The background permission must be only requested AFTER foreground permission
