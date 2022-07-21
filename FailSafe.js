@@ -53,7 +53,7 @@ export const FailSafe = () => {
       //activate failsafe if location is lost
       if (isLocationLost) {
         let speed = Math.max(distanceTravelled / timeTravelled);
-        let approxTime = Math.min(speed / distanceRemaining);
+        let approxTime = Math.min(distanceRemaining / speed);
         failSafeAlarm(approxTime);
       }
     }
