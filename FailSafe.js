@@ -4,6 +4,8 @@ import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 import { useNavigation } from '@react-navigation/native';
 import { distanceBetween } from './src/utils';
+import { AlarmManager } from './AlarmManager';
+import * as Battery from 'expo-battery';
 
 const LOCATION_TRACKING = 'location-tracking';
 const TIME_INTERVAL = 10000; //in milliseconds
@@ -16,6 +18,7 @@ export const FailSafe = () => {
   const [isLocationLost, setIsLocationLost] = useState(false);
   const [distanceRemaining, setDistanceRemaining] = useState(0);
   const navigation = useNavigation();
+  const alarmManager = AlarmManager();
 
   //background task that tracks user's travel distance & speed and activates failsafe if location lost
   TaskManager.defineTask(LOCATION_TRACKING, async ({ data, error }) => {
@@ -64,7 +67,18 @@ export const FailSafe = () => {
     setTimeout(() => {
       if (isLocationLost) {
         //sound alarm
-        Alert.alert('ALARM SOUNDED!');
+        alarmManager.playAlarm();
+        Alert.alert(
+          "FAILSAFE ACTIVATED",
+          "Your device gps signal is lost",
+          [{
+            text: "Stop Alarm",
+            onPress: () => {
+              alarmManager.stopAlarm();
+              stopTrackPosition();
+            }
+          },]
+        )
       }
     }, timeLeft);
   };
@@ -73,6 +87,26 @@ export const FailSafe = () => {
   const storeDistanceRemain = (value) => {
     setDistanceRemaining(value);
   };
+
+  //battery level checker
+  const batteryLevelAlert = async () => {
+    const batteryLevel = await Battery.getBatteryLevelAsync();
+    if (batteryLevel < 0.2) {
+      //sound alarm
+      alarmManager.playAlarm();
+      Alert.alert(
+        "FAILSAFE ACTIVATED",
+        "Your device battery is below the threshold limit",
+        [{
+          text: "Stop Alarm",
+          onPress: () => {
+            alarmManager.stopAlarm();
+            stopTrackPosition();
+          }
+        },]
+      )
+    }
+  }
 
   //check for tracking permissions
   const checkRequestLocationPerms = async () => {
@@ -93,6 +127,7 @@ export const FailSafe = () => {
   //start taking note of user's travelling distance and speed
   const startTrackPosition = async () => {
     //console.log('START TRACK POSITION');
+    clearValues();
     const hasStartedLocUpdate = await Location.hasStartedLocationUpdatesAsync(LOCATION_TRACKING);
     //console.log('locUp?: ', hasStartedLocUpdate);
     if (permissionsIsGranted && !hasStartedLocUpdate) {
@@ -101,6 +136,7 @@ export const FailSafe = () => {
         timeInterval: TIME_INTERVAL,
         distanceInterval: 0,
       });
+      alarmManager.setupAudio();
     }
   };
 
@@ -110,6 +146,7 @@ export const FailSafe = () => {
       if (tracking) {
         Location.stopLocationUpdatesAsync(LOCATION_TRACKING);
         clearValues();
+        alarmManager.unloadAudio();
       }
     });
   };
@@ -125,7 +162,6 @@ export const FailSafe = () => {
     checkRequestLocationPerms,
     startTrackPosition,
     stopTrackPosition,
-    clearValues,
     storeDistanceRemain,
   };
 };
