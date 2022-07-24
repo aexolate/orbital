@@ -19,12 +19,10 @@ export default {
       userInterfaceStyle: 'light',
       supportsTablet: true,
       infoPlist: {
-        UIBackgroundModes: [
-          "location",
-          "fetch"
-        ],
-        NSLocationAlwaysUsageDescription: "App requires location even when the App is backgrounded."
-      }
+        UIBackgroundModes: ['location', 'fetch'],
+        NSLocationAlwaysUsageDescription:
+          'App requires location even when the App is backgrounded.',
+      },
     },
     android: {
       userInterfaceStyle: 'light',

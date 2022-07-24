@@ -68,17 +68,15 @@ export const FailSafe = () => {
       if (isLocationLost) {
         //sound alarm
         alarmManager.playAlarm();
-        Alert.alert(
-          "FAILSAFE ACTIVATED",
-          "Your device gps signal is lost",
-          [{
-            text: "Stop Alarm",
+        Alert.alert('FAILSAFE ACTIVATED', 'Your device gps signal is lost', [
+          {
+            text: 'Stop Alarm',
             onPress: () => {
               alarmManager.stopAlarm();
               stopTrackPosition();
-            }
-          },]
-        )
+            },
+          },
+        ]);
       }
     }, timeLeft);
   };
@@ -94,19 +92,17 @@ export const FailSafe = () => {
     if (batteryLevel < 0.2) {
       //sound alarm
       alarmManager.playAlarm();
-      Alert.alert(
-        "FAILSAFE ACTIVATED",
-        "Your device battery is below the threshold limit",
-        [{
-          text: "Stop Alarm",
+      Alert.alert('FAILSAFE ACTIVATED', 'Your device battery is below the threshold limit', [
+        {
+          text: 'Stop Alarm',
           onPress: () => {
             alarmManager.stopAlarm();
             stopTrackPosition();
-          }
-        },]
-      )
+          },
+        },
+      ]);
     }
-  }
+  };
 
   //check for tracking permissions
   const checkRequestLocationPerms = async () => {
