@@ -21,11 +21,8 @@ import {
 import { DatabaseManager, WaypointsManager } from '../utils';
 import { LocationRegion } from 'expo-location';
 import { useIsFocused } from '@react-navigation/native';
-<<<<<<< HEAD
 import FailSafe from '../../FailSafe.js';
-=======
 import { getData, storeData } from '../utils/AsyncStorage';
->>>>>>> 18e5afa3c8bc2d795aaa3c1049a1833139fc3a89
 
 const MapMenu = ({ route, navigation }) => {
   const [promptVisible, setPromptVisible] = useState(false);
@@ -72,7 +69,7 @@ const MapMenu = ({ route, navigation }) => {
   //Initializing Function
   useEffect(() => {
     getData('HAS_LAUNCHED').then((res) => {
-      if(res == 'TRUE') {
+      if (res == 'TRUE') {
         setShowGuide(false);
       }
     });
@@ -312,7 +309,11 @@ const MapMenu = ({ route, navigation }) => {
         </Button>
 
         <Portal>
-          <Modal visible={showGuide} onDismiss={dismissGuide} contentContainerStyle={{ backgroundColor: 'white', padding: 10 }}>
+          <Modal
+            visible={showGuide}
+            onDismiss={dismissGuide}
+            contentContainerStyle={{ backgroundColor: 'white', padding: 10 }}
+          >
             <View style={{ alignItems: 'center' }}>
               <Text style={{ fontWeight: 'bold', fontSize: 20 }}>Quick Start Guide</Text>
               <Image
@@ -328,7 +329,6 @@ const MapMenu = ({ route, navigation }) => {
             </View>
           </Modal>
         </Portal>
-
       </View>
     </PaperProvider>
   );

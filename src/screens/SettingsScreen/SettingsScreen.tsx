@@ -80,7 +80,7 @@ const SettingsMenu = ({ navigation }) => {
           status={checked ? 'checked' : 'unchecked'}
           onPress={() => {
             setChecked(!checked);
-            storeData('failsafe-battery', checked);
+            storeData('failsafe', checked);
           }}
         />
         <Text>Enable Failsafe </Text>
