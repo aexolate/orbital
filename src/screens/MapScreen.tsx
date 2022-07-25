@@ -21,7 +21,7 @@ import {
 import { DatabaseManager, WaypointsManager } from '../utils';
 import { LocationRegion } from 'expo-location';
 import { useIsFocused } from '@react-navigation/native';
-import FailSafe from '../../FailSafe.js';
+import FailSafe from '../utils/FailSafe.js';
 import { getData, storeData } from '../utils/AsyncStorage';
 
 const MapMenu = ({ route, navigation }) => {
@@ -30,7 +30,7 @@ const MapMenu = ({ route, navigation }) => {
   const [previewLocation, setPreviewLocation] = useState(CONSTANTS.LOCATIONS.DEFAULT);
   const [distanceToDest, setDistanceToDest] = useState(Infinity);
   const [reachedDestination, setReachedDestination] = useState(false); //Indicates whether the user has been in radius of destination
-  const [showGuide, setShowGuide] = useState(true);
+  const [showGuide, setShowGuide] = useState(false);
 
   const alarmManager = AlarmManager();
   const waypointsManager = WaypointsManager();
@@ -69,8 +69,8 @@ const MapMenu = ({ route, navigation }) => {
   //Initializing Function
   useEffect(() => {
     getData('HAS_LAUNCHED').then((res) => {
-      if (res == 'TRUE') {
-        setShowGuide(false);
+      if (res != 'TRUE') {
+        setShowGuide(true);
       }
     });
 

@@ -3,10 +3,10 @@ import { Alert, View, StyleSheet, Dimensions } from 'react-native';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 import { useNavigation } from '@react-navigation/native';
-import { distanceBetween } from './src/utils';
-import { AlarmManager } from './AlarmManager';
+import { distanceBetween } from '../utils/distance';
+import { AlarmManager } from '../../AlarmManager';
 import * as Battery from 'expo-battery';
-import { getData } from './src/utils/AsyncStorage';
+import { getData } from './AsyncStorage';
 
 const LOCATION_TRACKING = 'location-tracking';
 const TIME_INTERVAL = 10000; //in milliseconds
@@ -34,42 +34,44 @@ export const FailSafe = () => {
       return;
     }
     if (data) {
-      await getData('failsafe').then((status) => setFailsafeEnabled(status));
-      if (failsafeEnabled) {
-        const { locations } = data;
-        batteryLevelAlert();
-
-        //set boolean for if location is lost (change depending on return type if no signal)
-        if (locations == undefined) {
-          setIsLocationLost(true);
-        } else {
-          setIsLocationLost(false);
-        }
-
-        //record down time & distance travelled if location not lost
-        if (!isLocationLost) {
-          setTimeTravelled((time) => time + TIME_INTERVAL);
-
-          if (previousLocation == null) {
-            setPreviousLocation(locations[0]);
+      getData('USE_FAILSAFE').then((useFailsafe) => {
+        console.log(useFailsafe);
+        if (useFailsafe) {
+          const { locations } = data;
+          batteryLevelAlert();
+  
+          //set boolean for if location is lost (change depending on return type if no signal)
+          if (locations == undefined) {
+            setIsLocationLost(true);
           } else {
-            setDistanceTravelled((distance) => {
-              let newDistance = distanceBetween(locations[0].coords, previousLocation.coords);
-              distance = distance + newDistance;
-            });
-            setPreviousLocation(locations[0]);
+            setIsLocationLost(false);
+          }
+  
+          //record down time & distance travelled if location not lost
+          if (!isLocationLost) {
+            setTimeTravelled((time) => time + TIME_INTERVAL);
+  
+            if (previousLocation == null) {
+              setPreviousLocation(locations[0]);
+            } else {
+              setDistanceTravelled((distance) => {
+                let newDistance = distanceBetween(locations[0].coords, previousLocation.coords);
+                distance = distance + newDistance;
+              });
+              setPreviousLocation(locations[0]);
+            }
+          }
+  
+          //console.log(locations[0]);
+  
+          //activate failsafe if location is lost
+          if (isLocationLost) {
+            let speed = Math.max(distanceTravelled / timeTravelled);
+            let approxTime = Math.min(distanceRemaining / speed);
+            failSafeAlarm(approxTime);
           }
         }
-
-        //console.log(locations[0]);
-
-        //activate failsafe if location is lost
-        if (isLocationLost) {
-          let speed = Math.max(distanceTravelled / timeTravelled);
-          let approxTime = Math.min(distanceRemaining / speed);
-          failSafeAlarm(approxTime);
-        }
-      }
+      });
     }
   });
 
