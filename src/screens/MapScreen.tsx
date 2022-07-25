@@ -93,6 +93,7 @@ const MapMenu = ({ route, navigation }) => {
   useEffect(() => {
     if (isFocused) {
       alarmManager.loadAudio();
+      failsafe.loadFailsafeAudio();
       failsafe.checkRequestLocationPerms();
     }
   }, [isFocused]);

@@ -97,6 +97,11 @@ export const FailSafe = () => {
     setDistanceRemaining(value);
   };
 
+  //load newly set ringtone
+  const loadFailsafeAudio = () => {
+    alarmManager.loadAudio();
+  }
+
   //battery level checker
   const batteryLevelAlert = async () => {
     const batteryLevel = await Battery.getBatteryLevelAsync();
@@ -170,6 +175,7 @@ export const FailSafe = () => {
     startTrackPosition,
     stopTrackPosition,
     storeDistanceRemain,
+    loadFailsafeAudio,
   };
 };
 
