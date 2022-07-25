@@ -21,7 +21,7 @@ import {
 import { DatabaseManager, WaypointsManager } from '../utils';
 import { LocationRegion } from 'expo-location';
 import { useIsFocused } from '@react-navigation/native';
-import FailSafe from '../utils/FailSafe.js';
+import FailSafe from '../utils/FailSafe';
 import { getData, storeData } from '../utils/AsyncStorage';
 
 const MapMenu = ({ route, navigation }) => {

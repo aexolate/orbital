@@ -3,7 +3,7 @@ import { Alert, View, StyleSheet, Dimensions } from 'react-native';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 import { useNavigation } from '@react-navigation/native';
-import { distanceBetween } from '../utils/distance';
+import { distanceBetween } from './distance';
 import { AlarmManager } from '../../AlarmManager';
 import * as Battery from 'expo-battery';
 import { getData } from './AsyncStorage';
@@ -19,7 +19,6 @@ export const FailSafe = () => {
   const [isLocationLost, setIsLocationLost] = useState(false);
   const [distanceRemaining, setDistanceRemaining] = useState(0);
   const [isActivated, setIsActivated] = useState(false);
-  const [failsafeEnabled, setFailsafeEnabled] = useState(false);
   const navigation = useNavigation();
   const alarmManager = AlarmManager();
 
@@ -35,7 +34,6 @@ export const FailSafe = () => {
     }
     if (data) {
       getData('USE_FAILSAFE').then((useFailsafe) => {
-        console.log(useFailsafe);
         if (useFailsafe) {
           const { locations } = data;
           batteryLevelAlert();
@@ -56,13 +54,11 @@ export const FailSafe = () => {
             } else {
               setDistanceTravelled((distance) => {
                 let newDistance = distanceBetween(locations[0].coords, previousLocation.coords);
-                distance = distance + newDistance;
+                return (distance = distance + newDistance);
               });
               setPreviousLocation(locations[0]);
             }
           }
-
-          //console.log(locations[0]);
 
           //activate failsafe if location is lost
           if (isLocationLost) {
