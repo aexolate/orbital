@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, View, StyleSheet, Dimensions } from 'react-native';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
@@ -17,8 +17,13 @@ export const FailSafe = () => {
   const [previousLocation, setPreviousLocation] = useState(null);
   const [isLocationLost, setIsLocationLost] = useState(false);
   const [distanceRemaining, setDistanceRemaining] = useState(0);
+  const [ isActivated, setIsActivated ] = useState(false);    
   const navigation = useNavigation();
   const alarmManager = AlarmManager();
+
+  useEffect(() => {
+    alarmManager.setupAudio();
+  }, []);
 
   //background task that tracks user's travel distance & speed and activates failsafe if location lost
   TaskManager.defineTask(LOCATION_TRACKING, async ({ data, error }) => {
@@ -28,6 +33,7 @@ export const FailSafe = () => {
     }
     if (data) {
       const { locations } = data;
+      batteryLevelAlert();
 
       //set boolean for if location is lost (change depending on return type if no signal)
       if (locations == undefined) {
@@ -51,7 +57,7 @@ export const FailSafe = () => {
         }
       }
 
-      console.log(locations[0]);
+      //console.log(locations[0]);
 
       //activate failsafe if location is lost
       if (isLocationLost) {
@@ -89,9 +95,10 @@ export const FailSafe = () => {
   //battery level checker
   const batteryLevelAlert = async () => {
     const batteryLevel = await Battery.getBatteryLevelAsync();
-    if (batteryLevel < 0.2) {
+    if (batteryLevel < 0.2 && !isActivated) {
       //sound alarm
       alarmManager.playAlarm();
+      setIsActivated(true);
       Alert.alert('FAILSAFE ACTIVATED', 'Your device battery is below the threshold limit', [
         {
           text: 'Stop Alarm',
@@ -132,7 +139,6 @@ export const FailSafe = () => {
         timeInterval: TIME_INTERVAL,
         distanceInterval: 0,
       });
-      alarmManager.setupAudio();
     }
   };
 
@@ -142,7 +148,6 @@ export const FailSafe = () => {
       if (tracking) {
         Location.stopLocationUpdatesAsync(LOCATION_TRACKING);
         clearValues();
-        alarmManager.unloadAudio();
       }
     });
   };
@@ -152,6 +157,7 @@ export const FailSafe = () => {
     setDistanceTravelled(0);
     setTimeTravelled(1);
     setPreviousLocation(null);
+    setIsActivated(false);
   };
 
   return {
