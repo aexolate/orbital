@@ -63,7 +63,7 @@ const SettingsMenu = ({ navigation }) => {
         keyboardType="numeric"
       />
       <SettingsButton keyValue={'radius'} />
-      
+
       <Text style={styles.audioText}>Alarm Sound: {songText}</Text>
       <Button
         style={styles.audioButton}
@@ -75,9 +75,14 @@ const SettingsMenu = ({ navigation }) => {
         Set Audio
       </Button>
 
-
-      <View style={{flexDirection: 'row'}}>
-        <Checkbox status={checked ? 'checked' : 'unchecked'} onPress={() => {setChecked(!checked)}} />
+      <View style={{ flexDirection: 'row' }}>
+        <Checkbox
+          status={checked ? 'checked' : 'unchecked'}
+          onPress={() => {
+            setChecked(!checked);
+            storeData('failsafe-battery', checked);
+          }}
+        />
         <Text>Enable Failsafe </Text>
       </View>
     </View>
