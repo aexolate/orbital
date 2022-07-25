@@ -122,6 +122,7 @@ export const FailSafe = () => {
   //check for tracking permissions
   const checkRequestLocationPerms = async () => {
     const fgPermissions = await Location.requestForegroundPermissionsAsync();
+    console.log('perm check');
     const bgPermissions = await Location.requestBackgroundPermissionsAsync();
     if (fgPermissions.granted && bgPermissions.granted) {
       setPermissionIsGranted(true);

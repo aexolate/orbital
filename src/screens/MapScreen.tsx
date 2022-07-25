@@ -167,6 +167,11 @@ const MapMenu = ({ route, navigation }) => {
     if (waypointsManager.waypoints.length > 0) {
       failsafe.startTrackPosition(); //start failsafe
       Location.getLastKnownPositionAsync().then((locationObj) => {
+        if(locationObj == null) {
+          Alert.alert('GPS Error', 'Location could not be obtained. Check if location service is turned on and reload the app.');
+          return;
+        }
+
         setDistanceToDest(waypointsManager.distanceToNearestWP(locationObj.coords));
       });
     }
@@ -174,6 +179,7 @@ const MapMenu = ({ route, navigation }) => {
     //Stops tracking user for failsafe if no waypoints
     if (waypointsManager.waypoints.length == 0) {
       failsafe.stopTrackPosition();
+      return;
     }
 
     //Handles geofencing when the waypoints are modified

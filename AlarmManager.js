@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Vibration } from 'react-native';
 import { Audio } from 'expo-av';
 import { getData } from './src/utils/AsyncStorage';
+import CONSTANTS from './src/constants/Constants';
 
 export const AlarmManager = () => {
   const [sound, setSound] = useState(null);
@@ -17,7 +18,10 @@ export const AlarmManager = () => {
   };
 
   const loadAudio = async () => {
-    const song = await getData('song');
+    let song = await getData('song');
+    if(song == null) {
+      song = CONSTANTS.MUSIC.song1;
+    }
     const { sound, status } = await Audio.Sound.createAsync(song.path);
     setSound(sound);
     setStatus(status);
