@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { StyleSheet, View, StatusBar, Alert } from 'react-native';
-import { Provider as PaperProvider, Button, Colors } from 'react-native-paper';
+import { StyleSheet, View, StatusBar, Alert, Text, Image } from 'react-native';
+import { Provider as PaperProvider, Button, Colors, Portal, Modal } from 'react-native-paper';
 import MapView from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
@@ -21,7 +21,11 @@ import {
 import { DatabaseManager, WaypointsManager } from '../utils';
 import { LocationRegion } from 'expo-location';
 import { useIsFocused } from '@react-navigation/native';
+<<<<<<< HEAD
 import FailSafe from '../../FailSafe.js';
+=======
+import { getData, storeData } from '../utils/AsyncStorage';
+>>>>>>> 18e5afa3c8bc2d795aaa3c1049a1833139fc3a89
 
 const MapMenu = ({ route, navigation }) => {
   const [promptVisible, setPromptVisible] = useState(false);
@@ -29,6 +33,7 @@ const MapMenu = ({ route, navigation }) => {
   const [previewLocation, setPreviewLocation] = useState(CONSTANTS.LOCATIONS.DEFAULT);
   const [distanceToDest, setDistanceToDest] = useState(Infinity);
   const [reachedDestination, setReachedDestination] = useState(false); //Indicates whether the user has been in radius of destination
+  const [showGuide, setShowGuide] = useState(true);
 
   const alarmManager = AlarmManager();
   const waypointsManager = WaypointsManager();
@@ -66,6 +71,12 @@ const MapMenu = ({ route, navigation }) => {
 
   //Initializing Function
   useEffect(() => {
+    getData('HAS_LAUNCHED').then((res) => {
+      if(res == 'TRUE') {
+        setShowGuide(false);
+      }
+    });
+
     alarmManager.setupAudio();
     //checkRequestLocationPerms(); //shifted to isFocused useEffect
   }, []);
@@ -194,6 +205,11 @@ const MapMenu = ({ route, navigation }) => {
     });
   };
 
+  const dismissGuide = () => {
+    setShowGuide(false);
+    storeData('HAS_LAUNCHED', 'TRUE');
+  };
+
   //Render
   return (
     <PaperProvider>
@@ -294,6 +310,25 @@ const MapMenu = ({ route, navigation }) => {
         >
           Waypoints
         </Button>
+
+        <Portal>
+          <Modal visible={showGuide} onDismiss={dismissGuide} contentContainerStyle={{ backgroundColor: 'white', padding: 10 }}>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ fontWeight: 'bold', fontSize: 20 }}>Quick Start Guide</Text>
+              <Image
+                source={require('../../assets/quickstart.png')}
+                style={{ width: '100%', height: undefined, aspectRatio: 1 }}
+              />
+              <Text>
+                Begin setting an alarm by long-pressing a location on the map, or using the
+                searchbar to use that location.
+              </Text>
+
+              <Button onPress={dismissGuide}>Dismiss</Button>
+            </View>
+          </Modal>
+        </Portal>
+
       </View>
     </PaperProvider>
   );
