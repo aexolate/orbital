@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
-import { Button, Text, TextInput } from 'react-native-paper';
+import { Button, Text, TextInput, Checkbox } from 'react-native-paper';
 import { useIsFocused } from '@react-navigation/native';
 import { getData, storeData } from '../../utils/AsyncStorage';
 import PropTypes from 'prop-types';
@@ -12,6 +12,7 @@ const SettingsMenu = ({ navigation }) => {
   const [radiusValue, setRadiusValue] = useState(DEFAULT_RADIUS); //radius that is displayed in app, also the current setting value
   const [songText, setSongText] = useState('');
   const isFocused = useIsFocused();
+  const [checked, setChecked] = React.useState(false);
 
   useEffect(() => {
     getData('radius').then((radius) => {
@@ -62,6 +63,7 @@ const SettingsMenu = ({ navigation }) => {
         keyboardType="numeric"
       />
       <SettingsButton keyValue={'radius'} />
+      
       <Text style={styles.audioText}>Alarm Sound: {songText}</Text>
       <Button
         style={styles.audioButton}
@@ -72,6 +74,12 @@ const SettingsMenu = ({ navigation }) => {
       >
         Set Audio
       </Button>
+
+
+      <View style={{flexDirection: 'row'}}>
+        <Checkbox status={checked ? 'checked' : 'unchecked'} onPress={() => {setChecked(!checked)}} />
+        <Text>Enable Failsafe </Text>
+      </View>
     </View>
   );
 };
