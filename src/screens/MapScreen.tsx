@@ -156,7 +156,6 @@ const MapMenu = ({ route, navigation }) => {
   useEffect(() => {
     //Updates the distance when waypoints are modified
     if (waypointsManager.waypoints.length > 0) {
-      failsafe.clearValues(); //clear distance and speed values
       failsafe.startTrackPosition(); //start failsafe
       Location.getLastKnownPositionAsync().then((locationObj) => {
         setDistanceToDest(waypointsManager.distanceToNearestWP(locationObj.coords));
