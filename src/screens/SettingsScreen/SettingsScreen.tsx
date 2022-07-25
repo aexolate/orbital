@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, FlatList } from 'react-native';
-import { Button, Text, TextInput } from 'react-native-paper';
+import { View, StyleSheet } from 'react-native';
+import { Button, Text, TextInput, Checkbox, Colors } from 'react-native-paper';
 import { useIsFocused } from '@react-navigation/native';
 import { getData, storeData } from '../../utils/AsyncStorage';
 import PropTypes from 'prop-types';
@@ -12,10 +12,19 @@ const SettingsMenu = ({ navigation }) => {
   const [radiusValue, setRadiusValue] = useState(DEFAULT_RADIUS); //radius that is displayed in app, also the current setting value
   const [songText, setSongText] = useState('');
   const isFocused = useIsFocused();
+  const [checked, setChecked] = React.useState(false);
 
   useEffect(() => {
     getData('radius').then((radius) => {
       setRadiusValue(radius == null ? DEFAULT_RADIUS : radius);
+    });
+
+    getData('USE_FAILSAFE').then((useFailsafe) => {
+      if (useFailsafe == undefined) {
+        setChecked(false);
+      } else {
+        setChecked(useFailsafe);
+      }
     });
   }, []);
 
@@ -30,8 +39,9 @@ const SettingsMenu = ({ navigation }) => {
   const SettingsButton = (props) => {
     return (
       <Button
-        style={styles.button}
         mode="contained"
+        color={Colors.blue800}
+        icon="map-marker-radius-outline"
         onPress={() => {
           const isNum = /^\d+$/.test(radiusText);
           if (!isNum || !(parseInt(radiusText) > 0)) {
@@ -43,7 +53,7 @@ const SettingsMenu = ({ navigation }) => {
           }
         }}
       >
-        confirm
+        Set Radius
       </Button>
     );
   };
@@ -53,25 +63,50 @@ const SettingsMenu = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.radiusText}>Default Activation Radius: {radiusValue} meters</Text>
-      <TextInput
-        style={styles.textInput}
-        placeholder="Enter Activation Radius"
-        value={radiusText}
-        onChangeText={setRadiusText}
-        keyboardType="numeric"
-      />
-      <SettingsButton keyValue={'radius'} />
-      <Text style={styles.audioText}>Alarm Sound: {songText}</Text>
-      <Button
-        style={styles.audioButton}
-        mode="contained"
-        onPress={() => {
-          navigation.navigate('Audio');
-        }}
-      >
-        Set Audio
-      </Button>
+      <View>
+        <Text style={styles.text}>Default Activation Radius: {radiusValue} meters</Text>
+        <TextInput
+          placeholder="Enter Activation Radius"
+          value={radiusText}
+          onChangeText={setRadiusText}
+          keyboardType="numeric"
+          dense
+        />
+        <SettingsButton keyValue={'radius'} />
+      </View>
+
+      <View style={styles.separator} />
+
+      <View>
+        <Text style={styles.text}>Alarm Sound: {songText}</Text>
+        <Button
+          mode="contained"
+          icon="volume-medium"
+          color={Colors.blue800}
+          onPress={() => {
+            navigation.navigate('Audio');
+          }}
+        >
+          Audio Menu
+        </Button>
+      </View>
+
+      <View style={styles.separator} />
+
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Text style={styles.text}>Enable Failsafe </Text>
+        <Checkbox
+          status={checked ? 'checked' : 'unchecked'}
+          onPress={() => {
+            storeData('USE_FAILSAFE', !checked);
+            setChecked(!checked);
+          }}
+        />
+      </View>
+      <Text>
+        * Failsafe will activate alarm when battery falls below 20% or GPS connectivity is not
+        working for prolonged period
+      </Text>
     </View>
   );
 };
@@ -84,27 +119,19 @@ SettingsMenu.propTypes = {
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
-    flexDirection: 'column',
+    padding: 10,
   },
-  radiusText: {
-    fontSize: 19,
-    top: 10,
+  separator: {
+    height: 15,
   },
-  textInput: {
-    height: 50,
-    width: 400,
-    top: 18,
+  text: {
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   button: {
     height: 40,
     width: 400,
     top: 25,
-  },
-  audioText: {
-    fontSize: 19,
-    top: 35,
-    justifyContent: 'space-between',
   },
   audioButton: {
     height: 40,

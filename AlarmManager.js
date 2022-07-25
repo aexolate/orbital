@@ -24,6 +24,12 @@ export const AlarmManager = () => {
     await sound.setIsLoopingAsync(true);
   };
 
+  const unloadAudio = async () => {
+    await sound?.unloadAsync();
+    setSound(null);
+    setStatus(null);
+  };
+
   //Stops playing the alarm
   const stopAlarm = async () => {
     await sound?.stopAsync();
@@ -47,6 +53,6 @@ export const AlarmManager = () => {
     }
   };
 
-  return { setupAudio, loadAudio, stopAlarm, playAlarm };
+  return { setupAudio, loadAudio, stopAlarm, playAlarm, unloadAudio };
 };
 export default AlarmManager;

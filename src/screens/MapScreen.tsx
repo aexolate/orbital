@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { StyleSheet, View, StatusBar, Alert } from 'react-native';
-import { Provider as PaperProvider, Button, Colors } from 'react-native-paper';
+import { StyleSheet, View, StatusBar, Alert, Text, Image } from 'react-native';
+import { Provider as PaperProvider, Button, Colors, Portal, Modal } from 'react-native-paper';
 import MapView from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
@@ -21,6 +21,8 @@ import {
 import { DatabaseManager, WaypointsManager } from '../utils';
 import { LocationRegion } from 'expo-location';
 import { useIsFocused } from '@react-navigation/native';
+import FailSafe from '../utils/FailSafe';
+import { getData, storeData } from '../utils/AsyncStorage';
 
 const MapMenu = ({ route, navigation }) => {
   const [promptVisible, setPromptVisible] = useState(false);
@@ -28,11 +30,13 @@ const MapMenu = ({ route, navigation }) => {
   const [previewLocation, setPreviewLocation] = useState(CONSTANTS.LOCATIONS.DEFAULT);
   const [distanceToDest, setDistanceToDest] = useState(Infinity);
   const [reachedDestination, setReachedDestination] = useState(false); //Indicates whether the user has been in radius of destination
+  const [showGuide, setShowGuide] = useState(false);
 
   const alarmManager = AlarmManager();
   const waypointsManager = WaypointsManager();
   const dbManager = DatabaseManager();
   const isFocused = useIsFocused();
+  const failsafe = FailSafe();
 
   const mapRef = useRef(null);
   const [wpRadius, setWpRadius] = useState(500); //waypoint radius value that can be changed from MapMenu
@@ -64,8 +68,14 @@ const MapMenu = ({ route, navigation }) => {
 
   //Initializing Function
   useEffect(() => {
+    getData('HAS_LAUNCHED').then((res) => {
+      if (res != 'TRUE') {
+        setShowGuide(true);
+      }
+    });
+
     alarmManager.setupAudio();
-    checkRequestLocationPerms();
+    //checkRequestLocationPerms(); //shifted to isFocused useEffect
   }, []);
 
   useEffect(() => {
@@ -83,10 +93,16 @@ const MapMenu = ({ route, navigation }) => {
   useEffect(() => {
     if (isFocused) {
       alarmManager.loadAudio();
+      failsafe.loadFailsafeAudio();
+      failsafe.checkRequestLocationPerms();
     }
   }, [isFocused]);
 
-  const checkRequestLocationPerms = () => {
+  useEffect(() => {
+    failsafe.storeDistanceRemain(distanceToDest);
+  }, [distanceToDest]);
+
+  /*const checkRequestLocationPerms = () => {
     //The background permission must be only requested AFTER foreground permission
     Location.requestForegroundPermissionsAsync().then(() => {
       Location.requestBackgroundPermissionsAsync().then(() => {
@@ -99,7 +115,7 @@ const MapMenu = ({ route, navigation }) => {
         });
       });
     });
-  };
+  }; */
 
   //selecting destination via longpress
   const selectLocLongPress = (mapEvent) => {
@@ -149,9 +165,15 @@ const MapMenu = ({ route, navigation }) => {
   useEffect(() => {
     //Updates the distance when waypoints are modified
     if (waypointsManager.waypoints.length > 0) {
+      failsafe.startTrackPosition(); //start failsafe
       Location.getLastKnownPositionAsync().then((locationObj) => {
         setDistanceToDest(waypointsManager.distanceToNearestWP(locationObj.coords));
       });
+    }
+
+    //Stops tracking user for failsafe if no waypoints
+    if (waypointsManager.waypoints.length == 0) {
+      failsafe.stopTrackPosition();
     }
 
     //Handles geofencing when the waypoints are modified
@@ -179,6 +201,11 @@ const MapMenu = ({ route, navigation }) => {
       zoom: 15,
       duration: 500,
     });
+  };
+
+  const dismissGuide = () => {
+    setShowGuide(false);
+    storeData('HAS_LAUNCHED', 'TRUE');
   };
 
   //Render
@@ -281,6 +308,28 @@ const MapMenu = ({ route, navigation }) => {
         >
           Waypoints
         </Button>
+
+        <Portal>
+          <Modal
+            visible={showGuide}
+            onDismiss={dismissGuide}
+            contentContainerStyle={{ backgroundColor: 'white', padding: 10 }}
+          >
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ fontWeight: 'bold', fontSize: 20 }}>Quick Start Guide</Text>
+              <Image
+                source={require('../../assets/quickstart.png')}
+                style={{ width: '100%', height: undefined, aspectRatio: 1 }}
+              />
+              <Text>
+                Begin setting an alarm by long-pressing a location on the map, or using the
+                searchbar to use that location.
+              </Text>
+
+              <Button onPress={dismissGuide}>Dismiss</Button>
+            </View>
+          </Modal>
+        </Portal>
       </View>
     </PaperProvider>
   );
