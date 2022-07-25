@@ -20,7 +20,7 @@ const SettingsMenu = ({ navigation }) => {
     });
 
     getData('USE_FAILSAFE').then((useFailsafe) => {
-      if(useFailsafe == undefined) {
+      if (useFailsafe == undefined) {
         setChecked(false);
       } else {
         setChecked(useFailsafe);
@@ -41,7 +41,7 @@ const SettingsMenu = ({ navigation }) => {
       <Button
         mode="contained"
         color={Colors.blue800}
-        icon='map-marker-radius-outline'
+        icon="map-marker-radius-outline"
         onPress={() => {
           const isNum = /^\d+$/.test(radiusText);
           if (!isNum || !(parseInt(radiusText) > 0)) {
@@ -63,7 +63,7 @@ const SettingsMenu = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <View >
+      <View>
         <Text style={styles.text}>Default Activation Radius: {radiusValue} meters</Text>
         <TextInput
           placeholder="Enter Activation Radius"
@@ -81,7 +81,7 @@ const SettingsMenu = ({ navigation }) => {
         <Text style={styles.text}>Alarm Sound: {songText}</Text>
         <Button
           mode="contained"
-          icon='volume-medium'
+          icon="volume-medium"
           color={Colors.blue800}
           onPress={() => {
             navigation.navigate('Audio');
@@ -103,7 +103,10 @@ const SettingsMenu = ({ navigation }) => {
           }}
         />
       </View>
-      <Text>* Failsafe will activate alarm when battery falls below 20% or GPS connectivity is not working for prolonged period</Text>
+      <Text>
+        * Failsafe will activate alarm when battery falls below 20% or GPS connectivity is not
+        working for prolonged period
+      </Text>
     </View>
   );
 };
@@ -116,14 +119,14 @@ SettingsMenu.propTypes = {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 10
+    padding: 10,
   },
   separator: {
     height: 15,
   },
   text: {
     fontSize: 18,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
   button: {
     height: 40,

@@ -39,18 +39,18 @@ export const FailSafe = () => {
         if (useFailsafe) {
           const { locations } = data;
           batteryLevelAlert();
-  
+
           //set boolean for if location is lost (change depending on return type if no signal)
           if (locations == undefined) {
             setIsLocationLost(true);
           } else {
             setIsLocationLost(false);
           }
-  
+
           //record down time & distance travelled if location not lost
           if (!isLocationLost) {
             setTimeTravelled((time) => time + TIME_INTERVAL);
-  
+
             if (previousLocation == null) {
               setPreviousLocation(locations[0]);
             } else {
@@ -61,9 +61,9 @@ export const FailSafe = () => {
               setPreviousLocation(locations[0]);
             }
           }
-  
+
           //console.log(locations[0]);
-  
+
           //activate failsafe if location is lost
           if (isLocationLost) {
             let speed = Math.max(distanceTravelled / timeTravelled);
@@ -102,7 +102,7 @@ export const FailSafe = () => {
   //load newly set ringtone
   const loadFailsafeAudio = () => {
     alarmManager.loadAudio();
-  }
+  };
 
   //battery level checker
   const batteryLevelAlert = async () => {
