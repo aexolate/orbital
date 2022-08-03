@@ -1,45 +1,50 @@
-import { useState } from 'react';
-import { Vibration } from 'react-native';
+import { useRef, useState } from 'react';
+import { Vibration, View } from 'react-native';
 import { Audio } from 'expo-av';
+import { getData } from './AsyncStorage';
 
 export const AudioSettingManager = () => {
-  const [sound, setSound] = useState(null);
-  const [status, setStatus] = useState(null);
+  const playbackSound = useRef(null);
+  const playbackStatus = useRef(null);
   const [currentSongName, setCurrentSongName] = useState('');
-  const [isPlaying, setIsPlaying] = useState(false);
+  const isPlaying = useRef(false);
 
   //Stops playing the audio
   const stopAudio = async () => {
-    sound?.stopAsync().then(() => {
-      Vibration.cancel();
-      setCurrentSongName('');
-      setIsPlaying(false);
-    });
+    await playbackSound.current.unloadAsync();
+    Vibration.cancel();
+    setCurrentSongName('');
+    isPlaying.current = false;
   };
 
   //Activates the audio
   const playAudio = async (song) => {
     const { sound, status } = await Audio.Sound.createAsync(song.path);
-    setSound(sound);
-    setStatus(status);
-    await sound.setIsLoopingAsync(true);
+    const volume = await getData('volume');
+    sound.setIsLoopingAsync(true);
+    playbackSound.current = sound;
+    playbackStatus.current = status;
     setCurrentSongName(song.name);
-    console.log(currentSongName); //test
 
-    if (!status.isPlaying) {
-      await sound?.playAsync();
+    if (!playbackStatus.current.isPlaying) {
+      await playbackSound.current.playAsync();
+      await playbackSound.current.setVolumeAsync(volume);
       //Vibration
       let VIBRATION_PATTERN = [200, 200];
       let VIBRATION_REPEAT = true;
       Vibration.vibrate(VIBRATION_PATTERN, VIBRATION_REPEAT);
-      setIsPlaying(true);
+      isPlaying.current = true;
     }
   };
 
   const playingStatus = () => {
-    return isPlaying;
+    return isPlaying.current;
   };
 
-  return { stopAudio, playAudio, currentSongName, playingStatus };
+  const setVolume = async (volume) => {
+    await playbackSound.current.setVolumeAsync(volume);
+  };
+
+  return { stopAudio, playAudio, currentSongName, playingStatus, setVolume };
 };
 export default AudioSettingManager;

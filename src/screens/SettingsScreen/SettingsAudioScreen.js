@@ -11,17 +11,6 @@ import PropTypes from 'prop-types';
 const SettingsAudioMenu = ({ navigation }) => {
   const audioSettingsManager = AudioSettingManager();
 
-  useFocusEffect(
-    React.useCallback(() => {
-      return async () => {
-        if (isPlaying) {
-          audioSettingsManager.stopAudio();
-          return;
-        }
-      };
-    }, []),
-  );
-
   return (
     <View>
       <Button

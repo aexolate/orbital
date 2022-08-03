@@ -10,6 +10,17 @@ import { useNavigation, useFocusEffect, useIsFocused } from '@react-navigation/n
 const MusicBox = (props) => {
   const navigation = useNavigation();
 
+  useFocusEffect(
+    React.useCallback(() => {
+      return async () => {
+        if (props.manager.playingStatus()) {
+          await props.manager.stopAudio();
+          return;
+        }
+      };
+    }, []),
+  );
+
   //method to set audio as main alarm
   const setAudio = () => {
     storeData('song', props.song);
@@ -39,14 +50,11 @@ const MusicBox = (props) => {
         </View>
       </View>
       <Button style={styles.rightContainer} onPress={() => handleAudioPlay()}>
-        <Ionicons name={
-                        props.manager.currentSongName == props.song.name 
-                        ? 'ios-pause-sharp' 
-                        : 'ios-play'
-                      } 
-                  size={24} 
-                  color="black" 
-                  />
+        <Ionicons
+          name={props.manager.currentSongName == props.song.name ? 'ios-pause-sharp' : 'ios-play'}
+          size={24}
+          color="black"
+        />
       </Button>
       <Button style={styles.setButton} mode="contained" onPress={() => setAudio()}>
         <Text style={styles.setButtonText}>SET</Text>
