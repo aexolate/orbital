@@ -4,18 +4,30 @@ import { Audio } from 'expo-av';
 import { Button, Text } from 'react-native-paper';
 import PropTypes from 'prop-types';
 import { Ionicons } from '@expo/vector-icons';
-import { storeData } from '../utils/AsyncStorage';
+import { getData, storeData } from '../utils/AsyncStorage';
 import { useNavigation, useFocusEffect, useIsFocused } from '@react-navigation/native';
 import Slider from '@react-native-community/slider';
 import { Value } from 'react-native-reanimated';
 
 const VolumeBox = (props) => {
-  const [currentVolume, setCurrentVolume] = useState(0);
+  const currentVolume = useRef(1);
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    if (isFocused) {
+      getData('volume').then(volume => {
+        console.log('get data volume: ', volume);
+        currentVolume.current = volume;
+      })
+      console.log('current volume: ', currentVolume.current);
+    }
+  }, [isFocused]);
 
   useFocusEffect(
     React.useCallback(() => {
       return async () => {
-        storeData('volume', currentVolume);
+        console.log('store current volume', currentVolume.current);
+        storeData('volume', currentVolume.current);
       };
     }, []),
   );
@@ -30,11 +42,11 @@ const VolumeBox = (props) => {
       <View style={styles.rightContainer}>
         <Slider
           style={{ width: 200, height: 40 }}
-          value={1}
+          value={currentVolume.current}
           minimumTrackTintColor="grey"
           maximumTrackTintColor="#000000"
           onValueChange={(value) => {
-            setCurrentVolume(value);
+            currentVolume.current = value;
             storeData('volume', value);
             props.manager.setVolume(value);
           }}

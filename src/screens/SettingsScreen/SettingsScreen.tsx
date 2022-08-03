@@ -12,18 +12,31 @@ const SettingsMenu = ({ navigation }) => {
   const [radiusValue, setRadiusValue] = useState(DEFAULT_RADIUS); //radius that is displayed in app, also the current setting value
   const [songText, setSongText] = useState('');
   const isFocused = useIsFocused();
-  const [checked, setChecked] = React.useState(false);
+  const [checkedFailsafe, setCheckedFailsafe] = React.useState(false);
+  const [checkedVibration, setCheckedVibration] = React.useState(false);
 
   useEffect(() => {
+
+    //initial load for radius value setting
     getData('radius').then((radius) => {
       setRadiusValue(radius == null ? DEFAULT_RADIUS : radius);
     });
 
+    //initial load for failsafe setting
     getData('USE_FAILSAFE').then((useFailsafe) => {
       if (useFailsafe == undefined) {
-        setChecked(false);
+        setCheckedFailsafe(false);
       } else {
-        setChecked(useFailsafe);
+        setCheckedFailsafe(useFailsafe);
+      }
+    });
+
+    //initial load for vibration setting
+    getData('vibration').then((vibration) => {
+      if (vibration == undefined) {
+        setCheckedVibration(false);
+      } else {
+        setCheckedVibration(vibration);
       }
     });
   }, []);
@@ -96,10 +109,10 @@ const SettingsMenu = ({ navigation }) => {
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <Text style={styles.text}>Enable Failsafe </Text>
         <Checkbox
-          status={checked ? 'checked' : 'unchecked'}
+          status={checkedFailsafe ? 'checked' : 'unchecked'}
           onPress={() => {
-            storeData('USE_FAILSAFE', !checked);
-            setChecked(!checked);
+            storeData('USE_FAILSAFE', !checkedFailsafe);
+            setCheckedFailsafe(!checkedFailsafe);
           }}
         />
       </View>
@@ -107,6 +120,20 @@ const SettingsMenu = ({ navigation }) => {
         * Failsafe will activate alarm when battery falls below 20% or GPS connectivity is not
         working for prolonged period
       </Text>
+
+      <View style={styles.separator} />
+
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Text style={styles.text}>Enable Vibration </Text>
+        <Checkbox
+          status={checkedVibration ? 'checked' : 'unchecked'}
+          onPress={() => {
+            storeData('vibration', !checkedVibration);
+            setCheckedVibration(!checkedVibration);
+          }}
+        />
+      </View>
+
     </View>
   );
 };

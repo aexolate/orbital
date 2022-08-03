@@ -30,9 +30,13 @@ export const AudioSettingManager = () => {
       await playbackSound.current.playAsync();
       await playbackSound.current.setVolumeAsync(volume);
       //Vibration
-      let VIBRATION_PATTERN = [200, 200];
-      let VIBRATION_REPEAT = true;
-      Vibration.vibrate(VIBRATION_PATTERN, VIBRATION_REPEAT);
+      getData('vibration').then(vibration => {
+        if (vibration) {
+          let VIBRATION_PATTERN = [200, 200];
+          let VIBRATION_REPEAT = true;
+          Vibration.vibrate(VIBRATION_PATTERN, VIBRATION_REPEAT);
+        }
+      })
       isPlaying.current = true;
     }
   };
