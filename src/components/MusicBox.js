@@ -8,40 +8,7 @@ import { storeData } from '../utils/AsyncStorage';
 import { useNavigation, useFocusEffect, useIsFocused } from '@react-navigation/native';
 
 const MusicBox = (props) => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const playbackSound = useRef(null);
-  const playbackStatus = useRef(null);
-
   const navigation = useNavigation();
-  const isFocused = useIsFocused();
-
-  useEffect(() => {
-    if (playbackSound.current == null) {
-      initializeAudio();
-    }
-  }, []);
-
-  useFocusEffect(
-    React.useCallback(() => {
-      return async () => {
-        if (playbackStatus.current.isPlaying) {
-          const status = await playbackSound.current.stopAsync();
-          status.isPlaying = false; //for IOS delay issues
-          setIsPlaying(false);
-          playbackStatus.current = status;
-          return;
-        }
-      };
-    }, []),
-  );
-
-  //method to initiliaze audio
-  const initializeAudio = async () => {
-    const { sound, status } = await Audio.Sound.createAsync(props.song.path);
-    sound.setIsLoopingAsync(true);
-    playbackSound.current = sound;
-    playbackStatus.current = status;
-  };
 
   //method to set audio as main alarm
   const setAudio = () => {
@@ -52,19 +19,14 @@ const MusicBox = (props) => {
 
   //method to handle playing and stopping of audio in this component
   const handleAudioPlay = async () => {
-    if (playbackStatus.current.isPlaying) {
-      const status = await playbackSound.current.stopAsync();
-      status.isPlaying = false; //for IOS delay issues
-      setIsPlaying(false);
-      playbackStatus.current = status;
+    if (props.manager.playingStatus && props.manager.currentSongName == props.song.name) {
+      props.manager.stopAudio();
       return;
-    }
-
-    if (!playbackStatus.current.isPlaying) {
-      const status = await playbackSound.current.playAsync();
-      status.isPlaying = true; //for IOS delay issues
-      setIsPlaying(true);
-      playbackStatus.current = status;
+    } else {
+      if (props.manager.playingStatus()) {
+        props.manager.stopAudio();
+      }
+      props.manager.playAudio(props.song);
       return;
     }
   };
@@ -77,7 +39,14 @@ const MusicBox = (props) => {
         </View>
       </View>
       <Button style={styles.rightContainer} onPress={() => handleAudioPlay()}>
-        <Ionicons name={isPlaying ? 'ios-pause-sharp' : 'ios-play'} size={24} color="black" />
+        <Ionicons name={
+                        props.manager.currentSongName == props.song.name 
+                        ? 'ios-pause-sharp' 
+                        : 'ios-play'
+                      } 
+                  size={24} 
+                  color="black" 
+                  />
       </Button>
       <Button style={styles.setButton} mode="contained" onPress={() => setAudio()}>
         <Text style={styles.setButtonText}>SET</Text>
@@ -88,6 +57,7 @@ const MusicBox = (props) => {
 
 MusicBox.propTypes = {
   song: PropTypes.object,
+  manager: PropTypes.object,
 };
 
 export default MusicBox;

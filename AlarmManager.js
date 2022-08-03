@@ -19,7 +19,7 @@ export const AlarmManager = () => {
 
   const loadAudio = async () => {
     let song = await getData('song');
-    if(song == null) {
+    if (song == null) {
       song = CONSTANTS.MUSIC.song1;
     }
     const { sound, status } = await Audio.Sound.createAsync(song.path);
