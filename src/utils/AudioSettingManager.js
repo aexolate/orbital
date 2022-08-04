@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Vibration, View } from 'react-native';
+import { Vibration } from 'react-native';
 import { Audio } from 'expo-av';
 import { getData } from './AsyncStorage';
 
@@ -30,13 +30,13 @@ export const AudioSettingManager = () => {
       await playbackSound.current.playAsync();
       await playbackSound.current.setVolumeAsync(volume);
       //Vibration
-      getData('vibration').then(vibration => {
+      getData('vibration').then((vibration) => {
         if (vibration) {
           let VIBRATION_PATTERN = [200, 200];
           let VIBRATION_REPEAT = true;
           Vibration.vibrate(VIBRATION_PATTERN, VIBRATION_REPEAT);
         }
-      })
+      });
       isPlaying.current = true;
     }
   };
@@ -46,7 +46,9 @@ export const AudioSettingManager = () => {
   };
 
   const setVolume = async (volume) => {
-    await playbackSound.current.setVolumeAsync(volume);
+    if (isPlaying.current) {
+      await playbackSound.current.setVolumeAsync(volume);
+    }
   };
 
   return { stopAudio, playAudio, currentSongName, playingStatus, setVolume };

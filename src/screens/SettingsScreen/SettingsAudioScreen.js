@@ -4,7 +4,6 @@ import { Button } from 'react-native-paper';
 import MusicBox from '../../components/MusicBox';
 import VolumeBox from '../../components/VolumeBox';
 import AudioSettingManager from '../../utils/AudioSettingManager';
-import { useNavigation, useFocusEffect, useIsFocused } from '@react-navigation/native';
 import CONSTANTS from '../../constants/Constants.js';
 import PropTypes from 'prop-types';
 

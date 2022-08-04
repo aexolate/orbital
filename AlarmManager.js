@@ -51,13 +51,13 @@ export const AlarmManager = () => {
     if (!status.isPlaying) {
       await sound?.playAsync();
       //Vibration
-      getData('vibration').then(vibration => {
+      getData('vibration').then((vibration) => {
         if (vibration) {
           let VIBRATION_PATTERN = [200, 200];
           let VIBRATION_REPEAT = true;
           Vibration.vibrate(VIBRATION_PATTERN, VIBRATION_REPEAT);
         }
-      })
+      });
     }
   };
 

@@ -18,6 +18,26 @@ const App = () => {
         storeData('song', CONSTANTS.MUSIC.song1);
       }
     });
+    getData('vibration').then((vibration) => {
+      if (vibration == undefined) {
+        storeData('vibration', false);
+      }
+    });
+    getData('USE_FAILSAFE').then((useFailsafe) => {
+      if (useFailsafe == undefined) {
+        storeData('USE_FAILSAFE', false);
+      }
+    });
+    getData('batteryThreshold').then((useFailsafe) => {
+      if (useFailsafe == undefined) {
+        storeData('batteryThreshold', 20);
+      }
+    });
+    getData('volume').then((volume) => {
+      if (volume == undefined) {
+        storeData('volume', 1);
+      }
+    });
   }, []);
 
   return (

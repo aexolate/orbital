@@ -8,18 +8,25 @@ import PropTypes from 'prop-types';
 //activation radius is currently only set in confirm location, should change to on load screen
 const SettingsMenu = ({ navigation }) => {
   const DEFAULT_RADIUS = 500;
+  const DEFAULT_BATTERY = 20;
   const [radiusText, setRadiusText] = useState(''); //text for radius setting input
   const [radiusValue, setRadiusValue] = useState(DEFAULT_RADIUS); //radius that is displayed in app, also the current setting value
+  const [batteryText, setBatteryText] = useState('');
+  const [batteryValue, setBatteryValue] = useState(DEFAULT_BATTERY);
   const [songText, setSongText] = useState('');
   const isFocused = useIsFocused();
   const [checkedFailsafe, setCheckedFailsafe] = React.useState(false);
   const [checkedVibration, setCheckedVibration] = React.useState(false);
 
   useEffect(() => {
-
     //initial load for radius value setting
     getData('radius').then((radius) => {
       setRadiusValue(radius == null ? DEFAULT_RADIUS : radius);
+    });
+
+    //initial load for battery threshold setting
+    getData('batteryThreshold').then((batteryThreshold) => {
+      setBatteryValue(batteryThreshold == null ? DEFAULT_BATTERY : batteryThreshold);
     });
 
     //initial load for failsafe setting
@@ -49,7 +56,7 @@ const SettingsMenu = ({ navigation }) => {
     }
   }, [isFocused]);
 
-  const SettingsButton = (props) => {
+  const SettingsRadiusButton = (props) => {
     return (
       <Button
         mode="contained"
@@ -70,7 +77,34 @@ const SettingsMenu = ({ navigation }) => {
       </Button>
     );
   };
-  SettingsButton.propTypes = {
+
+  const SettingsBatteryButton = (props) => {
+    return (
+      <Button
+        mode="contained"
+        color={Colors.blue800}
+        icon="battery-alert"
+        onPress={() => {
+          const isNum = /^\d+$/.test(batteryText);
+          if (!isNum || !(parseInt(batteryText) > 0) || !(parseInt(batteryText) < 100)) {
+            alert('Invalid battery percentage, must be whole number between 0% and 100%');
+          } else {
+            storeData(props.keyValue, batteryText);
+            setBatteryValue(parseInt(batteryText));
+            setBatteryText('');
+          }
+        }}
+      >
+        Set Battery Threshold
+      </Button>
+    );
+  };
+
+  SettingsRadiusButton.propTypes = {
+    keyValue: PropTypes.string.isRequired,
+  };
+
+  SettingsBatteryButton.propTypes = {
     keyValue: PropTypes.string.isRequired,
   };
 
@@ -85,7 +119,7 @@ const SettingsMenu = ({ navigation }) => {
           keyboardType="numeric"
           dense
         />
-        <SettingsButton keyValue={'radius'} />
+        <SettingsRadiusButton keyValue={'radius'} />
       </View>
 
       <View style={styles.separator} />
@@ -107,6 +141,36 @@ const SettingsMenu = ({ navigation }) => {
       <View style={styles.separator} />
 
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Text style={styles.text}>Enable Vibration </Text>
+        <Checkbox
+          status={checkedVibration ? 'checked' : 'unchecked'}
+          onPress={() => {
+            storeData('vibration', !checkedVibration);
+            setCheckedVibration(!checkedVibration);
+          }}
+        />
+      </View>
+      <Text>
+        * Vibration will be active when any audio is played, including alarms and preview audio
+      </Text>
+
+      <View style={styles.separator} />
+
+      <View>
+        <Text style={styles.text}>Failsafe Battery Threshold: {batteryValue} %</Text>
+        <TextInput
+          placeholder="Enter Battery Threshold Value"
+          value={batteryText}
+          onChangeText={setBatteryText}
+          keyboardType="numeric"
+          dense
+        />
+        <SettingsBatteryButton keyValue={'batteryThreshold'} />
+      </View>
+
+      <View style={styles.separator} />
+
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <Text style={styles.text}>Enable Failsafe </Text>
         <Checkbox
           status={checkedFailsafe ? 'checked' : 'unchecked'}
@@ -117,23 +181,9 @@ const SettingsMenu = ({ navigation }) => {
         />
       </View>
       <Text>
-        * Failsafe will activate alarm when battery falls below 20% or GPS connectivity is not
-        working for prolonged period
+        * Failsafe will activate alarm when battery falls below set battery threshold value or when
+        location is lost
       </Text>
-
-      <View style={styles.separator} />
-
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <Text style={styles.text}>Enable Vibration </Text>
-        <Checkbox
-          status={checkedVibration ? 'checked' : 'unchecked'}
-          onPress={() => {
-            storeData('vibration', !checkedVibration);
-            setCheckedVibration(!checkedVibration);
-          }}
-        />
-      </View>
-
     </View>
   );
 };

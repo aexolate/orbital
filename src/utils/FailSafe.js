@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, View, StyleSheet, Dimensions } from 'react-native';
+import { Alert } from 'react-native';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 import { useNavigation } from '@react-navigation/native';
@@ -103,20 +103,23 @@ export const FailSafe = () => {
   //battery level checker
   const batteryLevelAlert = async () => {
     const batteryLevel = await Battery.getBatteryLevelAsync();
-    if (batteryLevel < 0.2 && !isActivated) {
-      //sound alarm
-      alarmManager.playAlarm();
-      setIsActivated(true);
-      Alert.alert('FAILSAFE ACTIVATED', 'Your device battery is below the threshold limit', [
-        {
-          text: 'Stop Alarm',
-          onPress: () => {
-            alarmManager.stopAlarm();
-            stopTrackPosition();
+    getData('batteryThreshold').then((batteryThreshold) => {
+      const batteryPercentage = batteryThreshold / 100;
+      if (batteryLevel < batteryPercentage && !isActivated) {
+        //sound alarm
+        alarmManager.playAlarm();
+        setIsActivated(true);
+        Alert.alert('FAILSAFE ACTIVATED', 'Your device battery is below the threshold limit', [
+          {
+            text: 'Stop Alarm',
+            onPress: () => {
+              alarmManager.stopAlarm();
+              stopTrackPosition();
+            },
           },
-        },
-      ]);
-    }
+        ]);
+      }
+    });
   };
 
   //check for tracking permissions
