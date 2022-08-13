@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Vibration } from 'react-native';
-import { Audio } from 'expo-av';
-import { getData } from './src/utils/AsyncStorage';
+import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
 import CONSTANTS from './src/constants/Constants';
+import { getAlarmSong, getUseVibration } from './src/utils/KeysManager';
 
 export const AlarmManager = () => {
   const [sound, setSound] = useState(null);
@@ -12,14 +12,16 @@ export const AlarmManager = () => {
   const setupAudio = async () => {
     await Audio.setAudioModeAsync({
       staysActiveInBackground: true,
+      interruptionModeAndroid: InterruptionModeAndroid.DuckOthers,
+      interruptionModeIOS: InterruptionModeIOS.DuckOthers,
     });
 
     loadAudio();
   };
 
   const loadAudio = async () => {
-    let song = await getData('song');
-    if(song == null) {
+    let song = await getAlarmSong();
+    if (song == null) {
       song = CONSTANTS.MUSIC.song1;
     }
     const { sound, status } = await Audio.Sound.createAsync(song.path);
@@ -51,9 +53,13 @@ export const AlarmManager = () => {
     if (!status.isPlaying) {
       await sound?.playAsync();
       //Vibration
-      let VIBRATION_PATTERN = [200, 200];
-      let VIBRATION_REPEAT = true;
-      Vibration.vibrate(VIBRATION_PATTERN, VIBRATION_REPEAT);
+      getUseVibration().then((vibration) => {
+        if (vibration) {
+          let VIBRATION_PATTERN = [200, 200];
+          let VIBRATION_REPEAT = true;
+          Vibration.vibrate(VIBRATION_PATTERN, VIBRATION_REPEAT);
+        }
+      });
     }
   };
 

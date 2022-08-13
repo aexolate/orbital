@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, View, StyleSheet, Dimensions } from 'react-native';
+import { Alert } from 'react-native';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 import { useNavigation } from '@react-navigation/native';
 import { distanceBetween } from './distance';
 import { AlarmManager } from '../../AlarmManager';
 import * as Battery from 'expo-battery';
-import { getData } from './AsyncStorage';
+import { getBatteryThreshold, getUseFailsafe } from './KeysManager';
 
 const LOCATION_TRACKING = 'location-tracking';
 const TIME_INTERVAL = 10000; //in milliseconds
@@ -33,7 +33,7 @@ export const FailSafe = () => {
       return;
     }
     if (data) {
-      getData('USE_FAILSAFE').then((useFailsafe) => {
+      getUseFailsafe().then((useFailsafe) => {
         if (useFailsafe) {
           const { locations } = data;
           batteryLevelAlert();
@@ -103,26 +103,28 @@ export const FailSafe = () => {
   //battery level checker
   const batteryLevelAlert = async () => {
     const batteryLevel = await Battery.getBatteryLevelAsync();
-    if (batteryLevel < 0.2 && !isActivated) {
-      //sound alarm
-      alarmManager.playAlarm();
-      setIsActivated(true);
-      Alert.alert('FAILSAFE ACTIVATED', 'Your device battery is below the threshold limit', [
-        {
-          text: 'Stop Alarm',
-          onPress: () => {
-            alarmManager.stopAlarm();
-            stopTrackPosition();
+    getBatteryThreshold().then((batteryThreshold) => {
+      //const batteryThresholdPercentage = batteryThreshold / 100;
+      if (batteryLevel < batteryThreshold && !isActivated) {
+        //sound alarm
+        alarmManager.playAlarm();
+        setIsActivated(true);
+        Alert.alert('FAILSAFE ACTIVATED', 'Your device battery is below the threshold limit', [
+          {
+            text: 'Stop Alarm',
+            onPress: () => {
+              alarmManager.stopAlarm();
+              stopTrackPosition();
+            },
           },
-        },
-      ]);
-    }
+        ]);
+      }
+    });
   };
 
   //check for tracking permissions
   const checkRequestLocationPerms = async () => {
     const fgPermissions = await Location.requestForegroundPermissionsAsync();
-    console.log('perm check');
     const bgPermissions = await Location.requestBackgroundPermissionsAsync();
     if (fgPermissions.granted && bgPermissions.granted) {
       setPermissionIsGranted(true);
