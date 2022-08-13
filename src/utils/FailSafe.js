@@ -7,6 +7,7 @@ import { distanceBetween } from './distance';
 import { AlarmManager } from '../../AlarmManager';
 import * as Battery from 'expo-battery';
 import { getData } from './AsyncStorage';
+import { getBatteryThreshold, getUseFailsafe } from './KeysManager';
 
 const LOCATION_TRACKING = 'location-tracking';
 const TIME_INTERVAL = 10000; //in milliseconds
@@ -33,7 +34,8 @@ export const FailSafe = () => {
       return;
     }
     if (data) {
-      getData('USE_FAILSAFE').then((useFailsafe) => {
+      getUseFailsafe().then((useFailsafe) => {
+        console.log(useFailsafe);
         if (useFailsafe) {
           const { locations } = data;
           batteryLevelAlert();
@@ -103,9 +105,9 @@ export const FailSafe = () => {
   //battery level checker
   const batteryLevelAlert = async () => {
     const batteryLevel = await Battery.getBatteryLevelAsync();
-    getData('batteryThreshold').then((batteryThreshold) => {
-      const batteryPercentage = batteryThreshold / 100;
-      if (batteryLevel < batteryPercentage && !isActivated) {
+    getBatteryThreshold().then((batteryThreshold) => {
+      //const batteryThresholdPercentage = batteryThreshold / 100;
+      if (batteryLevel < batteryThreshold && !isActivated) {
         //sound alarm
         alarmManager.playAlarm();
         setIsActivated(true);
@@ -125,7 +127,6 @@ export const FailSafe = () => {
   //check for tracking permissions
   const checkRequestLocationPerms = async () => {
     const fgPermissions = await Location.requestForegroundPermissionsAsync();
-    console.log('perm check');
     const bgPermissions = await Location.requestBackgroundPermissionsAsync();
     if (fgPermissions.granted && bgPermissions.granted) {
       setPermissionIsGranted(true);

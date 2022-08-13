@@ -1,8 +1,8 @@
 import React from 'react';
 import { TextInput } from 'react-native-paper';
 import PropTypes from 'prop-types';
-import { getData } from '../utils/AsyncStorage';
 import { useIsFocused } from '@react-navigation/native';
+import { getDefaultActivationRadius } from '../utils/KeysManager';
 
 const RadiusTextInput = (props) => {
   const [text, setText] = React.useState('');
@@ -18,9 +18,13 @@ const RadiusTextInput = (props) => {
   }, [text]);
 
   const updateRadius = () => {
-    getData('radius').then((val) => {
-      setText(val == null ? DEFAULT_RADIUS.toString() : val.toString());
+    getDefaultActivationRadius().then((val) => {
+      setText(val.toString());
     });
+
+    // getData('radius').then((val) => {
+    //   setText(val == null ? DEFAULT_RADIUS.toString() : val.toString());
+    // });
   };
 
   React.useEffect(() => {
