@@ -11,23 +11,15 @@ const VolumeBox = (props) => {
   const [initialVolume, setInitialVolume] = useState(1); //only for initial render, to trigger re-render
 
   useEffect(() => {
-    getAlarmVolume().then(volume => {
+    getAlarmVolume().then((volume) => {
       currentVolume.current = volume;
       setInitialVolume(volume);
     });
-
-    // getData('volume').then((volume) => {
-    //   if (volume != undefined) {
-    //     currentVolume.current = parseInt(volume);
-    //     setInitialVolume(parseInt(volume));
-    //   }
-    // });
   }, []);
 
   useFocusEffect(
     React.useCallback(() => {
       return async () => {
-        //storeData('volume', currentVolume.current);
         storeAlarmVolume(currentVolume.current);
       };
     }, []),
@@ -47,7 +39,6 @@ const VolumeBox = (props) => {
           onValueChange={(value) => {
             currentVolume.current = value;
             storeAlarmVolume(value);
-            //storeData('volume', value);
             props.manager.setVolume(value);
           }}
         />

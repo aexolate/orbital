@@ -4,7 +4,6 @@ import CONSTANTS from '../constants/Constants';
 //The function returns the value of the key if present, else stores and returns the default value if absent
 const getDataOrDefault = async (key: string, defaultValue: any): Promise<any> => {
   return getData(key).then((val) => {
-
     //console.log('[Debug] getDataOrDefault ' + key + ' ' + val);
 
     if (val == undefined) {

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Vibration } from 'react-native';
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
-import { getData } from './src/utils/AsyncStorage';
 import CONSTANTS from './src/constants/Constants';
 import { getAlarmSong, getUseVibration } from './src/utils/KeysManager';
 
@@ -21,7 +20,6 @@ export const AlarmManager = () => {
   };
 
   const loadAudio = async () => {
-    //let song = await getData('song');
     let song = await getAlarmSong();
     if (song == null) {
       song = CONSTANTS.MUSIC.song1;

@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react';
 import { Vibration } from 'react-native';
 import { Audio } from 'expo-av';
-import { getData } from './AsyncStorage';
 import { getAlarmVolume, getUseVibration } from './KeysManager';
 
 export const AudioSettingManager = () => {
@@ -21,7 +20,6 @@ export const AudioSettingManager = () => {
   //Activates the audio
   const playAudio = async (song) => {
     const { sound, status } = await Audio.Sound.createAsync(song.path);
-    //const volume = await getData('volume');
     const volume = await getAlarmVolume();
     sound.setIsLoopingAsync(true);
     playbackSound.current = sound;
@@ -31,7 +29,7 @@ export const AudioSettingManager = () => {
     if (!playbackStatus.current.isPlaying) {
       await playbackSound.current.playAsync();
       await playbackSound.current.setVolumeAsync(volume);
-    
+
       //Vibration
       getUseVibration().then((vibration) => {
         if (vibration) {

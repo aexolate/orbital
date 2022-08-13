@@ -6,7 +6,6 @@ import { useNavigation } from '@react-navigation/native';
 import { distanceBetween } from './distance';
 import { AlarmManager } from '../../AlarmManager';
 import * as Battery from 'expo-battery';
-import { getData } from './AsyncStorage';
 import { getBatteryThreshold, getUseFailsafe } from './KeysManager';
 
 const LOCATION_TRACKING = 'location-tracking';
@@ -35,7 +34,6 @@ export const FailSafe = () => {
     }
     if (data) {
       getUseFailsafe().then((useFailsafe) => {
-        console.log(useFailsafe);
         if (useFailsafe) {
           const { locations } = data;
           batteryLevelAlert();

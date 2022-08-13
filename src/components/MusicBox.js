@@ -3,7 +3,6 @@ import { Alert, View, StyleSheet, Dimensions } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import PropTypes from 'prop-types';
 import { Ionicons } from '@expo/vector-icons';
-import { storeData } from '../utils/AsyncStorage';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { storeAlarmSong } from '../utils/KeysManager';
 
@@ -23,7 +22,6 @@ const MusicBox = (props) => {
 
   //method to set audio as main alarm
   const setAudio = () => {
-    //storeData('song', props.song);
     storeAlarmSong(props.song);
     Alert.alert('Alarm song set!', 'The alarm song is now ' + props.song.name + '!');
     navigation.navigate('Map');

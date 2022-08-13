@@ -2,9 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Button, Text, TextInput, Checkbox, Colors } from 'react-native-paper';
 import { useIsFocused } from '@react-navigation/native';
-import { getData, storeData } from '../../utils/AsyncStorage';
 import PropTypes from 'prop-types';
-import { getAlarmSong, getBatteryThreshold, getDefaultActivationRadius, getUseFailsafe, getUseVibration, storeBatteryThreshold, storeDefaultActivationRadius, storeUseFailSafe, storeUseVibration } from '../../utils/KeysManager';
+import {
+  getAlarmSong,
+  getBatteryThreshold,
+  getDefaultActivationRadius,
+  getUseFailsafe,
+  getUseVibration,
+  storeBatteryThreshold,
+  storeDefaultActivationRadius,
+  storeUseFailSafe,
+  storeUseVibration,
+} from '../../utils/KeysManager';
 
 //activation radius is currently only set in confirm location, should change to on load screen
 const SettingsMenu = ({ navigation }) => {
@@ -20,58 +29,26 @@ const SettingsMenu = ({ navigation }) => {
   const [checkedVibration, setCheckedVibration] = React.useState(false);
 
   useEffect(() => {
-    //initial load for radius value setting
-    // getData('radius').then((radius) => {
-    //   setRadiusValue(radius == null ? DEFAULT_RADIUS : radius);
-    // });
     getDefaultActivationRadius().then((rad) => {
       setRadiusValue(rad);
     });
 
-    //initial load for battery threshold setting
-    // getData('batteryThreshold').then((batteryThreshold) => {
-    //   setBatteryValue(batteryThreshold == null ? DEFAULT_BATTERY : parseInt(batteryThreshold));
-    // });
-
-    getBatteryThreshold().then(bat => {
+    getBatteryThreshold().then((bat) => {
       setBatteryValue(bat);
     });
 
-    //initial load for failsafe setting
-    // getData('USE_FAILSAFE').then((useFailsafe) => {
-    //   if (useFailsafe == undefined) {
-    //     setCheckedFailsafe(false);
-    //   } else {
-    //     setCheckedFailsafe(useFailsafe);
-    //   }
-    // });
-
-    getUseFailsafe().then(useFailsafe => {
+    getUseFailsafe().then((useFailsafe) => {
       setCheckedFailsafe(useFailsafe);
     });
 
-    //initial load for vibration setting
-    // getData('vibration').then((vibration) => {
-    //   if (vibration == undefined) {
-    //     setCheckedVibration(true);
-    //   } else {
-    //     setCheckedVibration(vibration);
-    //   }
-    // });
-
-    getUseVibration().then(useVibration => {
+    getUseVibration().then((useVibration) => {
       setCheckedVibration(useVibration);
     });
-
   }, []);
 
   useEffect(() => {
     if (isFocused) {
-      // getData('song').then((song) => {
-      //   setSongText(song.name);
-      // });
-
-      getAlarmSong().then(song => {
+      getAlarmSong().then((song) => {
         setSongText(song.name);
       });
     }
@@ -89,7 +66,6 @@ const SettingsMenu = ({ navigation }) => {
             alert('Invalid Radius');
           } else {
             storeDefaultActivationRadius(parseInt(radiusText));
-            //storeData(props.keyValue, radiusText);
             setRadiusValue(parseInt(radiusText));
             setRadiusText('');
           }
@@ -112,7 +88,6 @@ const SettingsMenu = ({ navigation }) => {
             alert('Invalid battery percentage, must be whole number between 0% and 100%');
           } else {
             const batPercentage = parseInt(batteryText) / 100;
-            //storeData(props.keyValue, batteryText);
             storeBatteryThreshold(batPercentage);
             setBatteryValue(batPercentage);
             setBatteryText('');
